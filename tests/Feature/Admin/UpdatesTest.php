@@ -147,8 +147,8 @@ it('maps package paths to the core and the web root, never to site data', functi
     ['core/storage/logs/', '/home/core/storage/logs'],
     ['core/.env', null],
     ['core/storage/app/private/cv/cv.pdf', null],
-    ['core/themes/luca-pro/theme.json', null],
-    ['themes/luca-pro/assets/app.css', null],
+    ['core/themes/demo-pro/theme.json', null],
+    ['themes/demo-pro/assets/app.css', null],
     ['uploads/photo.webp', null],
     ['.htaccess', null],
     ['core-path.php', null],
@@ -164,8 +164,8 @@ it('extracts a package in short steps, leaving data and configuration untouched'
         '.htaccess' => 'from package',
         'uploads/photo.webp' => 'from package',
         'core/storage/app/private/cv.pdf' => 'from package',
-        'themes/luca-pro/assets/app.css' => 'pro',
-        'core/themes/luca-pro/theme.json' => '{}',
+        'themes/demo-pro/assets/app.css' => 'pro',
+        'core/themes/demo-pro/theme.json' => '{}',
     ]);
     file_put_contents($this->state, json_encode(['token' => 'abc', 'zip' => $package, 'next' => 0, 'total' => 17, 'return' => '/admin/system?update=finish']));
 
@@ -187,8 +187,8 @@ it('extracts a package in short steps, leaving data and configuration untouched'
         ->and(file_get_contents("{$this->web}/.htaccess"))->toBe('custom rules')
         ->and(file_get_contents("{$this->web}/uploads/photo.webp"))->toBe('original')
         ->and("{$this->core}/storage/app/private/cv.pdf")->not->toBeFile()
-        ->and("{$this->web}/themes/luca-pro")->not->toBeDirectory()
-        ->and("{$this->core}/themes/luca-pro")->not->toBeDirectory()
+        ->and("{$this->web}/themes/demo-pro")->not->toBeDirectory()
+        ->and("{$this->core}/themes/demo-pro")->not->toBeDirectory()
         ->and(glob("{$this->web}/**/*.resume-tmp") ?: [])->toBe([]);
 
     @unlink($package);

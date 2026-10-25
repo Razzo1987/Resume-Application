@@ -1,6 +1,17 @@
 # Installing and updating Resume App
 
 This guide covers a standard shared hosting account with **cPanel**; any Apache + PHP + MySQL server works the same way.
+Once the site is installed, [CONFIGURATION.md](CONFIGURATION.md) explains how to set it up from the admin panel.
+
+- [Requirements](#requirements)
+- [Getting the package](#getting-the-package)
+- [Package layout](#package-layout)
+- [First installation](#first-installation)
+- [Updating](#updating)
+- [Moving the content](#moving-the-content)
+- [Themes](#themes)
+- [The `.htaccess` file](#the-htaccess-file)
+- [Troubleshooting](#troubleshooting)
 
 ## Requirements
 
@@ -11,7 +22,30 @@ This guide covers a standard shared hosting account with **cPanel**; any Apache 
 | Web server | Apache with `mod_rewrite` and `.htaccess` files enabled (`AllowOverride All`) |
 | Recommended | `mod_headers`, `mod_deflate`, an SSL certificate (AutoSSL / Let's Encrypt) |
 
-The installer checks all of them before doing anything.
+The installer checks all of them before doing anything. Nothing else is needed on the server: no SSH, Composer or
+Node.js (the package already contains the PHP dependencies and the compiled assets).
+
+## Getting the package
+
+Every version is published on the [GitHub releases page](https://github.com/Razzo1987/Resume-Application/releases)
+with two files:
+
+| File | Content |
+|---|---|
+| `resume-app-x.y.z.zip` | the complete application, ready to extract (about 26 MB) |
+| `resume-app-x.y.z.zip.sha256` | its SHA-256 checksum |
+
+To check that the download is complete and unchanged, compare the checksum with the one in the `.sha256` file
+(also shown at the end of the release notes):
+
+```bash
+sha256sum resume-app-x.y.z.zip                      # Linux
+shasum -a 256 resume-app-x.y.z.zip                  # macOS
+certutil -hashfile resume-app-x.y.z.zip SHA256      # Windows (Command Prompt)
+```
+
+Do not use the "Source code" archives that GitHub adds to every release: they contain the sources, without the
+dependencies and the compiled assets, and are meant for development.
 
 ## Package layout
 
@@ -25,7 +59,7 @@ public_html/
 └── core/                        application code: denied to browsers by .htaccess
     ├── .env                     configuration and secrets (written by the installer, never part of a package)
     ├── storage/                 CV PDFs, cache, logs (never part of a package)
-    └── themes/                  themes (PRO themes are installed here too)
+    └── themes/                  themes (additional themes are installed here too)
 ```
 
 If your hosting lets you keep files outside the web root, you can move `core/` there and create
@@ -49,11 +83,33 @@ If your hosting lets you keep files outside the web root, you can move `core/` t
 5. Done. The installer creates the tables, the administrator, `core/.env` (permissions `0600`), the `uploads/`
    folder and the managed block in `public_html/.htaccess`. From now on `/install` answers 404.
 
-Then, in the admin area:
+Then, in the admin area (`https://your-domain/<admin path>`):
 
-- user menu → *Profile*: turn on two-factor authentication;
-- *Themes* → choose the theme; *Settings* → the CV file name and the other options;
-- fill in *Profile* and the CV sections, upload the CV PDF of each language.
+1. user menu → *Profile*: turn on **two-factor authentication** and keep the recovery codes;
+2. *Website* → *Site languages*: check the default language and the active ones;
+3. *Résumé* → *Profile*: name, photo, headlines, contacts; then the CV sections (experience, projects, education...);
+4. *Content* → *CV PDFs*: upload the CV of each language;
+5. *Website* → *Settings*: SEO texts, sharing image, site icon, privacy options;
+6. *Website* → *CV layout*: order of the sections and which ones appear in the menu;
+7. open the site (*Go to site* in the top bar) and check it in every language.
+
+[CONFIGURATION.md](CONFIGURATION.md) describes every page of the admin panel.
+
+### What the installer asks
+
+| Field | Notes |
+|---|---|
+| Site address | the public address, e.g. `https://www.example.com` (it becomes `APP_URL`) |
+| Your name | the owner of the CV: profile name, site name and sender of the emails |
+| Main language, other languages | the site languages; more can be added later from the admin |
+| Sample CV | loads the "John Doe" demo content, useful to see how everything works |
+| Database | server (`localhost` on cPanel), port (`3306`), database name, user, password |
+| Administrator | email and password (at least 10 characters) |
+| Admin path | the address of the admin area (`/admin` by default: a less obvious one keeps bots away) |
+| HTTPS, without www | permanent redirects; turn on HTTPS only when the certificate already works |
+
+The installer speaks Italian or English, following the browser language; the admin interface uses the same language
+(it can be changed later with `RESUME_ADMIN_LOCALE`, see [CONFIGURATION.md](CONFIGURATION.md#server-settings-coreenv)).
 
 ### Safety checks done by the installer
 
@@ -96,7 +152,7 @@ encrypted with the `APP_KEY` in `core/storage`, never in content exports) or set
 
 1. Admin → *System* → *Start maintenance*, then *Tools* → *Export the content* (or a full backup from cPanel).
 2. Extract the new zip into `public_html`, overwriting the files.
-   `core/.env`, `uploads/`, `core/storage/` (CV PDFs) and PRO themes are not part of the package and are never touched.
+   `core/.env`, `uploads/`, `core/storage/` (CV PDFs) and the installed themes are not part of the package and are never touched.
 3. Admin → *System*: the page shows "New version uploaded" → press **Complete the update**
    (database migrations, cache clean-up, `.htaccess` block rewritten, new version recorded).
 4. *Tools* → *Files no longer used*: lists the files of previous versions that are not in the new package
@@ -131,7 +187,8 @@ addresses used as locations, or dates that differ between languages). Old addres
 
 ## Themes
 
-The package contains the open `base` theme. Additional themes are installed from their zip in the admin:
+The package contains the open `base` theme. Additional themes (your own or third-party ones) are installed from their
+zip in the admin:
 **Themes** → *Install or update a theme* → upload → *Activate*. Theme files go to `core/themes/{name}` and the
 compiled assets to `themes/{name}` in the web root; updating the application never touches them. Installing a newer
 zip of the same theme updates it in place. A theme that is not in use can be removed from the same page.

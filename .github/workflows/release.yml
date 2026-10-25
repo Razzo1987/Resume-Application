@@ -22,9 +22,20 @@ jobs:
       - name: Versione del tag = file VERSION
         run: test "v$(cat VERSION)" = "${GITHUB_REF_NAME}"
       - run: bash scripts/build-release.sh dist
+      # Note della release: la voce della versione nel CHANGELOG (le mostra anche l'admin quando avvisa dell'aggiornamento)
+      - name: Note dal CHANGELOG
+        run: |
+          awk -v version="$(cat VERSION)" '
+            index($0, "## [" version "]") == 1 { found = 1; next }
+            found && /^## \[/ { exit }
+            found { print }
+          ' CHANGELOG.md > dist/RELEASE_NOTES.md
+          test -s dist/RELEASE_NOTES.md
+          printf '\n---\nSHA-256 of the package: `%s`\n' "$(cut -d' ' -f1 dist/*.zip.sha256)" >> dist/RELEASE_NOTES.md
       - uses: softprops/action-gh-release@v2
         with:
+          name: Resume App ${{ github.ref_name }}
+          body_path: dist/RELEASE_NOTES.md
           files: |
             dist/*.zip
             dist/*.sha256
-          generate_release_notes: true

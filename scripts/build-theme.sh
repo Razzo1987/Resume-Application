@@ -3,7 +3,7 @@
 #
 #   scripts/build-theme.sh <cartella-del-tema> [--icons <sorgente icone>] [--zip <cartella output>]
 #
-# La cartella del tema può stare fuori dal repository (es. ../themes-pro/luca-pro): viene copiata
+# La cartella del tema può stare fuori dal repository (es. ../my-themes/fancy): viene copiata
 # in themes/{nome} (ignorata da git), compilata in public/themes/{nome} e impacchettata così:
 #   {nome}/theme.json, icons.php, views/, lang/, README.md, LICENSE*   → core/themes/{nome}
 #   {nome}/dist/                                                       → webroot/themes/{nome}

@@ -10,6 +10,10 @@ All notable changes to this project are documented here. The format follows [Kee
 - `core/manifest.json` declares the minimum PHP version and the required extensions.
 - Base theme: 52 more icons for interests and key figures (sport and outdoors, free time and culture, work, skills and sectors), among them `cycling` and `ai`.
 
+### Documentation
+- New README, installation guide with the release download and checksum (`docs/INSTALL.md`) and configuration guide with a tour of the admin panel, the settings, the icons and the `.env` options (`docs/CONFIGURATION.md`).
+- Issue templates, funding link; GitHub releases use the changelog entry as release notes.
+
 ## [2.0.2] — 2026-10-26
 
 ### Added

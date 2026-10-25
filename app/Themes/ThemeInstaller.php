@@ -146,7 +146,7 @@ class ThemeInstaller
                 $names[$index] = $stat['name'];
             }
 
-            // Cartella principale facoltativa ("luca-pro/theme.json" oppure "theme.json")
+            // Cartella principale facoltativa ("mio-tema/theme.json" oppure "theme.json")
             $prefix = in_array('theme.json', $names, true) ? '' : (string) Str::before((string) collect($names)->first(fn (string $name): bool => str_ends_with($name, '/theme.json') && substr_count($name, '/') === 1), 'theme.json');
 
             if (! in_array($prefix.'theme.json', $names, true)) {
