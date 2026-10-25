@@ -65,6 +65,7 @@ json.dump({"name": "resume-app", "version": ver, "files": files}, open(out, "w")
 PY
 
 echo "== Zip"
+rm -f "$OUT/$NAME.zip"   # zip aggiorna un archivio esistente: si riparte sempre da zero
 ( cd "$PKG" && zip -qr -X "$OUT/$NAME.zip" . )
 ( cd "$OUT" && sha256sum "$NAME.zip" > "$NAME.zip.sha256" )
 echo "Creato $OUT/$NAME.zip ($(du -h "$OUT/$NAME.zip" | cut -f1))"
