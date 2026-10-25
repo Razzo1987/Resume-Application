@@ -11,6 +11,7 @@
 use App\Http\Controllers\Site\BlogController;
 use App\Http\Controllers\Site\CvController;
 use App\Http\Controllers\Site\DetailController;
+use App\Http\Controllers\Site\FaviconController;
 use App\Http\Controllers\Site\RobotsController;
 use App\Http\Controllers\Site\RootController;
 use App\Http\Controllers\Site\SegmentController;
@@ -24,6 +25,7 @@ $word = '[A-Za-z0-9]+(?:-[A-Za-z0-9]+)*';
 Route::get('/', RootController::class)->name('site.root');
 Route::get('/sitemap.xml', SitemapController::class)->name('site.sitemap');
 Route::get('/robots.txt', RobotsController::class)->name('site.robots');
+Route::get('/favicon.ico', FaviconController::class)->name('site.favicon');
 
 // "/it" → "/it-IT"
 Route::get('/{language}', [RootController::class, 'language'])->where('language', '[A-Za-z]{2,3}')->name('site.language');

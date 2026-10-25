@@ -40,7 +40,11 @@ class ImageOptimizer
 
         ob_start();
 
-        if ($format === 'jpeg') {
+        if ($format === 'png') {
+            // PNG (es. icona del sito: i browser la accettano ovunque), trasparenza conservata
+            imagepng($image, null, 9);
+            $extension = 'png';
+        } elseif ($format === 'jpeg') {
             // JPEG (es. immagine per i social, dove WebP non è sempre supportato): trasparenza su bianco
             imagejpeg($this->flatten($image), null, 85);
             $extension = 'jpg';

@@ -58,6 +58,7 @@ return [
 
     'fields' => [
         'og_image' => 'Immagine per la condivisione',
+        'site_icon' => 'Icona del sito (favicon)',
         'name' => 'Nome',
         'full_name' => 'Nome e cognome',
         'title' => 'Titolo',
@@ -180,6 +181,7 @@ return [
 
     'help' => [
         'og_image' => 'Mostrata quando il CV viene condiviso sui social (Open Graph). Consigliata 1200×630; salvata in JPG. Se manca si usa la foto del profilo.',
+        'site_icon' => 'Quadrata, almeno 512×512 (PNG con trasparenza). Usata nella scheda del browser e quando il sito viene aggiunto alla schermata Home.',
         'is_visible' => 'Se spento, l\'elemento resta qui ma non compare sul sito.',
         'end_date_empty' => 'Lascia vuoto se è ancora in corso.',
         'expires_empty' => 'Vuoto = senza scadenza.',

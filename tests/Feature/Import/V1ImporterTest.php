@@ -134,7 +134,9 @@ beforeEach(function () {
     File::ensureDirectoryExists("{$this->files}/resume");
     File::ensureDirectoryExists("{$this->files}/languages");
 
-    foreach (['img/avatars/me.png', 'img/acme.png', 'img/unimib.png', 'img/badge x.png'] as $image) {
+    File::ensureDirectoryExists("{$this->files}/img/favicon");
+
+    foreach (['img/avatars/me.png', 'img/acme.png', 'img/unimib.png', 'img/badge x.png', 'img/favicon/android-chrome-512x512.png'] as $image) {
         $gd = imagecreatetruecolor(40, 40);
         imagepng($gd, "{$this->files}/{$image}");
     }
@@ -243,7 +245,8 @@ it('imports the current CV, redirects the old CV files and keeps the footer text
     expect($cv->language->code)->toBe('it-IT')
         ->and($cv->is_current)->toBeTrue()
         ->and(app(Settings::class)->bool('cv.fallback_to_default'))->toBeTrue()
-        ->and(app(Settings::class)->translated('footer.gdpr_text', 'it-IT'))->toBe("Testo protetto.\nAutorizzo il trattamento dei dati (D.Lgs. 2018/101).");
+        ->and(app(Settings::class)->translated('footer.gdpr_text', 'it-IT'))->toBe("Testo protetto.\nAutorizzo il trattamento dei dati (D.Lgs. 2018/101).")
+        ->and(app(Settings::class)->get('site.icon'))->toStartWith('site/')->toEndWith('.png');
 
     Storage::disk('local')->assertExists($cv->path);
 

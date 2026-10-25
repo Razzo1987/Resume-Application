@@ -31,6 +31,7 @@ class Settings
         'seo.title' => [],
         'seo.description' => [],
         'seo.og_image' => null,
+        'site.icon' => null,                          // icona del sito (favicon), PNG quadrato
         'footer.gdpr_text' => [],
         'footer.show_last_updated' => false,         // "Aggiornato a…" nel footer: spento di default
         'print.enabled' => true,                      // versione di stampa + pulsante "Stampa"

@@ -84,6 +84,7 @@ class V1Importer
             $this->certifications($legacy);
             $this->resumes($cvs);
             $this->footer();
+            $this->siteIcon();
         });
 
         return $this->log;
@@ -473,6 +474,22 @@ class V1Importer
             $this->settings->set('footer.gdpr_text', $texts);
             $this->note('Testo del footer (copyright e consenso GDPR): '.implode(', ', array_keys($texts)));
         }
+    }
+
+    /**
+     * Icona del sito dalla favicon della v1 (la versione più grande), se non ce n'è già una.
+     */
+    private function siteIcon(): void
+    {
+        $source = collect(['img/favicon/android-chrome-512x512.png', 'img/favicon/android-chrome-192x192.png', 'img/favicon/apple-touch-icon.png'])
+            ->first(fn (string $file): bool => is_file($this->files.'/'.$file));
+
+        if ($source === null || $this->settings->get('site.icon') !== null) {
+            return;
+        }
+
+        $this->settings->set('site.icon', $this->images->store($this->files.'/'.$source, 'icon.png', 'uploads', 'site', 512, 'png'));
+        $this->note('Icona del sito: '.basename($source));
     }
 
     private function organization(string $name, ?string $logo, ?string $website, ?OrganizationType $type = null): ?Organization

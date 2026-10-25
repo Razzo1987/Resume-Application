@@ -115,6 +115,11 @@ class ManageSettings extends Page
                         Fields::image('seo.og_image', 'seo', 1200, 'jpeg')
                             ->label(__('admin.fields.og_image'))
                             ->helperText(__('admin.help.og_image')),
+                        Fields::image('site.icon', 'site', 512, 'png')
+                            ->label(__('admin.fields.site_icon'))
+                            ->helperText(__('admin.help.site_icon'))
+                            ->imageEditor()
+                            ->imageCropAspectRatio('1:1'),
                         Translatable::tabs(fn (string $locale): array => [
                             TextInput::make("seo.title.{$locale}")->label(__('admin.fields.seo_title'))->helperText(__('admin.help.default_seo_title'))->maxLength(70),
                             Textarea::make("seo.description.{$locale}")->label(__('admin.fields.seo_description'))->maxLength(170)->rows(2),

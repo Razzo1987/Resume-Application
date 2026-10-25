@@ -58,6 +58,7 @@ return [
 
     'fields' => [
         'og_image' => 'Sharing image',
+        'site_icon' => 'Site icon (favicon)',
         'name' => 'Name',
         'full_name' => 'Full name',
         'title' => 'Title',
@@ -180,6 +181,7 @@ return [
 
     'help' => [
         'og_image' => 'Shown when the CV is shared on social networks (Open Graph). 1200×630 recommended; saved as JPG. If missing, the profile photo is used.',
+        'site_icon' => 'Square, at least 512×512 (PNG with transparency). Used in the browser tab and when the site is added to the home screen.',
         'is_visible' => 'When off, the item stays here but is not shown on the website.',
         'end_date_empty' => 'Leave empty if it is still ongoing.',
         'expires_empty' => 'Empty = does not expire.',

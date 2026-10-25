@@ -10,6 +10,7 @@ use App\Models\SocialLink;
 use App\Site\Contact\Cloak;
 use App\Site\Formatting\Dates;
 use App\Site\Media\Images;
+use App\Site\Media\SiteIcon;
 use App\Support\Languages\Locales;
 use App\Support\Settings\Settings;
 
@@ -33,6 +34,7 @@ final class LayoutFactory
         private readonly Images $images,
         private readonly Dates $dates,
         private readonly Blog $blog,
+        private readonly SiteIcon $icon,
     ) {}
 
     public function make(Page $page): Layout
@@ -96,6 +98,7 @@ final class LayoutFactory
             gdprText: $this->settings->translated('footer.gdpr_text', $locale),
             blogUrl: $hasBlog ? url($this->urls->blogPath($locale)) : null,
             feedUrl: $hasBlog ? url($this->urls->feedPath($locale)) : null,
+            icons: $this->icon->urls(),
         );
     }
 }

@@ -2,7 +2,10 @@
 
 use App\Models\Language;
 use App\Models\Profile;
+use App\Support\Media\ImageOptimizer;
 use App\Support\Settings\Settings;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 
 beforeEach(fn () => seedDemo());
 
@@ -94,4 +97,24 @@ it('keeps JSON-LD safe from script injection', function () {
 
     expect($html)->not->toContain('</script><script>alert(1)')
         ->and(collect(jsonLdNodes($html))->firstWhere('@type', 'Person')['name'])->toBe('John </script><script>alert(1)</script>');
+});
+
+it('links the site icon in the pages and from /favicon.ico', function () {
+    $this->get('/favicon.ico')->assertNotFound();
+
+    $source = sys_get_temp_dir().'/icon-'.bin2hex(random_bytes(4)).'.png';
+    imagepng(imagecreatetruecolor(600, 600), $source);
+    app(Settings::class)->set('site.icon', app(ImageOptimizer::class)->store($source, 'icon.png', 'uploads', 'site', 512, 'png'));
+    @unlink($source);
+
+    $html = (string) $this->get('/it-IT')->assertOk()->getContent();
+
+    expect($html)->toMatch('#<link rel="icon" type="image/png" sizes="32x32" href="[^"]+/site/icon-[a-z0-9]+-32\.png">#')
+        ->toMatch('#<link rel="apple-touch-icon" href="[^"]+-180\.png">#');
+
+    $icon = (string) preg_replace('#^.*/(site/)#', '$1', (string) Str::match('#href="([^"]+-32\.png)"#', $html));
+    Storage::disk('uploads')->assertExists($icon);
+    expect(getimagesize(Storage::disk('uploads')->path($icon))[0])->toBe(32);
+
+    $this->get('/favicon.ico')->assertStatus(301)->assertRedirectContains('-32.png');
 });

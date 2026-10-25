@@ -19,6 +19,7 @@ final readonly class Layout
      * @param  list<array{platform: string, icon: string, url: string, label: string}>  $socials
      * @param  array{href: string, text: string}|null  $email  valori codificati (vedi Cloak)
      * @param  array{href: string, text: string}|null  $phone  valori codificati (vedi Cloak)
+     * @param  array<int, string>|null  $icons  icona del sito: dimensione => URL
      */
     public function __construct(
         public string $locale,
@@ -40,5 +41,6 @@ final readonly class Layout
         public ?string $gdprText,
         public ?string $blogUrl = null,
         public ?string $feedUrl = null,
+        public ?array $icons = null,
     ) {}
 }

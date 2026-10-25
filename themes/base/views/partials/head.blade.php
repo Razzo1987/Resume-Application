@@ -38,6 +38,10 @@
 @else
 <meta name="twitter:card" content="summary">
 @endif
+@if ($layout->icons)
+<link rel="icon" type="image/png" sizes="32x32" href="{{ $layout->icons[32] }}">
+<link rel="apple-touch-icon" href="{{ $layout->icons[180] }}">
+@endif
 <meta name="theme-color" content="{{ $theme->themeColor ?? '#16324f' }}">
 @if ($layout->feedUrl)
 <link rel="alternate" type="application/rss+xml" title="{{ __('site.blog.feed') }} — {{ $layout->profile->full_name }}" href="{{ $layout->feedUrl }}">
