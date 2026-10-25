@@ -245,11 +245,12 @@ return [
 
     'themes' => [
         'install' => 'Installa o aggiorna un tema',
-        'install_help' => 'Carica lo zip del tema (creato con scripts/build-theme.sh). Se il tema è già installato viene aggiornato; la scelta del tema attivo non cambia.',
+        'install_help' => 'Carica lo zip del tema. Se il tema è già installato viene aggiornato; il tema attivo resta quello scelto.',
         'install_submit' => 'Installa',
         'package' => 'Pacchetto del tema (.zip)',
         'installed' => 'Tema ":theme" :version installato',
         'updated' => 'Tema ":theme" aggiornato da :from a :to',
+        'reinstalled' => 'Tema ":theme" :version reinstallato',
         'activate' => 'Attiva',
         'activated' => 'Tema ":theme" attivo',
         'remove' => 'Rimuovi',

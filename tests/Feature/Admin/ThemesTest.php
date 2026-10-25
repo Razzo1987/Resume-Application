@@ -181,6 +181,12 @@ it('installs, activates and removes themes from the admin page', function () {
         ->assertNotified(__('admin.themes.installed', ['theme' => 'Demo PRO', 'version' => '1.0.0']))
         ->assertSee('Demo PRO');
 
+    $again = UploadedFile::fake()->createWithContent('demo-pro-1.0.0.zip', (string) file_get_contents(themeZip()));
+
+    Livewire::test(ManageThemes::class)
+        ->callAction('install', ['package' => $again])
+        ->assertNotified(__('admin.themes.reinstalled', ['theme' => 'Demo PRO', 'version' => '1.0.0']));
+
     Livewire::test(ManageThemes::class)
         ->callAction('activate', arguments: ['theme' => 'demo-pro']);
 

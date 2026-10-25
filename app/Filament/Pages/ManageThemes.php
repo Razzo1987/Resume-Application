@@ -96,9 +96,11 @@ class ManageThemes extends Page
                         $result = app(ThemeInstaller::class)->install($disk->path($path));
 
                         Notification::make()->success()
-                            ->title($result['updated']
-                                ? __('admin.themes.updated', ['theme' => $result['theme']->title, 'from' => $result['previous'], 'to' => $result['theme']->version])
-                                : __('admin.themes.installed', ['theme' => $result['theme']->title, 'version' => $result['theme']->version]))
+                            ->title(match (true) {
+                                ! $result['updated'] => __('admin.themes.installed', ['theme' => $result['theme']->title, 'version' => $result['theme']->version]),
+                                $result['previous'] === $result['theme']->version => __('admin.themes.reinstalled', ['theme' => $result['theme']->title, 'version' => $result['theme']->version]),
+                                default => __('admin.themes.updated', ['theme' => $result['theme']->title, 'from' => $result['previous'], 'to' => $result['theme']->version]),
+                            })
                             ->send();
                     } catch (ThemeException $exception) {
                         Notification::make()->danger()->title(__('admin.themes.errors.title'))->body($exception->getMessage())->persistent()->send();

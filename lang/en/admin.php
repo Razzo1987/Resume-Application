@@ -245,11 +245,12 @@ return [
 
     'themes' => [
         'install' => 'Install or update a theme',
-        'install_help' => 'Upload the theme zip (built with scripts/build-theme.sh). If the theme is already installed it is updated; the active theme does not change.',
+        'install_help' => 'Upload the theme zip. If the theme is already installed it is updated; the active theme stays the same.',
         'install_submit' => 'Install',
         'package' => 'Theme package (.zip)',
         'installed' => 'Theme ":theme" :version installed',
         'updated' => 'Theme ":theme" updated from :from to :to',
+        'reinstalled' => 'Theme ":theme" :version installed again',
         'activate' => 'Activate',
         'activated' => 'Theme ":theme" is active',
         'remove' => 'Remove',
