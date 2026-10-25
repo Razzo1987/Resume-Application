@@ -29,3 +29,5 @@ All notable changes to this project are documented here. The format follows [Kee
 - Base theme: reduced Bootstrap build, SVG icon sprite generated from the theme icon map (Font Awesome Free), no web fonts, WCAG 2.1 AA (axe), Lighthouse 100 on the demo data.
 - Site strings for de-DE, fr-FR, es-ES, pt-PT, pt-BR, nl-NL (drafts to be reviewed by native speakers); en-US uses "résumé".
 - End-to-end tests with Playwright (Chromium, Firefox, WebKit, mobile) in CI.
+- Blog: paginated list per language, article page with `BlogPosting` data, RSS feed per language (`/{language}/feed.xml`), sitemap entries, "latest articles" CV section, blog entry in the menu. An article appears only in the languages it is written in; scheduled publication is respected by the page cache.
+- Admin: "View on site" on projects, experiences and articles that have a public page.

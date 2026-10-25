@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Site;
 
+use App\Models\Article;
 use App\Models\Experience;
 use App\Models\Language;
 use App\Models\Project;
@@ -28,6 +29,7 @@ final class UrlChangeRedirects
         $key = match (true) {
             $model instanceof Project => 'projects',
             $model instanceof Experience => 'experience',
+            $model instanceof Article => 'blog',
             default => null,
         };
 

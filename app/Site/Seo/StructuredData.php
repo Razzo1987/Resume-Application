@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Site\Seo;
 
+use App\Models\Article;
 use App\Models\Certification;
 use App\Models\Education;
 use App\Models\Experience;
@@ -106,14 +107,102 @@ final class StructuredData
                     'breadcrumb' => ['@id' => $page->canonical.'#breadcrumb'],
                 ]),
                 $this->breadcrumbList($page),
-                self::clean([
-                    '@type' => 'Person',
-                    '@id' => $this->personId(),
-                    'name' => $this->cv->profile()->full_name,
-                    'url' => url($this->urls->homePath($locale)),
-                ]),
+                $this->personReference($locale),
             ],
         ];
+    }
+
+    /**
+     * Elenco del blog.
+     *
+     * @param  iterable<Article>  $articles
+     * @return array<string, mixed>
+     */
+    public function blogGraph(Page $page, string $locale, iterable $articles): array
+    {
+        $posts = [];
+
+        foreach ($articles as $article) {
+            $posts[] = self::clean([
+                '@type' => 'BlogPosting',
+                'headline' => $article->t('title', $locale),
+                'url' => url((string) $this->urls->articlePath($article, $locale)),
+                'datePublished' => $article->published_at?->toAtomString(),
+            ]);
+        }
+
+        return [
+            '@context' => 'https://schema.org',
+            '@graph' => [
+                $this->website(),
+                self::clean([
+                    '@type' => 'Blog',
+                    '@id' => $page->canonical.'#blog',
+                    'url' => $page->canonical,
+                    'name' => $page->title,
+                    'description' => $page->description,
+                    'inLanguage' => $locale,
+                    'isPartOf' => ['@id' => $this->websiteId()],
+                    'author' => ['@id' => $this->personId()],
+                    'blogPost' => $posts,
+                    'breadcrumb' => ['@id' => $page->canonical.'#breadcrumb'],
+                ]),
+                $this->breadcrumbList($page),
+                $this->personReference($locale),
+            ],
+        ];
+    }
+
+    /**
+     * Articolo del blog: BlogPosting con autore, date e immagine.
+     *
+     * @return array<string, mixed>
+     */
+    public function articleGraph(Page $page, Article $article, string $locale): array
+    {
+        $title = (string) $article->t('title', $locale);
+
+        return [
+            '@context' => 'https://schema.org',
+            '@graph' => [
+                $this->website(),
+                self::clean([
+                    '@type' => 'BlogPosting',
+                    '@id' => $page->canonical.'#article',
+                    'headline' => mb_strlen($title) > 110 ? mb_substr($title, 0, 109).'…' : $title,
+                    'description' => $page->description,
+                    'url' => $page->canonical,
+                    'mainEntityOfPage' => $page->canonical,
+                    'image' => $this->images->url($article->cover_image),
+                    'datePublished' => $article->published_at?->toAtomString(),
+                    'dateModified' => $article->updated_at?->toAtomString(),
+                    'inLanguage' => $locale,
+                    'wordCount' => str_word_count(strip_tags((string) $article->t('body', $locale))),
+                    'author' => ['@id' => $this->personId()],
+                    'publisher' => ['@id' => $this->personId()],
+                    'isPartOf' => ['@type' => 'Blog', '@id' => url($this->urls->blogPath($locale)).'#blog'],
+                    'breadcrumb' => ['@id' => $page->canonical.'#breadcrumb'],
+                ]),
+                $this->breadcrumbList($page),
+                $this->personReference($locale),
+            ],
+        ];
+    }
+
+    /**
+     * Nodo Person essenziale per le pagine diverse dal CV (quello completo è nella pagina CV).
+     *
+     * @return array<string, mixed>
+     */
+    private function personReference(string $locale): array
+    {
+        return self::clean([
+            '@type' => 'Person',
+            '@id' => $this->personId(),
+            'name' => $this->cv->profile()->full_name,
+            'url' => url($this->urls->homePath($locale)),
+            'image' => $this->images->url($this->cv->profile()->photo),
+        ]);
     }
 
     /**

@@ -187,7 +187,7 @@ return [
         'slug' => 'Si genera da solo se lo lasci vuoto. Minuscole, numeri e trattini.',
         'project_experience' => 'L\'esperienza (azienda) in cui hai svolto il progetto.',
         'excerpt' => 'Usato negli elenchi e come descrizione SEO se quella non è compilata.',
-        'published_at' => 'Una data futura programma la pubblicazione.',
+        'published_at' => 'Vuota: si pubblica adesso. Una data futura programma la pubblicazione. Nel blog di una lingua compaiono solo gli articoli con il titolo scritto in quella lingua.',
         'language_code' => 'Lingua-PAESE, es. it-IT. Pacchetti inclusi: :packs.',
         'language_name' => 'Nella lingua stessa, es. "Deutsch".',
         'is_default' => 'È la lingua a cui porta l\'indirizzo principale (/) e quella usata quando manca una traduzione. Per cambiarla, rendi default un\'altra lingua.',
@@ -235,6 +235,7 @@ return [
     ],
 
     'actions' => [
+        'view_on_site' => 'Apri nel sito',
         'save' => 'Salva',
         'download' => 'Scarica',
         'make_current' => 'Rendi corrente',

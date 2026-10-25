@@ -50,6 +50,7 @@ return [
     'code' => 'fa-solid fa-code',
     'chart' => 'fa-solid fa-chart-line',
     'blog' => 'fa-solid fa-newspaper',
+    'rss' => 'fa-solid fa-rss',
     'lightbulb' => 'fa-solid fa-lightbulb',
     'rocket' => 'fa-solid fa-rocket',
     'trophy' => 'fa-solid fa-trophy',

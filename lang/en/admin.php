@@ -187,7 +187,7 @@ return [
         'slug' => 'Generated automatically when empty. Lowercase letters, numbers and dashes.',
         'project_experience' => 'The role (company) in which you worked on the project.',
         'excerpt' => 'Used in lists and as SEO description when that is empty.',
-        'published_at' => 'A future date schedules the publication.',
+        'published_at' => 'Empty: published now. A future date schedules the publication. The blog of a language lists only the articles whose title is written in that language.',
         'language_code' => 'language-COUNTRY, e.g. en-GB. Included packs: :packs.',
         'language_name' => 'In the language itself, e.g. "Deutsch".',
         'is_default' => 'The language the main address (/) leads to, and the fallback when a translation is missing. To change it, make another language the default.',
@@ -235,6 +235,7 @@ return [
     ],
 
     'actions' => [
+        'view_on_site' => 'View on site',
         'save' => 'Save',
         'download' => 'Download',
         'make_current' => 'Make current',

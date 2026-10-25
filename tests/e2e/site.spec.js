@@ -105,7 +105,7 @@ test.describe('CV', () => {
 });
 
 test.describe('accessibility (axe, WCAG 2.1 AA)', () => {
-    for (const path of ['/it-IT', '/en-GB/experience/data-governance-manager-acme-consulting', '/en-GB/projects/data-catalog-and-lineage', '/it-IT/pagina-inesistente']) {
+    for (const path of ['/it-IT', '/en-GB/experience/data-governance-manager-acme-consulting', '/en-GB/projects/data-catalog-and-lineage', '/it-IT/blog', '/en-GB/blog/why-data-governance-pays-off', '/it-IT/pagina-inesistente']) {
         test(path, async ({ page }) => {
             await page.goto(path);
 

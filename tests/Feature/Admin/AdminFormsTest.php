@@ -9,6 +9,7 @@ use App\Filament\Resources\Experiences\Pages\ListExperiences;
 use App\Filament\Resources\Languages\Pages\CreateLanguage;
 use App\Filament\Resources\Languages\Pages\EditLanguage;
 use App\Filament\Resources\PageSections\Pages\ManagePageSections;
+use App\Filament\Resources\Projects\Pages\EditProject;
 use App\Filament\Resources\Volunteering\Pages\CreateVolunteering;
 use App\Filament\Resources\Volunteering\Pages\ListVolunteering;
 use App\Models\CvDocument;
@@ -17,6 +18,7 @@ use App\Models\Language;
 use App\Models\Organization;
 use App\Models\PageSection;
 use App\Models\Profile;
+use App\Models\Project;
 use App\Models\User;
 use App\Site\Cache\PageCache;
 use App\Support\Settings\Settings;
@@ -229,4 +231,18 @@ it('refreshes the public pages after reordering the CV sections', function () {
         ->call('reorderTable', $order);
 
     expect(app(PageCache::class)->get(app(PageCache::class)->key('http://localhost/it-IT')))->toBeNull();
+});
+
+it('links the edit page to the public page when there is one', function () {
+    seedDemo();
+
+    $withPage = Project::query()->where('slug->it-IT', 'data-catalog-e-lineage')->sole();
+    $withoutPage = Project::query()->where('slug->it-IT', 'regole-di-data-quality')->sole();
+
+    Livewire::test(EditProject::class, ['record' => $withPage->getRouteKey()])
+        ->assertActionVisible('viewOnSite')
+        ->assertActionHasUrl('viewOnSite', 'http://localhost/it-IT/progetti/data-catalog-e-lineage');
+
+    Livewire::test(EditProject::class, ['record' => $withoutPage->getRouteKey()])
+        ->assertActionHidden('viewOnSite');
 });

@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Http\Controllers\Site;
 
 use App\Http\Controllers\Controller;
+use App\Models\Article;
 use App\Models\Experience;
 use App\Models\Project;
 use App\Site\CvData;
@@ -31,10 +32,17 @@ class DetailController extends Controller
         $record = match ($key) {
             'projects' => $this->find(Project::query()->visible()->with(['client', 'experience.organization', 'skills.category']), $slug, $locale, $locales),
             'experience' => $this->find(Experience::query()->visible()->with(['organization', 'skills.category', 'projects' => fn ($query) => $query->visible()->chronological()->with('client')]), $slug, $locale, $locales),
+            'blog' => $this->find(Article::query()->published(), $slug, $locale, $locales),
             default => null,
         };
 
-        abort_unless(($record instanceof Project || $record instanceof Experience) && $record->hasDetailPage(), 404);
+        $exists = match (true) {
+            $record instanceof Project, $record instanceof Experience => $record->hasDetailPage(),
+            $record instanceof Article => $record->isAvailableIn($locale),
+            default => false,
+        };
+
+        abort_unless($exists, 404);
 
         $canonical = (string) $urls->pathFor($record, $locale);
 
@@ -42,9 +50,11 @@ class DetailController extends Controller
             return redirect()->to(url($canonical), 301);
         }
 
-        return $record instanceof Project
-            ? view('theme::project', ['page' => $pages->project($record, $locale), 'project' => $record, 'cv' => $cv])
-            : view('theme::experience', ['page' => $pages->experience($record, $locale), 'experience' => $record, 'cv' => $cv]);
+        return match (true) {
+            $record instanceof Project => view('theme::project', ['page' => $pages->project($record, $locale), 'project' => $record, 'cv' => $cv]),
+            $record instanceof Experience => view('theme::experience', ['page' => $pages->experience($record, $locale), 'experience' => $record, 'cv' => $cv]),
+            default => view('theme::article', ['page' => $pages->article($record, $locale), 'article' => $record, 'cv' => $cv]),
+        };
     }
 
     /**

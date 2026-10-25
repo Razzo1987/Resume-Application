@@ -127,6 +127,13 @@ return [
         'reading_time' => '{1} :count minuto de leitura|[2,*] :count minutos de leitura',
         'no_articles' => 'Nenhum artigo publicado ainda.',
         'feed' => 'Feed RSS',
+        'description' => 'Artigos e notas de :name.',
+        'page' => 'Página :page',
+        'newer' => 'Artigos mais recentes',
+        'older' => 'Artigos anteriores',
+        'back_to_blog' => 'Voltar ao blog',
+        'pagination' => 'Páginas do blog',
+        'latest' => 'Últimos artigos',
     ],
 
     'footer' => [

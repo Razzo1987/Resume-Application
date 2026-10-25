@@ -63,6 +63,7 @@ class CacheSitePages
         return str_starts_with($type, 'text/html')
             || str_starts_with($type, 'text/plain')
             || str_starts_with($type, 'application/xml')
+            || str_starts_with($type, 'application/rss+xml')
             || str_starts_with($type, 'text/xml');
     }
 }

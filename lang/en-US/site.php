@@ -126,6 +126,13 @@ return [
         'reading_time' => '{1} :count minute read|[2,*] :count minute read',
         'no_articles' => 'No articles published yet.',
         'feed' => 'RSS feed',
+        'description' => 'Articles and notes by :name.',
+        'page' => 'Page :page',
+        'newer' => 'Newer articles',
+        'older' => 'Older articles',
+        'back_to_blog' => 'Back to the blog',
+        'pagination' => 'Blog pages',
+        'latest' => 'Latest articles',
     ],
 
     'footer' => [

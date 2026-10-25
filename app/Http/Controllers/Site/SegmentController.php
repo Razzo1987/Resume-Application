@@ -9,6 +9,7 @@ use App\Models\CvDocument;
 use App\Site\CvFiles;
 use App\Site\SiteContext;
 use App\Site\SiteUrls;
+use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
@@ -22,7 +23,7 @@ use Symfony\Component\HttpFoundation\ResponseHeaderBag;
  */
 class SegmentController extends Controller
 {
-    public function __invoke(Request $request, string $locale, string $segment, SiteContext $site, SiteUrls $urls, CvFiles $files): RedirectResponse|BinaryFileResponse
+    public function __invoke(Request $request, string $locale, string $segment, SiteContext $site, SiteUrls $urls, CvFiles $files): RedirectResponse|BinaryFileResponse|View
     {
         $key = $urls->segmentKey($locale, $segment);
         $canonical = $key !== null ? '/'.$locale.'/'.$urls->segment($locale, $key) : null;
@@ -30,12 +31,15 @@ class SegmentController extends Controller
         abort_if($key === null, 404);
 
         if ($canonical !== $request->getPathInfo()) {
-            return redirect()->to(url($canonical), 301);
+            $query = $request->getQueryString();
+
+            return redirect()->to(url($canonical).($query !== null ? '?'.$query : ''), 301);
         }
 
         return match ($key) {
             'cv' => $this->downloadCv($request, $site, $files),
             'projects', 'experience' => redirect()->to(url($urls->sectionPath($locale, $key)), 301),
+            'blog' => app()->call([app(BlogController::class), 'index'], ['request' => $request, 'locale' => $locale]),
             default => abort(404),
         };
     }

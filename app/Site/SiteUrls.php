@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Site;
 
+use App\Models\Article;
 use App\Models\Experience;
 use App\Models\Project;
 use App\Support\Languages\LanguagePacks;
@@ -73,6 +74,25 @@ final class SiteUrls
         return $this->detailPath('projects', $project->t('slug', $locale, false), $locale);
     }
 
+    public function blogPath(string $locale): string
+    {
+        return '/'.$locale.'/'.$this->segment($locale, 'blog');
+    }
+
+    public function feedPath(string $locale): string
+    {
+        return '/'.$locale.'/feed.xml';
+    }
+
+    public function articlePath(Article $article, string $locale): ?string
+    {
+        if (! $article->isAvailableIn($locale)) {
+            return null;
+        }
+
+        return $this->detailPath('blog', $article->t('slug', $locale, false), $locale);
+    }
+
     public function experiencePath(Experience $experience, string $locale): ?string
     {
         return $this->detailPath('experience', $experience->t('slug', $locale, false), $locale);
@@ -86,6 +106,7 @@ final class SiteUrls
         return match (true) {
             $model instanceof Project => $this->projectPath($model, $locale),
             $model instanceof Experience => $this->experiencePath($model, $locale),
+            $model instanceof Article => $this->articlePath($model, $locale),
             default => null,
         };
     }

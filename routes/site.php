@@ -8,6 +8,7 @@
  * e i controller verificano che l'URL sia quello canonico (altrimenti 301).
  */
 
+use App\Http\Controllers\Site\BlogController;
 use App\Http\Controllers\Site\CvController;
 use App\Http\Controllers\Site\DetailController;
 use App\Http\Controllers\Site\RobotsController;
@@ -31,6 +32,10 @@ Route::middleware(ResolveSiteLocale::class)->group(function () use ($locale, $wo
     Route::get('/{locale}', CvController::class)
         ->where('locale', $locale)
         ->name('site.cv');
+
+    Route::get('/{locale}/feed.xml', [BlogController::class, 'feed'])
+        ->where('locale', $locale)
+        ->name('site.feed');
 
     Route::get('/{locale}/{segment}', SegmentController::class)
         ->where(['locale' => $locale, 'segment' => $word])

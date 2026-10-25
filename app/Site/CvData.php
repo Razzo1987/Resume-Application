@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Site;
 
 use App\Enums\PageSectionKey;
+use App\Models\Article;
 use App\Models\Certification;
 use App\Models\Education;
 use App\Models\Experience;
@@ -33,7 +34,10 @@ final class CvData
     /** @var array<string, mixed> */
     private array $memo = [];
 
-    public function __construct(private readonly RichText $richText) {}
+    public function __construct(
+        private readonly RichText $richText,
+        private readonly Blog $blog,
+    ) {}
 
     public function profile(): Profile
     {
@@ -104,8 +108,7 @@ final class CvData
             PageSectionKey::Languages => $this->languageSkills()->isNotEmpty(),
             PageSectionKey::Publications => $this->publications()->isNotEmpty(),
             PageSectionKey::Interests => $this->interests()->isNotEmpty(),
-            // Il blog arriva in M3
-            PageSectionKey::LatestArticles => false,
+            PageSectionKey::LatestArticles => $this->latestArticles()->isNotEmpty(),
         };
     }
 
@@ -194,6 +197,16 @@ final class CvData
     public function interests(): Collection
     {
         return $this->remember('interests', fn (): Collection => Interest::query()->visible()->ordered()->get());
+    }
+
+    /**
+     * Ultimi articoli del blog scritti nella lingua della pagina.
+     *
+     * @return Collection<int, Article>
+     */
+    public function latestArticles(): Collection
+    {
+        return $this->remember('latestArticles', fn (): Collection => $this->blog->latest(app()->getLocale()));
     }
 
     /**

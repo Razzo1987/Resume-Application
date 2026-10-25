@@ -14,7 +14,7 @@ final readonly class Layout
     /**
      * @param  list<string>  $headlines
      * @param  array<string, string|int>  $photo  attributi di <img> (src, width, height) o vuoto
-     * @param  list<array{key: string, title: string, url: string}>  $menu
+     * @param  list<array{key: string, title: string, url: string, current: bool}>  $menu
      * @param  list<array{code: string, name: string, url: string, current: bool}>  $languages
      * @param  list<array{platform: string, icon: string, url: string, label: string}>  $socials
      * @param  array{href: string, text: string}|null  $email  valori codificati (vedi Cloak)
@@ -38,5 +38,7 @@ final readonly class Layout
         public ?string $lastUpdated,
         public ?string $lastUpdatedMachine,
         public ?string $gdprText,
+        public ?string $blogUrl = null,
+        public ?string $feedUrl = null,
     ) {}
 }

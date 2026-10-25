@@ -5,19 +5,22 @@ declare(strict_types=1);
 namespace App\Http\Controllers\Site;
 
 use App\Http\Controllers\Controller;
+use App\Models\Article;
 use App\Models\Experience;
 use App\Models\Project;
+use App\Site\Blog;
 use App\Site\LastUpdated;
 use App\Site\SiteUrls;
 use App\Support\Languages\Locales;
 use Illuminate\Http\Response;
+use Illuminate\Support\Carbon;
 
 /**
  * sitemap.xml: CV e pagine dedicate in tutte le lingue attive, con le versioni alternative (hreflang).
  */
 class SitemapController extends Controller
 {
-    public function __invoke(SiteUrls $urls, Locales $locales, LastUpdated $lastUpdated): Response
+    public function __invoke(SiteUrls $urls, Locales $locales, LastUpdated $lastUpdated, Blog $blog): Response
     {
         $entries = [];
         $default = $locales->default();
@@ -47,6 +50,21 @@ class SitemapController extends Controller
                 'alternates' => $urls->alternates(fn (string $code): ?string => $urls->experiencePath($experience, $code)),
                 'lastmod' => $experience->updated_at,
             ];
+        }
+
+        // Blog: elenco nelle lingue che hanno articoli, poi ogni articolo nelle lingue in cui è scritto
+        $blogAlternates = $urls->alternates(fn (string $code): ?string => $blog->hasArticles($code) ? $urls->blogPath($code) : null);
+
+        if ($blogAlternates !== []) {
+            $entries[] = ['alternates' => $blogAlternates, 'lastmod' => Article::query()->published()->max('published_at') !== null ? Carbon::parse((string) Article::query()->published()->max('published_at')) : null];
+        }
+
+        foreach (Article::query()->published()->orderByDesc('published_at')->get() as $article) {
+            $alternates = $urls->alternates(fn (string $code): ?string => $urls->articlePath($article, $code));
+
+            if ($alternates !== []) {
+                $entries[] = ['alternates' => $alternates, 'lastmod' => $article->updated_at];
+            }
         }
 
         $xml = view('sitemap', ['entries' => $entries, 'default' => $default])->render();

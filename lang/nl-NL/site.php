@@ -127,6 +127,13 @@ return [
         'reading_time' => '{1} :count minuut leestijd|[2,*] :count minuten leestijd',
         'no_articles' => 'Nog geen artikelen gepubliceerd.',
         'feed' => 'RSS-feed',
+        'description' => 'Artikelen en notities van :name.',
+        'page' => 'Pagina :page',
+        'newer' => 'Nieuwere artikelen',
+        'older' => 'Oudere artikelen',
+        'back_to_blog' => 'Terug naar de blog',
+        'pagination' => 'Blogpagina\'s',
+        'latest' => 'Nieuwste artikelen',
     ],
 
     'footer' => [

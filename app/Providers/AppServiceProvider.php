@@ -19,6 +19,7 @@ use App\Models\Publication;
 use App\Models\Skill;
 use App\Models\SkillCategory;
 use App\Models\SocialLink;
+use App\Site\Blog;
 use App\Site\Cache\PageCache;
 use App\Site\CvData;
 use App\Site\CvFiles;
@@ -69,6 +70,7 @@ class AppServiceProvider extends ServiceProvider
         $this->app->scoped(StructuredData::class);
         $this->app->scoped(Pages::class);
         $this->app->scoped(LayoutFactory::class);
+        $this->app->scoped(Blog::class);
     }
 
     public function boot(): void
@@ -93,7 +95,7 @@ class AppServiceProvider extends ServiceProvider
         Table::configureUsing(fn (Table $table): Table => $table->afterReordering(fn () => $this->app->make(PageCache::class)->flush()));
 
         // Indirizzi cambiati → redirect 301 dal vecchio al nuovo
-        Event::listen(['eloquent.updated: '.Project::class, 'eloquent.updated: '.Experience::class], function (Model $model): void {
+        Event::listen(['eloquent.updated: '.Project::class, 'eloquent.updated: '.Experience::class, 'eloquent.updated: '.Article::class], function (Model $model): void {
             $this->app->make(UrlChangeRedirects::class)->slugsChanged($model);
         });
 

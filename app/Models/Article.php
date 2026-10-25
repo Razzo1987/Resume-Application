@@ -41,6 +41,42 @@ class Article extends Model implements Translatable
         ];
     }
 
+    protected static function booted(): void
+    {
+        // "Pubblicato" senza data: si pubblica adesso
+        static::saving(function (Article $article): void {
+            if ($article->status === ArticleStatus::Published && $article->published_at === null) {
+                $article->published_at = now();
+            }
+        });
+    }
+
+    /**
+     * Articoli scritti in una lingua (titolo presente): nel blog di quella lingua compaiono solo questi.
+     *
+     * @param  Builder<static>  $query
+     * @return Builder<static>
+     */
+    public function scopeAvailableIn(Builder $query, string $locale): Builder
+    {
+        return $query->whereNotNull("title->{$locale}")->where("title->{$locale}", '!=', '');
+    }
+
+    public function isAvailableIn(string $locale): bool
+    {
+        return filled($this->t('title', $locale, false));
+    }
+
+    /**
+     * Minuti di lettura stimati (200 parole al minuto).
+     */
+    public function readingMinutes(?string $locale = null): int
+    {
+        $words = str_word_count(strip_tags((string) $this->t('body', $locale)));
+
+        return max(1, (int) ceil($words / 200));
+    }
+
     /**
      * @param  Builder<static>  $query
      * @return Builder<static>
@@ -56,11 +92,14 @@ class Article extends Model implements Translatable
     {
         return $this->status === ArticleStatus::Published
             && $this->published_at !== null
-            && $this->published_at->isPast();
+            && ! $this->published_at->isFuture();
     }
 
+    /**
+     * Lo slug nasce solo dal titolo scritto in quella lingua: un articolo non tradotto non ha indirizzo in quella lingua.
+     */
     public function slugSource(string $locale): ?string
     {
-        return $this->t('title', $locale);
+        return $this->t('title', $locale, false);
     }
 }

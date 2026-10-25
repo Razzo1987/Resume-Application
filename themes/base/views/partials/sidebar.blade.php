@@ -48,7 +48,7 @@
             <nav class="site-nav" aria-label="{{ __('site.a11y.main_menu') }}">
                 <ul>
                     @foreach ($layout->menu as $item)
-                        <li><a href="{{ $item['url'] }}">{{ $item['title'] }}</a></li>
+                        <li><a href="{{ $item['url'] }}"@if ($item['current']) aria-current="true"@endif>{{ $item['title'] }}</a></li>
                     @endforeach
                 </ul>
             </nav>

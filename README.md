@@ -3,7 +3,7 @@
 A multilingual CV / résumé web application with a lightweight admin panel, built with **Laravel** and **Filament**.
 It runs on any standard LAMP hosting (including cPanel shared hosting), uses **no cookies** on the public site and loads **no third-party resources** (fonts, scripts and styles are all self-hosted).
 
-> Status: **v2 in development** — admin panel and public site with the open `base` theme are in place (milestones M0–M2); blog, installer and update page come next.
+> Status: **v2 in development** — admin panel, public site with the open `base` theme and blog are in place (milestones M0–M3); installer and update page come next.
 
 ## Features (v2.0)
 
@@ -48,6 +48,7 @@ npx playwright test                 # end-to-end + accessibility (needs the demo
   Wrong casing, trailing slashes, segments or slugs of another language are redirected (301) to the canonical address.
 - Translated URL segments come from the language packs and can be changed per language in the admin;
   when a slug or a segment changes, the old address keeps working with a permanent redirect.
+- Blog at `/{language}/blog` with an RSS feed at `/{language}/feed.xml`; an article is listed only in the languages it is written in.
 - Projects and experiences get a dedicated page only when there is something more than the CV summary
   (a detail text, an image, or related projects), so search engines never see empty pages.
 - SEO: `canonical`, `hreflang` + `x-default`, Open Graph, sitemap with language alternates, Schema.org JSON-LD

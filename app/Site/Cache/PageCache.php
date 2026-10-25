@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Site\Cache;
 
+use App\Site\Blog;
 use App\Themes\ThemeManager;
 use Illuminate\Contracts\Cache\Repository;
 use Illuminate\Support\Facades\Cache;
@@ -47,7 +48,7 @@ final class PageCache
 
         if ($this->enabled()) {
             try {
-                $this->store()->put($key, ['content' => $content, 'type' => $type, 'etag' => $etag, 'time' => time()], self::TTL);
+                $this->store()->put($key, ['content' => $content, 'type' => $type, 'etag' => $etag, 'time' => time()], $this->ttl());
             } catch (Throwable) {
                 // Cache non scrivibile: la pagina si genera comunque a ogni richiesta
             }
@@ -80,6 +81,24 @@ final class PageCache
         }
 
         return $this->assetsVersion;
+    }
+
+    /**
+     * Secondi di validità: al massimo TTL, ma mai oltre la prossima pubblicazione programmata di un articolo.
+     */
+    public function ttl(): int
+    {
+        try {
+            $next = app(Blog::class)->nextScheduledAt();
+        } catch (Throwable) {
+            $next = null;
+        }
+
+        if ($next === null) {
+            return self::TTL;
+        }
+
+        return max(1, min(self::TTL, (int) ceil(now()->diffInSeconds($next, false))));
     }
 
     public function flush(): void

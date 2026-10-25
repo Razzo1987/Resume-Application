@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\Articles\Pages;
 
 use App\Filament\Resources\Articles\ArticleResource;
+use App\Filament\Support\SiteActions;
 use Filament\Actions\DeleteAction;
 use Filament\Resources\Pages\EditRecord;
 
@@ -13,6 +14,7 @@ class EditArticle extends EditRecord
     protected function getHeaderActions(): array
     {
         return [
+            SiteActions::viewOnSite(),
             DeleteAction::make(),
         ];
     }

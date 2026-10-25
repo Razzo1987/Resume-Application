@@ -27,6 +27,7 @@ final class Page
         public array $breadcrumbs = [],
         public ?string $robots = null,
         public bool $isCv = false,
+        public ?string $section = null,
     ) {}
 
     public function xDefault(): ?string

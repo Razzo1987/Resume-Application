@@ -202,7 +202,12 @@ class DemoSeeder extends Seeder
         Article::query()->create([
             'title' => ['it-IT' => 'Perché la Data Governance conviene', 'en-GB' => 'Why data governance pays off'],
             'excerpt' => ['it-IT' => 'Tre benefici concreti.', 'en-GB' => 'Three concrete benefits.'],
-            'body' => ['it-IT' => '<p>Testo di esempio.</p>', 'en-GB' => '<p>Sample text.</p>'],
+            'body' => [
+                'it-IT' => '<p>Un programma di Data Governance ben impostato si ripaga in fretta.</p><h2>1. Meno tempo perso a cercare i dati</h2><p>Un catalogo condiviso dice dove sono i dati, chi li gestisce e come si usano.</p><h2>2. Decisioni basate su numeri affidabili</h2><p>Regole di qualità misurate ogni giorno rendono i report credibili.</p><h2>3. Conformità senza affanno</h2><p>Lineage e responsabilità chiare semplificano audit e richieste del regolatore.</p>',
+                'en-GB' => '<p>A well-designed data governance programme pays for itself quickly.</p><h2>1. Less time spent looking for data</h2><p>A shared catalogue tells where data lives, who owns it and how to use it.</p><h2>2. Decisions based on reliable numbers</h2><p>Quality rules measured every day make reports credible.</p><h2>3. Compliance without the rush</h2><p>Clear lineage and ownership make audits and regulator requests simpler.</p>',
+            ],
+            'cover_image' => self::sampleCover(),
+            'cover_alt' => ['it-IT' => 'Illustrazione astratta con barre e linee', 'en-GB' => 'Abstract illustration with bars and lines'],
             'status' => ArticleStatus::Published,
             'published_at' => now()->subDay(),
         ]);
@@ -249,6 +254,42 @@ class DemoSeeder extends Seeder
 
         try {
             return app(ImageOptimizer::class)->store((string) $source, 'john-doe.png', 'uploads', 'profile', 800);
+        } finally {
+            @unlink((string) $source);
+        }
+    }
+
+    /**
+     * Copertina di esempio per l'articolo: barre e linee disegnate con GD.
+     */
+    public static function sampleCover(): ?string
+    {
+        if (! function_exists('imagecreatetruecolor')) {
+            return null;
+        }
+
+        $image = imagecreatetruecolor(1200, 630);
+
+        if ($image === false) {
+            return null;
+        }
+
+        imagefill($image, 0, 0, (int) imagecolorallocate($image, 22, 50, 79));
+        $colors = [[244, 201, 93], [123, 167, 214], [219, 228, 238]];
+
+        foreach ([180, 300, 240, 420, 360, 470] as $index => $height) {
+            [$red, $green, $blue] = $colors[$index % 3];
+            imagefilledrectangle($image, 150 + $index * 150, 560 - $height, 230 + $index * 150, 560, (int) imagecolorallocate($image, $red, $green, $blue));
+        }
+
+        imagesetthickness($image, 6);
+        imageline($image, 120, 520, 1080, 120, (int) imagecolorallocate($image, 255, 255, 255));
+
+        $source = tempnam(sys_get_temp_dir(), 'demo-cover');
+        imagepng($image, $source);
+
+        try {
+            return app(ImageOptimizer::class)->store((string) $source, 'data-governance.png', 'uploads', 'articles', 2000);
         } finally {
             @unlink((string) $source);
         }
