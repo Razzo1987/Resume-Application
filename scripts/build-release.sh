@@ -22,7 +22,9 @@ git -C "$ROOT" archive --format=tar HEAD | tar -x -C "$WORK/src"
 
 echo "== Dipendenze di produzione e asset"
 ( cd "$WORK/src"
-  composer install --no-dev --optimize-autoloader --classmap-authoritative --no-interaction --no-progress
+  composer install --no-dev --prefer-dist --optimize-autoloader --classmap-authoritative --no-interaction --no-progress
+  # Se Composer ha dovuto clonare i pacchetti da git (dist non scaricabili), niente cartelle .git nel pacchetto
+  find vendor -type d -name .git -prune -exec rm -rf {} +
   npm ci --no-audit --no-fund
   npm run build
   rm -rf node_modules tests .github .editorconfig phpunit.xml phpstan.neon* pint.json \
