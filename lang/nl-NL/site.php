@@ -154,5 +154,7 @@ return [
     'errors' => [
         'not_found_title' => 'Pagina niet gevonden',
         'not_found_text' => 'De pagina die je zoekt bestaat niet of is verplaatst.',
+        'maintenance_title' => 'Site wordt bijgewerkt',
+        'maintenance_text' => 'De site wordt bijgewerkt: kom over een paar minuten terug.',
     ],
 ];

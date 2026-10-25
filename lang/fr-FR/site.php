@@ -154,5 +154,7 @@ return [
     'errors' => [
         'not_found_title' => 'Page introuvable',
         'not_found_text' => 'La page que vous cherchez n\'existe pas ou a été déplacée.',
+        'maintenance_title' => 'Site en cours de mise à jour',
+        'maintenance_text' => 'Le site est en cours de mise à jour : revenez dans quelques minutes.',
     ],
 ];

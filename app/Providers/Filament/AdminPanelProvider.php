@@ -4,6 +4,7 @@ namespace App\Providers\Filament;
 
 use App\Filament\Support\InitialsAvatarProvider;
 use App\Filament\Widgets\SiteStatusWidget;
+use App\Filament\Widgets\SystemAlertsWidget;
 use App\Http\Middleware\NoIndex;
 use App\Http\Middleware\SetAdminLocale;
 use Filament\Auth\MultiFactor\App\AppAuthentication;
@@ -53,6 +54,7 @@ class AdminPanelProvider extends PanelProvider
                 Dashboard::class,
             ])
             ->widgets([
+                SystemAlertsWidget::class,
                 SiteStatusWidget::class,
                 AccountWidget::class,
             ])

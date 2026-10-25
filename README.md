@@ -3,7 +3,7 @@
 A multilingual CV / résumé web application with a lightweight admin panel, built with **Laravel** and **Filament**.
 It runs on any standard LAMP hosting (including cPanel shared hosting), uses **no cookies** on the public site and loads **no third-party resources** (fonts, scripts and styles are all self-hosted).
 
-> Status: **v2 in development** — admin panel, public site with the open `base` theme and blog are in place (milestones M0–M3); installer and update page come next.
+> Status: **v2 release candidate** — admin panel, public site with the open `base` theme, blog, web installer and update page are in place (milestones M0–M4).
 
 ## Features (v2.0)
 
@@ -17,7 +17,7 @@ It runs on any standard LAMP hosting (including cPanel shared hosting), uses **n
 
 ## Requirements
 
-- PHP **8.4 or 8.5** with `intl`, `mbstring`, `pdo_mysql`, `gd`, `zip`, `fileinfo`, `bcmath`
+- PHP **8.4 or 8.5** with `intl`, `mbstring`, `pdo_mysql`, `gd`, `zip`, `fileinfo`, `dom`, `openssl`
 - MySQL 8.0+ (or MariaDB 10.11+)
 - Apache with `mod_rewrite` (`.htaccess` support)
 
@@ -72,7 +72,7 @@ mapped to the theme's icon set; `scripts/build-icons.mjs` builds the SVG sprite 
 |---|---|
 | `app/Models` | CV content; translated fields are JSON columns (`{"it-IT": "…", "en-GB": "…"}`) |
 | `app/Filament` | Admin panel: resources, profile and settings pages, dashboard widget |
-| `app/Support` | Languages and language packs, settings, translations, image optimisation (WebP) |
+| `app/Support` | Languages and language packs, settings, translations, image optimisation (WebP), installer, system tools (maintenance, updates, backup) |
 | `app/Site` | Public site: URLs, page metadata, JSON-LD, CV data loader, page cache, redirects |
 | `app/Themes` | Theme manager (active theme → `base` inheritance, icon map) |
 | `themes/base` | Open theme: views, icons, SCSS/JS sources (built into `public/themes/base`) |
@@ -84,7 +84,8 @@ mapped to the theme's icon set; `scripts/build-icons.mjs` builds the SVG sprite 
 
 ## Deployment (release package)
 
-The release zip is extracted **entirely inside the web root** (e.g. `public_html/`):
+The release zip (`scripts/build-release.sh`) is extracted **entirely inside the web root** (e.g. `public_html/`)
+and installed from the browser at `/install`:
 
 ```
 public_html/
@@ -92,6 +93,9 @@ public_html/
 ├── uploads/                     uploaded images (never part of a package)
 └── core/                        application code, denied to browsers by .htaccess
 ```
+
+Updates are full packages extracted over the previous one, completed from the admin *System* page
+(migrations, caches, `.htaccess`, clean-up of files no longer used). See **[docs/INSTALL.md](docs/INSTALL.md)**.
 
 If your hosting allows it, `core/` can live outside the web root: create `public_html/core-path.php` returning its absolute path.
 

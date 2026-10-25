@@ -21,6 +21,11 @@ return [
     // Cache HTML delle pagine pubbliche (disattivabile in sviluppo con RESUME_PAGE_CACHE=false).
     'page_cache' => (bool) env('RESUME_PAGE_CACHE', true),
 
+    // Installer: percorso del .env che segna l'installazione (vuoto = quello di Laravel). Serve solo ai test.
+    'installer' => [
+        'env_path' => null,
+    ],
+
     'themes' => [
         // Tema attivo. Ogni tema eredita dal tema "base" le view e le stringhe che non ridefinisce.
         'active' => env('RESUME_THEME', 'base'),

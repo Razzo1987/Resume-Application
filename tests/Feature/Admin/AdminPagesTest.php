@@ -43,7 +43,7 @@ it('opens the list, create and edit pages', function (string $resource) {
 
 it('opens the dashboard, the profile and the settings pages', function (string $path) {
     $this->get('/admin'.$path)->assertOk();
-})->with(['', '/profile-data', '/settings']);
+})->with(['', '/profile-data', '/settings', '/system']);
 
 it('shows the admin in English when configured', function () {
     config(['resume.admin_locale' => 'en']);

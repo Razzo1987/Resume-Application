@@ -152,6 +152,14 @@ final class Pages
         return $page;
     }
 
+    public function maintenance(): Page
+    {
+        return new Page(
+            title: __('site.errors.maintenance_title').' — '.$this->cv->profile()->full_name,
+            robots: 'noindex',
+        );
+    }
+
     public function notFound(): Page
     {
         return new Page(

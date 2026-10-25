@@ -30,6 +30,7 @@ use App\Site\Seo\StructuredData;
 use App\Site\SiteContext;
 use App\Site\SiteUrls;
 use App\Site\UrlChangeRedirects;
+use App\Support\Install\InstallState;
 use App\Support\Languages\LanguagePacks;
 use App\Support\Languages\Locales;
 use App\Support\Settings\Settings;
@@ -79,7 +80,7 @@ class AppServiceProvider extends ServiceProvider
         Model::shouldBeStrict(! $this->app->isProduction());
 
         // In produzione tutti gli indirizzi generati (canonical, sitemap, link) usano il dominio di APP_URL
-        if ($this->app->isProduction() && filled(config('app.url'))) {
+        if ($this->app->isProduction() && filled(config('app.url')) && $this->app->make(InstallState::class)->isInstalled()) {
             URL::forceRootUrl((string) config('app.url'));
 
             if (str_starts_with((string) config('app.url'), 'https://')) {

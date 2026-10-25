@@ -154,5 +154,7 @@ return [
     'errors' => [
         'not_found_title' => 'Página no encontrada',
         'not_found_text' => 'La página que buscas no existe o se ha movido.',
+        'maintenance_title' => 'Sitio en actualización',
+        'maintenance_text' => 'Estamos actualizando el sitio: vuelve en unos minutos.',
     ],
 ];

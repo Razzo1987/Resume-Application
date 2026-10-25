@@ -25,9 +25,12 @@ echo "== Dipendenze di produzione e asset"
   composer install --no-dev --prefer-dist --optimize-autoloader --classmap-authoritative --no-interaction --no-progress
   # Se Composer ha dovuto clonare i pacchetti da git (dist non scaricabili), niente cartelle .git nel pacchetto
   find vendor -type d -name .git -prune -exec rm -rf {} +
+  # Pulizia di vendor: test, documentazione ed esempi dei pacchetti non servono in produzione
+  find vendor -mindepth 3 -maxdepth 3 -type d \( -iname tests -o -iname test -o -iname docs -o -iname doc -o -iname examples -o -name .github \) -prune -exec rm -rf {} +
+  find vendor -type f \( -iname '*.md' -o -name 'phpunit.xml*' -o -name 'phpstan.neon*' -o -name '.editorconfig' -o -name '.gitattributes' \) -delete
   npm ci --no-audit --no-fund
   npm run build
-  rm -rf node_modules tests .github .editorconfig phpunit.xml phpstan.neon* pint.json \
+  rm -rf node_modules tests docs .github .editorconfig phpunit.xml phpstan.neon* pint.json \
          package.json package-lock.json vite.config.* playwright.config.* scripts
 )
 

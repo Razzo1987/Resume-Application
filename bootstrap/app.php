@@ -2,6 +2,8 @@
 
 use App\Http\Middleware\CacheSitePages;
 use App\Http\Middleware\NormalizeSitePath;
+use App\Http\Middleware\RedirectToInstaller;
+use App\Http\Middleware\SiteMaintenance;
 use App\Http\Middleware\SiteSecurityHeaders;
 use App\Http\Middleware\StripCookies;
 use App\Site\NotFound;
@@ -18,16 +20,27 @@ $app = Application::configure(basePath: dirname(__DIR__))
         web: __DIR__.'/../routes/web.php',
         commands: __DIR__.'/../routes/console.php',
         then: function (): void {
+            // Installer: senza sessione (prima dell'installazione non esiste la chiave dell'app)
+            Route::middleware('installer')->group(base_path('routes/install.php'));
+
             // Sito pubblico: nessuna sessione, nessun CSRF, nessun cookie.
             Route::middleware('site')->group(base_path('routes/site.php'));
         },
     )
     ->withMiddleware(function (Middleware $middleware): void {
+        // Prima dell'installazione tutto porta a /install
+        $middleware->prepend(RedirectToInstaller::class);
+
+        $middleware->group('installer', [
+            StripCookies::class,
+        ]);
+
         // L'ordine conta: la risposta (anche quella dalla cache) passa sempre da intestazioni di sicurezza e StripCookies
         $middleware->group('site', [
             NormalizeSitePath::class,
             SiteSecurityHeaders::class,
             StripCookies::class,
+            SiteMaintenance::class,
             CacheSitePages::class,
             SubstituteBindings::class,
         ]);

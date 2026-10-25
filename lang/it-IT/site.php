@@ -153,5 +153,7 @@ return [
     'errors' => [
         'not_found_title' => 'Pagina non trovata',
         'not_found_text' => 'La pagina che cerchi non esiste o è stata spostata.',
+        'maintenance_title' => 'Sito in aggiornamento',
+        'maintenance_text' => 'Stiamo aggiornando il sito: torna tra qualche minuto.',
     ],
 ];
