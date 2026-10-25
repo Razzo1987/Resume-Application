@@ -55,6 +55,7 @@ return [
     ],
 
     'fields' => [
+        'og_image' => 'Sharing image',
         'name' => 'Name',
         'full_name' => 'Full name',
         'title' => 'Title',
@@ -162,7 +163,7 @@ return [
         'headlines' => 'Headlines',
         'bio' => 'About',
         'theme' => 'Theme',
-        'print_enabled' => 'Print version',
+        'print_enabled' => '"Print" button',
         'show_last_updated' => 'Show "Last updated" in the footer',
         'cv_filename_pattern' => 'Downloaded file name',
         'cv_fallback' => 'Default-language CV when missing',
@@ -176,6 +177,7 @@ return [
     ],
 
     'help' => [
+        'og_image' => 'Shown when the CV is shared on social networks (Open Graph). 1200×630 recommended; saved as JPG. If missing, the profile photo is used.',
         'is_visible' => 'When off, the item stays here but is not shown on the website.',
         'end_date_empty' => 'Leave empty if it is still ongoing.',
         'expires_empty' => 'Empty = does not expire.',
@@ -211,7 +213,7 @@ return [
         'country_code' => 'Two-letter code, e.g. GB.',
         'location' => 'City shown in the profile, e.g. London.',
         'headlines' => 'One per line: they rotate under the name.',
-        'print_enabled' => 'Clean print page and "Print" button.',
+        'print_enabled' => 'Shows the "Print" button. The clean print layout always applies, even when printing from the browser.',
         'show_last_updated' => 'Date of the latest change to the CV content.',
         'cv_filename_pattern' => 'Placeholders: {name} = full name, {lang} = IT/EN…, {locale} = it-IT/en-GB…',
         'cv_fallback' => 'When a language has no CV, the button downloads the default-language one.',

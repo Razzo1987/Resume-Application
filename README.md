@@ -3,9 +3,9 @@
 A multilingual CV / résumé web application with a lightweight admin panel, built with **Laravel** and **Filament**.
 It runs on any standard LAMP hosting (including cPanel shared hosting), uses **no cookies** on the public site and loads **no third-party resources** (fonts, scripts and styles are all self-hosted).
 
-> Status: **v2 in development** — data model and admin panel are in place (milestones M0–M1); the public site comes next.
+> Status: **v2 in development** — admin panel and public site with the open `base` theme are in place (milestones M0–M2); blog, installer and update page come next.
 
-## Features (planned for v2.0)
+## Features (v2.0)
 
 - CV sections: profile, key figures, experience, volunteering, projects, education, certifications, languages (CEFR), publications & talks, interests — each one can be enabled, disabled and reordered from the admin.
 - Dedicated, SEO-friendly pages for projects, experiences and blog articles; `canonical`, `hreflang`, Schema.org JSON-LD, sitemap and RSS.
@@ -39,7 +39,31 @@ Quality checks:
 php artisan test                    # Pest
 vendor/bin/phpstan analyse          # Larastan
 vendor/bin/pint --test              # code style
+npx playwright test                 # end-to-end + accessibility (needs the demo data and built assets)
 ```
+
+## Public site
+
+- `/` redirects to the default language; every page lives under its language code (`/it-IT`, `/en-GB/projects/{slug}`).
+  Wrong casing, trailing slashes, segments or slugs of another language are redirected (301) to the canonical address.
+- Translated URL segments come from the language packs and can be changed per language in the admin;
+  when a slug or a segment changes, the old address keeps working with a permanent redirect.
+- Projects and experiences get a dedicated page only when there is something more than the CV summary
+  (a detail text, an image, or related projects), so search engines never see empty pages.
+- SEO: `canonical`, `hreflang` + `x-default`, Open Graph, sitemap with language alternates, Schema.org JSON-LD
+  (`ProfilePage` + `Person`, publications, breadcrumbs). Email, phone and birth date are left out of JSON-LD unless enabled.
+- Privacy: no cookies, no third-party requests, strict Content Security Policy; email and phone are encoded in the HTML
+  and shown only by the theme script.
+- Performance: HTML page cache (cleared on every change), ETags, a reduced Bootstrap build and an SVG icon sprite
+  with only the icons the theme uses.
+
+## Themes
+
+A theme lives in `themes/{name}` with a `theme.json`, Blade views (`views/`), an icon map (`icons.php`) and its assets.
+Themes extend `base`: a view that a theme does not define is taken from `base`, so a theme can override a single
+section (`views/sections/experience.blade.php`) and nothing else. Icons are semantic names (`briefcase`, `email`, …)
+mapped to the theme's icon set; `scripts/build-icons.mjs` builds the SVG sprite from the map
+(`npm run build` does it for the base theme).
 
 ## Project layout
 
@@ -48,10 +72,12 @@ vendor/bin/pint --test              # code style
 | `app/Models` | CV content; translated fields are JSON columns (`{"it-IT": "…", "en-GB": "…"}`) |
 | `app/Filament` | Admin panel: resources, profile and settings pages, dashboard widget |
 | `app/Support` | Languages and language packs, settings, translations, image optimisation (WebP) |
+| `app/Site` | Public site: URLs, page metadata, JSON-LD, CV data loader, page cache, redirects |
 | `app/Themes` | Theme manager (active theme → `base` inheritance, icon map) |
 | `themes/base` | Open theme: views, icons, SCSS/JS sources (built into `public/themes/base`) |
 | `lang/{code}` | Language packs: `routes.php` (URL segments) and `site.php` (public site strings) |
 | `routes/site.php` | Public routes — no session, no CSRF, no cookies |
+| `tests/e2e` | Playwright tests (Chromium, Firefox, WebKit, mobile) with axe accessibility checks |
 | `stubs/` | `.htaccess` blocks used by release packages |
 | `scripts/build-release.sh` | Builds the full release zip |
 

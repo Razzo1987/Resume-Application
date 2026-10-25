@@ -31,3 +31,10 @@ Thumbs.db
 /public/themes
 /storage/framework/phpstan
 /public/uploads
+
+# Sprite SVG generato da scripts/build-icons.mjs
+/themes/*/resources/icons/sprite.svg
+
+# Playwright
+/test-results/
+/playwright-report/

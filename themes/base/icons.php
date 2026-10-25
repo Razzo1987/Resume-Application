@@ -15,6 +15,13 @@ return [
     'print' => 'fa-solid fa-print',
     'link' => 'fa-solid fa-link',
     'file-pdf' => 'fa-solid fa-file-pdf',
+    'arrow-left' => 'fa-solid fa-arrow-left',
+    'arrow-right' => 'fa-solid fa-arrow-right',
+    'verified' => 'fa-solid fa-circle-check',
+    'clock' => 'fa-solid fa-clock',
+    'star' => 'fa-solid fa-star',
+    'tag' => 'fa-solid fa-tag',
+    'menu' => 'fa-solid fa-bars',
 
     // Contatti e profilo
     'user' => 'fa-solid fa-user',
@@ -23,6 +30,8 @@ return [
     'location' => 'fa-solid fa-location-dot',
     'calendar' => 'fa-solid fa-calendar',
     'website' => 'fa-solid fa-globe',
+    'role' => 'fa-solid fa-user-tie',
+    'sector' => 'fa-solid fa-industry',
 
     // Sezioni del CV
     'briefcase' => 'fa-solid fa-briefcase',
@@ -40,6 +49,12 @@ return [
     'users' => 'fa-solid fa-users',
     'code' => 'fa-solid fa-code',
     'chart' => 'fa-solid fa-chart-line',
+    'blog' => 'fa-solid fa-newspaper',
+    'lightbulb' => 'fa-solid fa-lightbulb',
+    'rocket' => 'fa-solid fa-rocket',
+    'trophy' => 'fa-solid fa-trophy',
+    'database' => 'fa-solid fa-database',
+    'shield' => 'fa-solid fa-shield-halved',
 
     // Interessi (esempi)
     'camera' => 'fa-solid fa-camera',

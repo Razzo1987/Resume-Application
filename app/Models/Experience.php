@@ -91,6 +91,27 @@ class Experience extends Model implements Translatable
         return $query->where('kind', ExperienceKind::Volunteering);
     }
 
+    /**
+     * Ha una pagina dedicata solo se c'è qualcosa in più del riassunto nel CV:
+     * un testo di dettaglio o dei progetti visibili (niente pagine "vuote" per i motori di ricerca).
+     */
+    public function hasDetailPage(): bool
+    {
+        if (filled($this->t('details'))) {
+            return true;
+        }
+
+        $attributes = $this->getAttributes();
+
+        $projects = match (true) {
+            array_key_exists('visible_projects_count', $attributes) => (int) $attributes['visible_projects_count'],
+            $this->relationLoaded('projects') => $this->projects->where('is_visible', true)->count(),
+            default => $this->projects()->where('is_visible', true)->count(),
+        };
+
+        return $projects > 0;
+    }
+
     public function slugSource(string $locale): ?string
     {
         $role = $this->t('role', $locale);

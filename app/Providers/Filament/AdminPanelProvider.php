@@ -4,6 +4,7 @@ namespace App\Providers\Filament;
 
 use App\Filament\Support\InitialsAvatarProvider;
 use App\Filament\Widgets\SiteStatusWidget;
+use App\Http\Middleware\NoIndex;
 use App\Http\Middleware\SetAdminLocale;
 use Filament\Auth\MultiFactor\App\AppAuthentication;
 use Filament\Http\Middleware\Authenticate;
@@ -70,6 +71,7 @@ class AdminPanelProvider extends PanelProvider
                 PreventRequestForgery::class,
                 SubstituteBindings::class,
                 SetAdminLocale::class,
+                NoIndex::class,
                 DisableBladeIconComponents::class,
                 DispatchServingFilamentEvent::class,
             ])

@@ -129,6 +129,14 @@ class DemoSeeder extends Seeder
             $project->skills()->attach([$governance->id]);
         }
 
+        // Un progetto con il testo di dettaglio: ha una pagina dedicata
+        Project::query()->orderBy('id')->firstOrFail()->update([
+            'details' => [
+                'it-IT' => '<h2>Contesto</h2><p>Catalogo dei dati aziendali con lineage automatico dai sistemi sorgente ai report.</p><h2>Risultati</h2><ul><li>1.200 dataset documentati</li><li>Tempi di analisi d\'impatto ridotti del 60%</li></ul>',
+                'en-GB' => '<h2>Context</h2><p>Enterprise data catalogue with automated lineage from source systems to reports.</p><h2>Results</h2><ul><li>1,200 datasets documented</li><li>Impact analysis time cut by 60%</li></ul>',
+            ],
+        ]);
+
         Education::query()->create([
             'organization_id' => $university->id,
             'degree' => ['it-IT' => 'Laurea Magistrale', 'en-GB' => 'Master\'s Degree'],

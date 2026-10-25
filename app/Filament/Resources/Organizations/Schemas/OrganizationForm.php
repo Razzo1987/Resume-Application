@@ -33,7 +33,7 @@ class OrganizationForm
                 ->label(__('admin.fields.website'))
                 ->url()
                 ->maxLength(500),
-            Fields::image('logo', 'logos', 600)
+            Fields::image('logo', 'logos', 240)
                 ->imageEditor(),
         ];
     }

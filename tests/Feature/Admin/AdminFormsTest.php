@@ -8,14 +8,17 @@ use App\Filament\Resources\Experiences\Pages\CreateExperience;
 use App\Filament\Resources\Experiences\Pages\ListExperiences;
 use App\Filament\Resources\Languages\Pages\CreateLanguage;
 use App\Filament\Resources\Languages\Pages\EditLanguage;
+use App\Filament\Resources\PageSections\Pages\ManagePageSections;
 use App\Filament\Resources\Volunteering\Pages\CreateVolunteering;
 use App\Filament\Resources\Volunteering\Pages\ListVolunteering;
 use App\Models\CvDocument;
 use App\Models\Experience;
 use App\Models\Language;
 use App\Models\Organization;
+use App\Models\PageSection;
 use App\Models\Profile;
 use App\Models\User;
+use App\Site\Cache\PageCache;
 use App\Support\Settings\Settings;
 use Database\Seeders\DatabaseSeeder;
 use Database\Seeders\DemoSeeder;
@@ -212,4 +215,16 @@ it('does not offer to delete the default language', function () {
 
     Livewire::test(EditLanguage::class, ['record' => $english->getRouteKey()])
         ->assertActionVisible(DeleteAction::class);
+});
+
+it('refreshes the public pages after reordering the CV sections', function () {
+    $this->get('/it-IT');
+    expect(app(PageCache::class)->get('page.'.sha1('http://localhost/it-IT')))->not->toBeNull();
+
+    $order = PageSection::query()->orderByDesc('sort_order')->pluck('id')->map(fn ($id) => (string) $id)->all();
+
+    Livewire::test(ManagePageSections::class)
+        ->call('reorderTable', $order);
+
+    expect(app(PageCache::class)->get('page.'.sha1('http://localhost/it-IT')))->toBeNull();
 });

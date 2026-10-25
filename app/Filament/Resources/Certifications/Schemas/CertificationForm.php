@@ -49,7 +49,7 @@ class CertificationForm
                         TextInput::make('verification_url')->label(__('admin.fields.verification_url'))->url()->maxLength(500),
                     ]),
                     Grid::make(2)->schema([
-                        Fields::image('badge', 'badges', 800),
+                        Fields::image('badge', 'badges', 320),
                         Fields::publicPdf('file', 'certificates'),
                     ]),
                     Fields::visible(),

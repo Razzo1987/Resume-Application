@@ -2,6 +2,7 @@
 
 namespace App\Filament\Pages;
 
+use App\Filament\Support\Fields;
 use App\Filament\Support\Translatable;
 use App\Support\Settings\Settings;
 use App\Themes\ThemeManager;
@@ -111,6 +112,9 @@ class ManageSettings extends Page
 
                 Section::make(__('admin.sections.seo'))
                     ->schema([
+                        Fields::image('seo.og_image', 'seo', 1200, 'jpeg')
+                            ->label(__('admin.fields.og_image'))
+                            ->helperText(__('admin.help.og_image')),
                         Translatable::tabs(fn (string $locale): array => [
                             TextInput::make("seo.title.{$locale}")->label(__('admin.fields.seo_title'))->helperText(__('admin.help.default_seo_title'))->maxLength(70),
                             Textarea::make("seo.description.{$locale}")->label(__('admin.fields.seo_description'))->maxLength(170)->rows(2),

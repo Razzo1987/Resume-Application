@@ -1,28 +1,30 @@
 <?php
 
+use App\Models\Profile;
+use App\Site\Security\Csp;
 use Illuminate\Support\Facades\Route;
 
-it('serves the public home page through the active theme', function () {
-    $this->get('/')
-        ->assertOk()
-        ->assertSee('<html lang="it-IT">', escape: false)
-        ->assertSee('fa-solid fa-briefcase', escape: false)
-        ->assertSee(__('site.a11y.skip_to_content'));
-});
+beforeEach(fn () => seedDemo());
 
-it('sets no cookies on the public home page', function () {
-    $response = $this->get('/');
+dataset('public pages', [
+    'CV (it)' => '/it-IT',
+    'CV (en)' => '/en-GB',
+    'experience page' => '/it-IT/esperienze/data-governance-manager-acme-consulting',
+    'project page' => '/en-GB/projects/data-catalog-and-lineage',
+    'sitemap' => '/sitemap.xml',
+    'robots' => '/robots.txt',
+    'CV download' => '/it-IT/cv',
+    'redirect' => '/',
+    'not found' => '/it-IT/pagina-inesistente',
+    'unknown route' => '/qualcosa/di/strano.php',
+]);
+
+it('never sets cookies on public pages', function (string $path) {
+    $response = $this->get($path);
 
     expect($response->headers->getCookies())->toBeEmpty()
         ->and($response->headers->has('Set-Cookie'))->toBeFalse();
-});
-
-it('sets no cookies on the health check', function () {
-    $response = $this->get('/up');
-
-    $response->assertOk();
-    expect($response->headers->getCookies())->toBeEmpty();
-});
+})->with('public pages');
 
 it('strips cookies added by mistake on public routes', function () {
     Route::middleware('site')->get('/__cookie-probe', fn () => response('ok')->cookie('tracking', '1'));
@@ -39,12 +41,58 @@ it('does not start a session on public routes', function () {
     $this->get('/__session-probe')->assertSeeText('none');
 });
 
-it('loads only local assets on the public home page', function () {
-    $html = (string) $this->get('/')->getContent();
+it('renders the CV through the active theme', function () {
+    $this->get('/it-IT')
+        ->assertOk()
+        ->assertSee('<html lang="it-IT">', escape: false)
+        ->assertSee('<h1 class="profile-name">John Doe</h1>', escape: false)
+        ->assertSee('/themes/base/assets/', escape: false)
+        ->assertSee(__('site.a11y.skip_to_content'));
+});
 
-    preg_match_all('#(?:src|href)="(https?://[^/"]+)#', $html, $matches);
+it('loads only local resources (no CDN, fonts or trackers)', function (string $path) {
+    $html = (string) $this->get($path)->getContent();
 
-    $hosts = array_unique(array_map(fn (string $url): string => (string) parse_url($url, PHP_URL_HOST), $matches[1]));
+    expect(resourceHosts($html))->each->toBe('localhost')
+        ->and($html)->not->toContain('fonts.googleapis.com')
+        ->and($html)->not->toContain('fonts.bunny.net');
+})->with(['/it-IT', '/en-GB/projects/data-catalog-and-lineage', '/it-IT/pagina-inesistente']);
 
-    expect($hosts)->each->toBe('localhost');
+it('sends security headers with a strict content security policy', function () {
+    $response = $this->get('/it-IT');
+
+    $csp = (string) $response->headers->get('Content-Security-Policy');
+
+    expect($csp)->toContain("default-src 'self'")
+        ->toContain("style-src 'self'")
+        ->toContain("frame-ancestors 'none'")
+        ->not->toContain('unsafe-inline')
+        ->and($response->headers->get('X-Content-Type-Options'))->toBe('nosniff')
+        ->and($response->headers->get('Referrer-Policy'))->toBe('strict-origin-when-cross-origin');
+});
+
+it('allows only the known inline script through its hash', function () {
+    $html = (string) $this->get('/it-IT')->getContent();
+
+    preg_match_all('#<script(?![^>]*(?:\ssrc=|application/ld\+json))[^>]*>(.*?)</script>#s', $html, $inline);
+
+    expect($inline[1])->toBe([Csp::JS_FLAG]);
+});
+
+it('shows the theme 404 page in the language of the URL', function () {
+    $this->get('/en-GB/does-not-exist')
+        ->assertNotFound()
+        ->assertSee('<html lang="en-GB">', escape: false)
+        ->assertSee('Page not found')
+        ->assertSee('<meta name="robots" content="noindex">', escape: false);
+
+    $this->get('/qualcosa/di/strano.php')
+        ->assertNotFound()
+        ->assertSee('Pagina non trovata');
+});
+
+it('works before the profile is filled in', function () {
+    Profile::query()->delete();
+
+    $this->get('/it-IT')->assertOk();
 });

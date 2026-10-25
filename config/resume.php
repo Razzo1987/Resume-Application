@@ -15,6 +15,12 @@ return [
     // Lingua dell'interfaccia admin (traduzioni Filament: "it", "en", ...).
     'admin_locale' => env('RESUME_ADMIN_LOCALE', 'it'),
 
+    // Pagina del progetto open source (link "Realizzato con Resume App" nel footer).
+    'project_url' => 'https://github.com/Razzo1987/Resume-Application',
+
+    // Cache HTML delle pagine pubbliche (disattivabile in sviluppo con RESUME_PAGE_CACHE=false).
+    'page_cache' => (bool) env('RESUME_PAGE_CACHE', true),
+
     'themes' => [
         // Tema attivo. Ogni tema eredita dal tema "base" le view e le stringhe che non ridefinisce.
         'active' => env('RESUME_THEME', 'base'),

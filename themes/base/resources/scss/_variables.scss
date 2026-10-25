@@ -1,6 +1,33 @@
-// Variabili del tema base (sovrascrivono i default di Bootstrap).
+// Variabili del tema base (prima di Bootstrap: sovrascrivono i suoi default).
 // Font di sistema: nessun webfont da scaricare, nessuna richiesta esterna.
+
 $font-family-sans-serif: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", "Noto Sans", "Liberation Sans", Arial, sans-serif;
-$primary: #2c3e50;
+
+// Colori (contrasto verificato AA sul bianco e sulla barra laterale)
+$primary: #1d4f86;
+$secondary: #5b6573;
+$body-color: #1f2933;
+$body-bg: #ffffff;
+$border-color: #dfe5ec;
+$link-color: $primary;
+$link-decoration: underline;
+$link-underline-offset: .2em;
+
+// Colori propri del tema
+$sidebar-bg: #16324f;
+$sidebar-color: #ffffff;
+$sidebar-muted: rgba(255, 255, 255, .8);
+$accent: #f4c95d;
+$surface: #f3f6f9;
+$muted: #5b6573;
+$chip-bg: #e6edf5;
+$chip-color: #1d3a5c;
+
+$border-radius: .5rem;
+$border-radius-lg: .75rem;
+$headings-font-weight: 650;
+$headings-line-height: 1.25;
 $enable-shadows: false;
+$enable-dark-mode: false;
 $enable-negative-margins: true;
+$enable-smooth-scroll: true;

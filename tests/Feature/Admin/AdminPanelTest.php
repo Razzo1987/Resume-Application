@@ -49,3 +49,7 @@ it('uses session cookies only in the admin', function () {
 
     expect($names)->toContain(config('session.cookie'));
 });
+
+it('keeps the admin out of search engines', function () {
+    $this->get('/admin/login')->assertHeader('X-Robots-Tag', 'noindex, nofollow');
+});

@@ -20,7 +20,7 @@ class ImageOptimizer
     /**
      * Salva l'immagine sul disco indicato e restituisce il percorso relativo.
      */
-    public function store(string $sourcePath, string $originalName, string $disk, string $directory, int $maxSize = 1600): string
+    public function store(string $sourcePath, string $originalName, string $disk, string $directory, int $maxSize = 1600, string $format = 'webp'): string
     {
         $basename = Str::slug(pathinfo($originalName, PATHINFO_FILENAME)) ?: 'image';
         $unique = $basename.'-'.Str::lower(Str::random(6));
@@ -39,11 +39,20 @@ class ImageOptimizer
         $image = $this->resize($image, $maxSize);
 
         ob_start();
-        imagewebp($image, null, self::QUALITY);
-        $webp = (string) ob_get_clean();
 
-        $path = ltrim("{$directory}/{$unique}.webp", '/');
-        Storage::disk($disk)->put($path, $webp);
+        if ($format === 'jpeg') {
+            // JPEG (es. immagine per i social, dove WebP non è sempre supportato): trasparenza su bianco
+            imagejpeg($this->flatten($image), null, 85);
+            $extension = 'jpg';
+        } else {
+            imagewebp($image, null, self::QUALITY);
+            $extension = 'webp';
+        }
+
+        $content = (string) ob_get_clean();
+
+        $path = ltrim("{$directory}/{$unique}.{$extension}", '/');
+        Storage::disk($disk)->put($path, $content);
 
         return $path;
     }
@@ -98,6 +107,21 @@ class ImageOptimizer
         imagecopyresampled($resized, $image, 0, 0, 0, 0, $newWidth, $newHeight, $width, $height);
 
         return $resized;
+    }
+
+    private function flatten(GdImage $image): GdImage
+    {
+        $flat = imagecreatetruecolor(imagesx($image), imagesy($image));
+
+        if ($flat === false) {
+            return $image;
+        }
+
+        imagefill($flat, 0, 0, (int) imagecolorallocate($flat, 255, 255, 255));
+        imagealphablending($flat, true);
+        imagecopy($flat, $image, 0, 0, 0, 0, imagesx($image), imagesy($image));
+
+        return $flat;
     }
 
     private function isAnimatedGif(string $path): bool

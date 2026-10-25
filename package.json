@@ -3,11 +3,14 @@
     "private": true,
     "type": "module",
     "scripts": {
-        "build": "vite build",
-        "dev": "vite"
+        "icons": "node scripts/build-icons.mjs base",
+        "build": "node scripts/build-icons.mjs base && vite build",
+        "dev": "node scripts/build-icons.mjs base && vite"
     },
     "devDependencies": {
+        "@axe-core/playwright": "4.14.0",
         "@fortawesome/fontawesome-free": "^7.3.1",
+        "@playwright/test": "1.63.0",
         "@popperjs/core": "^2.11.8",
         "bootstrap": "^5.3.8",
         "concurrently": "^10.0.3",

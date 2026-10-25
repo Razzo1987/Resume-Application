@@ -6,6 +6,7 @@ namespace App\Providers;
 
 use App\Support\Settings\Settings;
 use App\Themes\ThemeManager;
+use App\View\Composers\SiteViewComposer;
 use Illuminate\Support\Facades\Lang;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
@@ -33,5 +34,8 @@ class ThemeServiceProvider extends ServiceProvider
         View::composer('theme::*', function (\Illuminate\View\View $view) use ($themes): void {
             $view->with('theme', $themes->active());
         });
+
+        // Dati comuni delle pagine pubbliche (menu, lingue, contatti, footer) e strumenti per i contenuti
+        View::composer('theme::*', SiteViewComposer::class);
     }
 }

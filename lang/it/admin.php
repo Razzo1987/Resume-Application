@@ -55,6 +55,7 @@ return [
     ],
 
     'fields' => [
+        'og_image' => 'Immagine per la condivisione',
         'name' => 'Nome',
         'full_name' => 'Nome e cognome',
         'title' => 'Titolo',
@@ -162,7 +163,7 @@ return [
         'headlines' => 'Qualifiche',
         'bio' => 'Presentazione',
         'theme' => 'Tema',
-        'print_enabled' => 'Versione di stampa',
+        'print_enabled' => 'Pulsante "Stampa"',
         'show_last_updated' => 'Mostra "Aggiornato a…" nel footer',
         'cv_filename_pattern' => 'Nome del file scaricato',
         'cv_fallback' => 'CV della lingua di default se manca',
@@ -176,6 +177,7 @@ return [
     ],
 
     'help' => [
+        'og_image' => 'Mostrata quando il CV viene condiviso sui social (Open Graph). Consigliata 1200×630; salvata in JPG. Se manca si usa la foto del profilo.',
         'is_visible' => 'Se spento, l\'elemento resta qui ma non compare sul sito.',
         'end_date_empty' => 'Lascia vuoto se è ancora in corso.',
         'expires_empty' => 'Vuoto = senza scadenza.',
@@ -211,7 +213,7 @@ return [
         'country_code' => 'Codice a due lettere, es. IT.',
         'location' => 'Città mostrata nel profilo, es. Milano.',
         'headlines' => 'Una per riga: ruotano sotto il nome.',
-        'print_enabled' => 'Pagina pulita per la stampa e pulsante "Stampa".',
+        'print_enabled' => 'Mostra il pulsante "Stampa". La versione di stampa pulita vale sempre, anche stampando dal browser.',
         'show_last_updated' => 'Data dell\'ultima modifica ai contenuti del CV.',
         'cv_filename_pattern' => 'Segnaposto: {name} = nome e cognome, {lang} = IT/EN…, {locale} = it-IT/en-GB…',
         'cv_fallback' => 'Se una lingua non ha un CV, il pulsante scarica quello della lingua di default.',

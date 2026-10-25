@@ -13,6 +13,7 @@ final readonly class Theme
 {
     /**
      * @param  list<string>  $entrypoints  chiavi del manifest Vite da includere nelle pagine
+     * @param  string|null  $sprite  chiave del manifest Vite dello sprite SVG delle icone
      */
     public function __construct(
         public string $name,
@@ -21,6 +22,7 @@ final readonly class Theme
         public ?string $extends,
         public string $path,
         public array $entrypoints,
+        public ?string $sprite = null,
     ) {}
 
     public static function fromDirectory(string $path): self
@@ -31,7 +33,7 @@ final readonly class Theme
             throw new InvalidArgumentException("Theme manifest not found: {$manifest}");
         }
 
-        /** @var array{name?: string, title?: string, version?: string, extends?: string|null, entrypoints?: list<string>} $data */
+        /** @var array{name?: string, title?: string, version?: string, extends?: string|null, entrypoints?: list<string>, sprite?: string|null} $data */
         $data = json_decode((string) file_get_contents($manifest), true, flags: JSON_THROW_ON_ERROR);
 
         $name = $data['name'] ?? basename($path);
@@ -43,6 +45,7 @@ final readonly class Theme
             extends: $data['extends'] ?? null,
             path: $path,
             entrypoints: $data['entrypoints'] ?? [],
+            sprite: $data['sprite'] ?? null,
         );
     }
 

@@ -1,6 +1,5 @@
 import { defineConfig } from 'vite';
 import laravel from 'laravel-vite-plugin';
-import { fileURLToPath } from 'node:url';
 
 // Asset del tema base: compilati in public/themes/base (manifest incluso).
 // I temi PRO hanno una build propria nel loro repository.
@@ -15,16 +14,15 @@ export default defineConfig({
             refresh: ['themes/base/views/**'],
         }),
     ],
-    resolve: {
-        alias: {
-            '@fa-webfonts': fileURLToPath(new URL('./node_modules/@fortawesome/fontawesome-free/webfonts', import.meta.url)),
-        },
+    build: {
+        // Lo sprite delle icone deve restare un file (usato con <svg><use href="...#nome">), mai inline
+        assetsInlineLimit: 0,
     },
     css: {
         preprocessorOptions: {
             scss: {
                 // Bootstrap 5.3 usa ancora @import: silenziamo gli avvisi di deprecazione di Dart Sass
-                silenceDeprecations: ['import', 'global-builtin', 'color-functions', 'mixed-decls', 'if-function'],
+                silenceDeprecations: ['import', 'global-builtin', 'color-functions', 'if-function'],
                 quietDeps: true,
             },
         },

@@ -53,6 +53,13 @@ return [
             'lock_path' => storage_path('framework/cache/locks'),
         ],
 
+        // Cache HTML delle pagine pubbliche (App\Site\Cache\PageCache), svuotata a ogni modifica dei contenuti
+        'pages' => [
+            'driver' => env('RESUME_PAGE_CACHE_DRIVER', 'file'),
+            'path' => storage_path('framework/cache/pages'),
+            'serialize' => false,
+        ],
+
         'storage' => [
             'driver' => 'storage',
             'disk' => env('CACHE_STORAGE_DISK'),

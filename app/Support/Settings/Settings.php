@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Support\Settings;
 
+use App\Site\Cache\PageCache;
 use App\Support\Languages\Locales;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
@@ -115,6 +116,9 @@ class Settings
     {
         Cache::forget(self::CACHE_KEY);
         $this->values = null;
+
+        // Le impostazioni cambiano le pagine pubbliche
+        app(PageCache::class)->flush();
     }
 
     /**

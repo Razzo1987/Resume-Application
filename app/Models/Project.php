@@ -74,6 +74,14 @@ class Project extends Model implements Translatable
         return $this->belongsToMany(Skill::class);
     }
 
+    /**
+     * Ha una pagina dedicata solo se c'è un testo di dettaglio o un'immagine.
+     */
+    public function hasDetailPage(): bool
+    {
+        return filled($this->t('details')) || filled($this->image);
+    }
+
     public function slugSource(string $locale): ?string
     {
         return $this->t('title', $locale);

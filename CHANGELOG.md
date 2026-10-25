@@ -20,3 +20,12 @@ All notable changes to this project are documented here. The format follows [Kee
 - Admin panel: one tab per active language in every form, translation status on the dashboard, settings page (theme, CV file name, print version, "last updated" footer, contact visibility, personal data in JSON-LD — off by default), profile page, two-factor authentication with recovery codes.
 - Uploaded images are resized and converted to WebP; the admin avatar is generated locally (no ui-avatars.com).
 - Demo seeder with a bilingual sample CV.
+- Public site with the open `base` theme: CV page with the sections in the configured order, dedicated pages for projects and experiences, language switcher to the same page, themed 404 page.
+- Multilingual routing with translated URL segments, canonical redirects (language code casing, trailing slashes, segments and slugs of other languages), redirects managed in the admin (also for sub-paths) and created automatically when a slug or a segment changes.
+- SEO: canonical, hreflang with x-default, Open Graph (with a dedicated sharing image), sitemap.xml with language alternates, robots.txt, Schema.org JSON-LD without personal contact data unless enabled.
+- CV download at `/{language}/{cv segment}` with the standard file name, ETag and optional fallback to the default language.
+- Email and phone encoded in the HTML and revealed by the theme script; print stylesheet and optional "Print" button; optional "last updated" date.
+- HTML page cache cleared on every change, strict Content Security Policy and security headers, `noindex` for the admin.
+- Base theme: reduced Bootstrap build, SVG icon sprite generated from the theme icon map (Font Awesome Free), no web fonts, WCAG 2.1 AA (axe), Lighthouse 100 on the demo data.
+- Site strings for de-DE, fr-FR, es-ES, pt-PT, pt-BR, nl-NL (drafts to be reviewed by native speakers); en-US uses "résumé".
+- End-to-end tests with Playwright (Chromium, Firefox, WebKit, mobile) in CI.

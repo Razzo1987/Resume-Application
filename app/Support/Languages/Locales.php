@@ -43,6 +43,29 @@ class Locales
         return $codes !== [] ? $codes : [$this->fallbackDefault()];
     }
 
+    /**
+     * Lingue attive (modelli), la lingua di default per prima.
+     *
+     * @return Collection<int, Language>
+     */
+    public function activeLanguages(): Collection
+    {
+        return $this->languages()
+            ->where('is_active', true)
+            ->sortBy([['is_default', 'desc'], ['sort_order', 'asc']])
+            ->values();
+    }
+
+    /**
+     * Lingua attiva con questo codice, senza distinguere maiuscole e minuscole ("it-it" → it-IT).
+     */
+    public function match(string $code): ?Language
+    {
+        $language = $this->activeLanguages()->first(fn (Language $language): bool => strcasecmp($language->code, $code) === 0);
+
+        return $language instanceof Language ? $language : null;
+    }
+
     public function default(): string
     {
         $default = $this->languages()->firstWhere('is_default', true);

@@ -2,11 +2,12 @@
     "name": "base",
     "title": "Base",
     "version": "2.0.0-dev",
-    "description": "Tema open source di riferimento: Bootstrap 5, Font Awesome Free, JavaScript senza dipendenze.",
+    "description": "Tema open source di riferimento: Bootstrap 5, icone Font Awesome Free (sprite SVG), JavaScript senza dipendenze.",
     "extends": null,
     "entrypoints": [
         "themes/base/resources/scss/app.scss",
         "themes/base/resources/js/app.js"
     ],
-    "license": "MIT"
+    "license": "MIT",
+    "sprite": "themes/base/resources/icons/sprite.svg"
 }

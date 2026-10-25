@@ -65,7 +65,7 @@ class ManageProfile extends Page
                     ->schema([
                         TextInput::make('full_name')->label(__('admin.fields.full_name'))->required()->maxLength(255),
                         Grid::make(2)->schema([
-                            Fields::image('photo', 'profile', 1200)->imageEditor()->imageCropAspectRatio('1:1'),
+                            Fields::image('photo', 'profile', 800)->imageEditor()->imageCropAspectRatio('1:1'),
                             Grid::make(1)->schema([
                                 DatePicker::make('birth_date')->label(__('admin.fields.birth_date'))->native(false)->helperText(__('admin.help.birth_date')),
                                 DatePicker::make('career_start_date')->label(__('admin.fields.career_start_date'))->native(false)->helperText(__('admin.help.career_start_date')),

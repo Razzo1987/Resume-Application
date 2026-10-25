@@ -13,10 +13,14 @@
 5. **Themes** extend `base`. Views are resolved with the `theme::` namespace (active theme first, then `base`). Icons are semantic names mapped per theme in `icons.php`; use `<x-theme-icon name="…"/>`.
 6. **Deployment layout**: release packages put `public/` at the web root and everything else in `core/` (denied by `.htaccess`). Do not rely on `base_path()` being outside the web root; never write secrets or user data under `public/` except uploaded images in `public/uploads`.
 7. Personal data (email, phone, birth date) is never emitted in JSON-LD unless the administrator explicitly enables it.
+8. **Public pages** get their data from `App\Site\CvData` (eager loaded; lazy loading throws outside production) and their metadata from `App\Site\Pages`. Rich text from the editors is always printed through `$richText->render()` (sanitized). Email and phone are printed only encoded (`App\Site\Contact\Cloak`).
+9. **Page cache**: any model that changes public pages must be listed in `AppServiceProvider::CONTENT_MODELS`; mass updates (`Model::query()->update()`) bypass the cache invalidation.
+10. **CSP**: no inline scripts or styles in theme views (no `style=""`, no `onclick`). JSON-LD blocks are allowed.
 
 ## Before committing
 ```bash
 php artisan test
 vendor/bin/phpstan analyse
 vendor/bin/pint --test
+npx playwright test --project=chromium   # needs the demo data (DemoSeeder) and built assets
 ```

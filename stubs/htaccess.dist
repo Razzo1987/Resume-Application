@@ -46,9 +46,10 @@
 
 <IfModule mod_headers.c>
     Header always set X-Content-Type-Options "nosniff"
-    <FilesMatch "\.(css|js|woff2|svg|png|jpe?g|webp|avif|ico)$">
+    # Asset compilati (hash nel nome) e file caricati (nome casuale) non cambiano mai: cache di un anno
+    <If "%{REQUEST_URI} =~ m#^(.*/)?(themes/[^/]+/assets|uploads)/#">
         Header set Cache-Control "public, max-age=31536000, immutable"
-    </FilesMatch>
+    </If>
 </IfModule>
 
 <IfModule mod_deflate.c>

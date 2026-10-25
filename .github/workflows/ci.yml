@@ -47,4 +47,49 @@ jobs:
       - run: vendor/bin/phpstan analyse --no-progress
       - run: php artisan test
 
-  # I test end-to-end con Playwright (Chromium, Firefox, WebKit) si aggiungono in M2 insieme al sito pubblico.
+  e2e:
+    name: E2E (Chromium, Firefox, WebKit)
+    runs-on: ubuntu-latest
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_ROOT_PASSWORD: root
+          MYSQL_DATABASE: resume_app_e2e
+        ports: ['3306:3306']
+        options: >-
+          --health-cmd="mysqladmin ping -proot" --health-interval=10s --health-timeout=5s --health-retries=5
+    env:
+      APP_ENV: local
+      APP_DEBUG: false
+      DB_CONNECTION: mysql
+      DB_HOST: 127.0.0.1
+      DB_PORT: 3306
+      DB_DATABASE: resume_app_e2e
+      DB_USERNAME: root
+      DB_PASSWORD: root
+      CI: true
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.5'
+          extensions: intl, mbstring, pdo_mysql, gd, zip, bcmath, fileinfo, sodium
+          coverage: none
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: composer install --no-interaction --no-progress
+      - run: npm ci && npm run build
+      - run: cp .env.example .env && php artisan key:generate
+      - name: Database con il CV dimostrativo
+        run: php artisan migrate:fresh --seed --force && php artisan db:seed --class=DemoSeeder --force
+      - run: npx playwright install --with-deps chromium firefox webkit
+      - run: npx playwright test
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: playwright-results
+          path: test-results/
+          retention-days: 7

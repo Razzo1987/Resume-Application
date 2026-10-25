@@ -54,9 +54,20 @@ class Highlight extends Model implements Translatable
     /**
      * Valore numerico: quello inserito oppure calcolato dai contenuti del sito.
      */
+    /** Valore calcolato (memorizzato: i contatori automatici fanno una query). */
+    private ?float $resolved = null;
+
+    private bool $isResolved = false;
+
     public function resolvedValue(): ?float
     {
-        return match ($this->source) {
+        if ($this->isResolved) {
+            return $this->resolved;
+        }
+
+        $this->isResolved = true;
+
+        return $this->resolved = match ($this->source) {
             HighlightSource::Manual => $this->value !== null ? (float) $this->value : null,
             HighlightSource::YearsExperience => ($start = Profile::current()->careerStart()) !== null
                 ? (float) (int) $start->diffInYears(now())

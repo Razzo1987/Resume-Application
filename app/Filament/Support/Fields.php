@@ -53,7 +53,7 @@ class Fields
             ->toolbarButtons([['bold', 'italic', 'link'], ['bulletList', 'orderedList'], ['undo', 'redo']]);
     }
 
-    public static function image(string $name, string $directory, int $maxSize = 1600): FileUpload
+    public static function image(string $name, string $directory, int $maxSize = 1600, string $format = 'webp'): FileUpload
     {
         return FileUpload::make($name)
             ->label(__("admin.fields.{$name}"))
@@ -69,6 +69,7 @@ class Fields
                 'uploads',
                 $directory,
                 $maxSize,
+                $format,
             ));
     }
 

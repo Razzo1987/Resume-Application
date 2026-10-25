@@ -21,13 +21,13 @@ return [
     ],
 
     'actions' => [
-        'download_cv' => 'Download CV',
-        'download_cv_lang' => 'Download the CV in :language (PDF)',
+        'download_cv' => 'Download résumé',
+        'download_cv_lang' => 'Download the résumé in :language (PDF)',
         'contact' => 'Contact me',
         'call' => 'Call',
         'details' => 'Details',
         'read_more' => 'Read more',
-        'back_to_cv' => 'Back to CV',
+        'back_to_cv' => 'Back to résumé',
         'all_articles' => 'All articles',
         'verify' => 'Verify',
         'open_link' => 'Open link',
@@ -129,7 +129,7 @@ return [
     ],
 
     'footer' => [
-        'last_updated' => 'CV last updated :date',
+        'last_updated' => 'Résumé last updated :date',
         'images_owners' => 'Images and logos belong to their respective owners.',
         'made_with' => 'Built with Resume App',
     ],

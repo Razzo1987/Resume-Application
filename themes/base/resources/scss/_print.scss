@@ -1,0 +1,187 @@
+// Versione di stampa: una pagina pulita, senza menu, pulsanti e colori di sfondo.
+
+@media print {
+    @page {
+        margin: 1.5cm;
+    }
+
+    html {
+        font-size: 10.5pt;
+    }
+
+    body {
+        color: #000;
+    }
+
+    .site {
+        display: block;
+    }
+
+    .site-sidebar {
+        position: static;
+        height: auto;
+        color: #000;
+        background: none;
+        border-bottom: 1px solid #999;
+    }
+
+    .sidebar-inner {
+        display: block;
+        padding: 0 0 .75rem;
+    }
+
+    .profile {
+        display: flow-root;
+        text-align: left;
+    }
+
+    .profile-photo {
+        float: left;
+        width: 5.5rem;
+        height: 5.5rem;
+        margin-right: 1rem;
+        border: 0;
+    }
+
+    .profile-headlines li {
+        display: inline;
+
+        & + li::before {
+            content: " · ";
+        }
+    }
+
+    .profile-name,
+    .profile-headlines {
+        color: #000;
+    }
+
+    .profile-name {
+        margin-top: 0;
+    }
+
+    .skip-link,
+    .sidebar-actions,
+    .site-nav,
+    .language-switcher,
+    .back-to-top,
+    .details-link,
+    .back-link,
+    .breadcrumbs,
+    .project-image,
+    .cloak-hint {
+        display: none !important;
+    }
+
+    // Profili social: indirizzo scritto per esteso
+    .socials {
+        display: block;
+        margin-top: .5rem;
+
+        a {
+            display: inline;
+            width: auto;
+            height: auto;
+            color: #000;
+
+            &::after {
+                font-size: 9pt;
+                content: " " attr(href);
+            }
+        }
+
+        li {
+            display: inline;
+            margin-right: 1rem;
+        }
+    }
+
+    .site-body {
+        padding: 0;
+    }
+
+    .site-main,
+    .site-footer {
+        max-width: none;
+    }
+
+    a {
+        color: #000;
+        text-decoration: none;
+    }
+
+    .rich-text a[href^="http"]::after,
+    .publication-title a[href^="http"]::after,
+    .certification-links a[href^="http"]::after {
+        font-size: 8.5pt;
+        color: #444;
+        word-break: break-all;
+        content: " (" attr(href) ")";
+    }
+
+    .cv-section {
+        padding-block: .75rem;
+        border: 0;
+    }
+
+    .section-title {
+        padding-bottom: .25rem;
+        border-bottom: 1px solid #999;
+        break-after: avoid;
+    }
+
+    .section-icon,
+    .highlight-icon,
+    .interest-icon {
+        color: #000;
+    }
+
+    .timeline-item,
+    .project-card,
+    .certification,
+    .language-skill,
+    .publication,
+    .highlight,
+    .interest {
+        break-inside: avoid;
+    }
+
+    .highlight,
+    .interest {
+        background: none;
+        border: 1px solid #bbb;
+    }
+
+    .highlight-value {
+        color: #000;
+    }
+
+    .projects {
+        grid-template-columns: 1fr 1fr;
+    }
+
+    .skill-list li,
+    .tag {
+        color: #000;
+        background: none;
+        border: 1px solid #bbb;
+    }
+
+    .cefr-bar span {
+        border: 1px solid #000;
+    }
+
+    .cefr-bar .on {
+        background: #000;
+        print-color-adjust: exact;
+    }
+
+    .site-footer {
+        margin-top: 1rem;
+        border-top: 1px solid #999;
+    }
+
+    .footer-credits {
+        display: none;
+    }
+}

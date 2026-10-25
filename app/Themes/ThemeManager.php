@@ -4,6 +4,9 @@ declare(strict_types=1);
 
 namespace App\Themes;
 
+use Illuminate\Support\Facades\Vite;
+use Throwable;
+
 /**
  * Risolve il tema attivo e la sua catena di ereditarietà (tema attivo → tema base).
  */
@@ -11,6 +14,8 @@ final class ThemeManager
 {
     /** @var array<string, Theme> */
     private array $loaded = [];
+
+    private string|false|null $spriteUrl = null;
 
     public function __construct(
         private readonly string $themesPath,
@@ -119,5 +124,31 @@ final class ThemeManager
     public function icon(string $name): ?string
     {
         return $this->icons()[$name] ?? null;
+    }
+
+    /**
+     * URL dello sprite SVG delle icone (il primo tema della catena che ne dichiara uno), se compilato.
+     */
+    public function spriteUrl(): ?string
+    {
+        if ($this->spriteUrl === null) {
+            $this->spriteUrl = false;
+
+            foreach ($this->chain() as $theme) {
+                if ($theme->sprite === null) {
+                    continue;
+                }
+
+                try {
+                    $this->spriteUrl = Vite::asset($theme->sprite, $theme->buildDirectory());
+                } catch (Throwable) {
+                    // Asset non compilati (npm run build): si usano le classi del font di icone
+                }
+
+                break;
+            }
+        }
+
+        return $this->spriteUrl === false ? null : $this->spriteUrl;
     }
 }

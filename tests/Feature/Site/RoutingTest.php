@@ -1,0 +1,169 @@
+<?php
+
+use App\Http\Middleware\NormalizeSitePath;
+use App\Models\Language;
+use App\Models\Project;
+use App\Models\Redirect;
+use Illuminate\Http\Request;
+
+beforeEach(fn () => seedDemo());
+
+it('redirects the home page to the default language', function () {
+    $this->get('/')
+        ->assertStatus(301)
+        ->assertRedirect('http://localhost/it-IT');
+
+    Language::query()->where('code', 'en-GB')->sole()->update(['is_default' => true]);
+
+    $this->get('/')->assertRedirect('http://localhost/en-GB');
+});
+
+it('normalizes language codes, trailing slashes and short codes', function (string $from, string $to) {
+    $this->get($from)->assertStatus(301)->assertRedirect('http://localhost'.$to);
+})->with([
+    'lowercase' => ['/it-it', '/it-IT'],
+    'uppercase' => ['/EN-GB', '/en-GB'],
+    'deep path' => ['/en-gb/projects/data-catalog-and-lineage', '/en-GB/projects/data-catalog-and-lineage'],
+    'double slash' => ['/it-IT//progetti/data-catalog-e-lineage', '/it-IT/progetti/data-catalog-e-lineage'],
+    'short code' => ['/en', '/en-GB'],
+    'query kept' => ['/it-it?utm_source=x', '/it-IT?utm_source=x'],
+]);
+
+it('removes trailing and double slashes', function () {
+    // Il client di test toglie lo slash finale dagli URL: si prova il middleware direttamente
+    $response = NormalizeSitePath::redirect(Request::create('http://localhost/it-IT/progetti/?a=1'));
+
+    expect($response?->getStatusCode())->toBe(301)
+        ->and($response?->headers->get('Location'))->toBe('http://localhost/it-IT/progetti?a=1')
+        ->and(NormalizeSitePath::redirect(Request::create('http://localhost/it-IT')))->toBeNull()
+        ->and(NormalizeSitePath::redirect(Request::create('http://localhost/')))->toBeNull()
+        ->and(NormalizeSitePath::redirect(Request::create('http://localhost/it-IT/', 'POST')))->toBeNull();
+});
+
+it('returns 404 for inactive or unknown languages', function () {
+    Language::query()->create(['code' => 'de-DE', 'name' => 'Deutsch', 'is_active' => false]);
+
+    $this->get('/de-DE')->assertNotFound();
+    $this->get('/xx-XX')->assertNotFound();
+    $this->get('/de')->assertNotFound();
+});
+
+it('serves detail pages only at their canonical address', function (string $from, string $to) {
+    $this->get($from)->assertStatus(301)->assertRedirect('http://localhost'.$to);
+})->with([
+    'uppercase slug' => ['/it-IT/progetti/Data-Catalog-E-Lineage', '/it-IT/progetti/data-catalog-e-lineage'],
+    'segment of another language' => ['/en-GB/progetti/data-catalog-and-lineage', '/en-GB/projects/data-catalog-and-lineage'],
+    'slug of another language' => ['/en-GB/projects/data-catalog-e-lineage', '/en-GB/projects/data-catalog-and-lineage'],
+]);
+
+it('opens project and experience pages', function () {
+    $this->get('/it-IT/progetti/data-catalog-e-lineage')
+        ->assertOk()
+        ->assertSee('<h1 class="detail-title">Data Catalog e lineage</h1>', escape: false)
+        ->assertSee('1.200 dataset documentati');
+
+    $this->get('/en-GB/experience/data-governance-manager-acme-consulting')
+        ->assertOk()
+        ->assertSee('Projects in this role');
+});
+
+it('has no page for items without details, hidden items or unknown slugs', function () {
+    // progetto senza testo di dettaglio né immagine
+    $this->get('/it-IT/progetti/regole-di-data-quality')->assertNotFound();
+
+    Project::query()->where('slug->it-IT', 'data-catalog-e-lineage')->update(['is_visible' => false]);
+    $this->get('/it-IT/progetti/data-catalog-e-lineage')->assertNotFound();
+
+    $this->get('/it-IT/progetti/non-esiste')->assertNotFound();
+    $this->get('/it-IT/sconosciuto/qualcosa')->assertNotFound();
+});
+
+it('sends listing segments to the CV section', function () {
+    $this->get('/it-IT/progetti')->assertRedirect('http://localhost/it-IT#projects');
+    $this->get('/en-GB/experience')->assertRedirect('http://localhost/en-GB#experience');
+    $this->get('/en-GB/progetti')->assertRedirect('http://localhost/en-GB/projects');
+});
+
+it('keeps old addresses working when a slug changes', function () {
+    $project = Project::query()->where('slug->it-IT', 'data-catalog-e-lineage')->sole();
+    $project->setTranslation('slug', 'it-IT', 'catalogo-dati');
+    $project->save();
+
+    $this->get('/it-IT/progetti/data-catalog-e-lineage')
+        ->assertStatus(301)
+        ->assertRedirect('http://localhost/it-IT/progetti/catalogo-dati');
+
+    $this->get('/it-IT/progetti/catalogo-dati')->assertOk();
+
+    // Un secondo cambio non crea catene di redirect
+    $project->setTranslation('slug', 'it-IT', 'catalogo');
+    $project->save();
+
+    expect(Redirect::query()->pluck('to_path', 'from_path')->all())->toEqual([
+        '/it-IT/progetti/data-catalog-e-lineage' => '/it-IT/progetti/catalogo',
+        '/it-IT/progetti/catalogo-dati' => '/it-IT/progetti/catalogo',
+    ]);
+});
+
+it('keeps old addresses working when a URL segment changes', function () {
+    $italian = Language::query()->where('code', 'it-IT')->sole();
+    $italian->update(['url_segments' => ['projects' => 'lavori']]);
+
+    $this->get('/it-IT/progetti/data-catalog-e-lineage')
+        ->assertStatus(301)
+        ->assertRedirect('http://localhost/it-IT/lavori/data-catalog-e-lineage');
+
+    $this->get('/it-IT/lavori/data-catalog-e-lineage')->assertOk();
+});
+
+it('applies the redirects managed in the admin, also to sub-paths', function () {
+    Redirect::query()->create(['from_path' => '/vecchio-cv', 'to_path' => '/it-IT', 'status_code' => 302]);
+    Redirect::query()->create(['from_path' => '/en-gb', 'to_path' => '/en-GB']);
+    Redirect::query()->create(['from_path' => '/spento', 'to_path' => '/it-IT', 'is_active' => false]);
+
+    $this->get('/vecchio-cv')->assertStatus(302)->assertRedirect('http://localhost/it-IT');
+    $this->get('/vecchio-cv/pagina')->assertStatus(302)->assertRedirect('http://localhost/it-IT/pagina');
+    $this->get('/spento')->assertNotFound();
+
+    expect(Redirect::query()->where('from_path', '/vecchio-cv')->value('hits'))->toBe(2);
+});
+
+it('lists every public page with its language versions in the sitemap', function () {
+    $xml = simplexml_load_string((string) $this->get('/sitemap.xml')->assertOk()->getContent());
+    $xml->registerXPathNamespace('s', 'http://www.sitemaps.org/schemas/sitemap/0.9');
+    $xml->registerXPathNamespace('x', 'http://www.w3.org/1999/xhtml');
+
+    $locations = array_map('strval', $xml->xpath('//s:url/s:loc'));
+
+    expect($locations)->toContain(
+        'http://localhost/it-IT',
+        'http://localhost/en-GB',
+        'http://localhost/it-IT/progetti/data-catalog-e-lineage',
+        'http://localhost/en-GB/experience/data-governance-manager-acme-consulting',
+    )->not->toContain('http://localhost/it-IT/progetti/regole-di-data-quality')
+        ->and($xml->xpath('//s:url[s:loc="http://localhost/en-GB"]/x:link[@hreflang="x-default"]/@href')[0]->__toString())
+        ->toBe('http://localhost/it-IT');
+});
+
+it('publishes a robots.txt that points to the sitemap and hides the admin path', function () {
+    $this->get('/robots.txt')
+        ->assertOk()
+        ->assertHeader('Content-Type', 'text/plain; charset=UTF-8')
+        ->assertSee('Sitemap: http://localhost/sitemap.xml')
+        ->assertDontSee('admin');
+});
+
+it('gives existing pages an address in a newly activated language', function () {
+    Language::query()->create(['code' => 'de-DE', 'name' => 'Deutsch']);
+
+    $project = Project::query()->where('slug->it-IT', 'data-catalog-e-lineage')->sole();
+
+    // contenuto non ancora tradotto in tedesco: lo slug nasce dal titolo nella lingua di default
+    expect($project->t('slug', 'de-DE', false))->toBe('data-catalog-e-lineage')
+        ->and(Redirect::query()->count())->toBe(0);
+
+    $this->get('/de-DE/projekte/data-catalog-e-lineage')
+        ->assertOk()
+        ->assertSee('<html lang="de-DE">', escape: false)
+        ->assertSee('Zurück zum Lebenslauf');
+});
