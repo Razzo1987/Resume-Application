@@ -376,8 +376,8 @@ details.more {
 }
 
 .fact {
-    display: flex;
-    flex-wrap: wrap;
+    display: grid;
+    grid-template-columns: max-content minmax(0, 1fr);
     gap: .5rem;
 
     dt {

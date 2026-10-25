@@ -79,6 +79,29 @@ Every release is a **full package**: there are no patches to apply in a specific
 While the site is in maintenance, visitors get a "Site being updated" page (HTTP 503, `Retry-After`), search
 engines are told to come back later, and the admin area keeps working.
 
+## Moving the content
+
+*System* → *Tools* → *Export the content* creates a zip with the content (database tables, uploaded images, CV PDFs;
+no users, passwords or `.env`). *Import content* on another installation (same or newer version) replaces all its
+content with the zip; users and passwords stay as they are, and a copy of the previous content is saved in
+`core/storage/app/private/backups`.
+
+### From version 1
+
+The content of Resume Application 1.x is imported with a command, usually on a development copy; the result is then
+moved to the server with *Export* / *Import content*:
+
+```bash
+mysql -u root -e "CREATE DATABASE resume_v1" && mysql -u root resume_v1 < dump-v1.sql   # or LEGACY_DB_* in .env
+php artisan resume:import-v1 --files=/path/to/v1/public_html --volunteering=9,13 \
+    --cv="it-IT=/path/to/v1/public_html/resume/My CV.pdf" --fresh
+```
+
+`--volunteering` lists the v1 ids of the volunteering experiences; `--cv` sets the current CV of a language (the
+other languages offer that one). The command prints what it imported and what to check by hand (for example full
+addresses used as locations, or dates that differ between languages). Old addresses of certificates
+(`/attachment/…`) and CVs (`/resume/…`) are redirected to the new ones.
+
 ## Themes
 
 The package contains the open `base` theme. Additional themes are installed from their zip in the admin:

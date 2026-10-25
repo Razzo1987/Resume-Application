@@ -40,5 +40,12 @@ All notable changes to this project are documented here. The format follows [Kee
 - Theme tooling: `scripts/build-theme.sh` (copy, icon sprite, assets, zip), Vite build per theme (`THEME=name`), icon sprites from Font Awesome 5 classes (`fas`, `fal`, `fad`…) and per-style sprite sources with duotone support, `theme_color` in `theme.json`, `partials/head-extra` and `partials/profile-headlines` extension points, base JavaScript behaviours reusable by other themes, end-to-end suite runnable against another theme (`E2E_THEME`).
 - The inline flag script also marks navigations inside the site (`js-same-site`), so themes do not replay intro animations.
 
+- `php artisan resume:import-v1`: imports the content of version 1 (one row per language, pairs by id) — profile, social profiles, experience and volunteering with organisations, logos and skills, projects linked to the experience of their dates and to their client, education, certifications with badges and PDFs, current CV, footer texts — and redirects the old addresses of PDFs and CVs.
+- Content import from an export zip (*System* → *Tools* → *Import content*): replaces content, images and CVs, keeps users and the installed version, saves a copy of the current content first, refuses exports from newer versions and unexpected files.
+
 ### Changed
+- Redirects are matched on the decoded path (old addresses with spaces work) and keep the encoding of the remaining path.
+- Project and education facts are laid out in two columns (label, value), also with long values.
+- Uploads in the admin up to 50 MB (theme and content zips), within the PHP limits.
+- The content export only includes the tables of the application database.
 - The menu highlights the section being read with a reading line instead of an intersection band: reliable with short sections and at the bottom of the page.

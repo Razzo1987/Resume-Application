@@ -1,6 +1,8 @@
 <?php
 
 use App\Filament\Pages\ManageSystem;
+use App\Models\Experience;
+use App\Models\Profile;
 use App\Models\User;
 use App\Support\Settings\Settings;
 use App\Support\System\Backup;
@@ -8,7 +10,9 @@ use App\Support\System\Maintenance;
 use App\Support\System\OrphanFiles;
 use App\Support\System\Updater;
 use Filament\Facades\Filament;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\File;
+use Illuminate\Support\Facades\Storage;
 use Livewire\Livewire;
 
 beforeEach(function () {
@@ -113,4 +117,70 @@ it('removes only the files left over by older versions, with their empty folders
         ->and(is_file("{$web}/core/storage/app/cv/cv.pdf"))->toBeTrue();
 
     File::deleteDirectory($web);
+});
+
+it('restores an export, keeping users and the installed version', function () {
+    app(Settings::class)->set(Updater::VERSION_KEY, '2.0.0');
+    $export = app(Backup::class)->create();
+    $photo = Profile::current()->photo;
+    $experiences = Experience::query()->count();
+
+    // Contenuti cambiati dopo l'esportazione
+    Experience::query()->get()->each->delete();
+    Profile::current()->update(['full_name' => 'Altro Nome']);
+    Storage::disk('uploads')->delete($photo);
+    app(Settings::class)->set(Updater::VERSION_KEY, '2.0.1');
+    $users = User::query()->count();
+
+    $result = app(Backup::class)->restore($export);
+
+    expect(Experience::query()->count())->toBe($experiences)
+        ->and(Profile::current()->full_name)->toBe('John Doe')
+        ->and(User::query()->count())->toBe($users)
+        ->and(app(Settings::class)->get(Updater::VERSION_KEY))->toBe('2.0.1')
+        ->and($result['files'])->toBeGreaterThan(0)
+        ->and(storage_path('app/private/backups/'.$result['backup']))->toBeFile();
+
+    Storage::disk('uploads')->assertExists($photo);
+    $this->get('/it-IT')->assertOk()->assertSee('John Doe');
+
+    @unlink($export);
+    @unlink(storage_path('app/private/backups/'.$result['backup']));
+});
+
+it('refuses exports that are not valid or come from a newer version', function (array $entries) {
+    $path = sys_get_temp_dir().'/restore-'.bin2hex(random_bytes(4)).'.zip';
+    $zip = new ZipArchive;
+    $zip->open($path, ZipArchive::CREATE);
+
+    foreach ($entries as $name => $content) {
+        $zip->addFromString($name, $content);
+    }
+
+    $zip->close();
+    $before = Experience::query()->count();
+
+    expect(fn () => app(Backup::class)->restore($path))->toThrow(RuntimeException::class)
+        ->and(Experience::query()->count())->toBe($before);
+
+    @unlink($path);
+})->with([
+    'no database' => [['uploads/a.webp' => 'x']],
+    'newer schema' => [['database.json' => json_encode(['tables' => ['migrations' => [['migration' => '2099_01_01_000000_future']], 'experiences' => []]])]],
+    'path traversal' => [['database.json' => json_encode(['tables' => []]), 'uploads/../../.env' => 'x']],
+    'other folder' => [['database.json' => json_encode(['tables' => []]), 'core/app.php' => '<?php']],
+]);
+
+it('imports an export from the system page', function () {
+    $export = app(Backup::class)->create();
+    Experience::query()->get()->each->delete();
+
+    Livewire::test(ManageSystem::class)
+        ->callAction('restore', ['package' => UploadedFile::fake()->createWithContent('export.zip', (string) file_get_contents($export))])
+        ->assertNotified();
+
+    expect(Experience::query()->count())->toBeGreaterThan(0);
+
+    @unlink($export);
+    array_map('unlink', glob(storage_path('app/private/backups/resume-backup-*.zip')) ?: []);
 });

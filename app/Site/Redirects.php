@@ -22,7 +22,8 @@ final class Redirects
      */
     public function match(string $path): ?array
     {
-        $path = Redirect::normalizePath($path);
+        // Si confronta il percorso decodificato (i redirect si scrivono "in chiaro", anche con spazi)
+        $path = Redirect::normalizePath(rawurldecode($path));
 
         // Candidati: il percorso stesso e tutti i suoi "genitori" (/a/b/c, /a/b, /a)
         $segments = explode('/', trim($path, '/'));
@@ -60,7 +61,8 @@ final class Redirects
 
         // Redirect di un prefisso: si conserva il resto del percorso
         if ($redirect->from_path !== $path && ! str_starts_with($target, 'http')) {
-            $target = rtrim($target, '/').substr($path, strlen($redirect->from_path));
+            $rest = substr($path, strlen($redirect->from_path));
+            $target = rtrim($target, '/').implode('/', array_map('rawurlencode', explode('/', $rest)));
         }
 
         return [$target, $redirect->status_code];
