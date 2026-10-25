@@ -33,7 +33,8 @@ return [
         'local' => [
             'driver' => 'local',
             'root' => storage_path('app/private'),
-            'serve' => true,
+            // I file privati (es. PDF dei CV) li serve l'applicazione, mai il web server
+            'serve' => false,
             'throw' => false,
             'report' => false,
         ],
@@ -42,6 +43,17 @@ return [
             'driver' => 'local',
             'root' => storage_path('app/public'),
             'url' => rtrim(env('APP_URL', 'http://localhost'), '/').'/storage',
+            'visibility' => 'public',
+            'throw' => false,
+            'report' => false,
+        ],
+
+        // Immagini e file pubblici caricati dall'admin: nella webroot, in uploads/
+        // (in produzione public_html/uploads, mai incluso nei pacchetti di aggiornamento)
+        'uploads' => [
+            'driver' => 'local',
+            'root' => public_path('uploads'),
+            'url' => '/uploads',
             'visibility' => 'public',
             'throw' => false,
             'report' => false,

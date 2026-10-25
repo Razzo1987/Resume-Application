@@ -3,7 +3,7 @@
 A multilingual CV / résumé web application with a lightweight admin panel, built with **Laravel** and **Filament**.
 It runs on any standard LAMP hosting (including cPanel shared hosting), uses **no cookies** on the public site and loads **no third-party resources** (fonts, scripts and styles are all self-hosted).
 
-> Status: **v2 in development** (milestone M0 — foundations). The previous version lives in the `1.x` history.
+> Status: **v2 in development** — data model and admin panel are in place (milestones M0–M1); the public site comes next.
 
 ## Features (planned for v2.0)
 
@@ -26,7 +26,8 @@ It runs on any standard LAMP hosting (including cPanel shared hosting), uses **n
 ```bash
 composer install
 cp .env.example .env && php artisan key:generate
-php artisan migrate
+php artisan migrate --seed          # base data: default languages, CV sections, key figures
+php artisan db:seed --class=DemoSeeder   # optional: sample CV of "John Doe" (it-IT / en-GB)
 npm install && npm run build
 php artisan make:filament-user      # first administrator
 php artisan serve                   # http://localhost:8000 — admin at /admin
@@ -44,6 +45,9 @@ vendor/bin/pint --test              # code style
 
 | Path | Content |
 |---|---|
+| `app/Models` | CV content; translated fields are JSON columns (`{"it-IT": "…", "en-GB": "…"}`) |
+| `app/Filament` | Admin panel: resources, profile and settings pages, dashboard widget |
+| `app/Support` | Languages and language packs, settings, translations, image optimisation (WebP) |
 | `app/Themes` | Theme manager (active theme → `base` inheritance, icon map) |
 | `themes/base` | Open theme: views, icons, SCSS/JS sources (built into `public/themes/base`) |
 | `lang/{code}` | Language packs: `routes.php` (URL segments) and `site.php` (public site strings) |

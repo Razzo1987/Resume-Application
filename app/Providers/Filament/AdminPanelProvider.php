@@ -2,11 +2,15 @@
 
 namespace App\Providers\Filament;
 
+use App\Filament\Support\InitialsAvatarProvider;
+use App\Filament\Widgets\SiteStatusWidget;
 use App\Http\Middleware\SetAdminLocale;
+use Filament\Auth\MultiFactor\App\AppAuthentication;
 use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\AuthenticateSession;
 use Filament\Http\Middleware\DisableBladeIconComponents;
 use Filament\Http\Middleware\DispatchServingFilamentEvent;
+use Filament\Navigation\NavigationGroup;
 use Filament\Pages\Dashboard;
 use Filament\Panel;
 use Filament\PanelProvider;
@@ -32,19 +36,31 @@ class AdminPanelProvider extends PanelProvider
             ->login()
             ->profile()
             ->passwordReset()
+            // Autenticazione a due fattori con app (Google Authenticator, 1Password, ...), con codici di recupero
+            ->multiFactorAuthentication([
+                AppAuthentication::make()->recoverable(),
+            ])
             ->colors([
                 'primary' => Color::Slate,
             ])
+            // Avatar generato in locale: il provider di default usa ui-avatars.com
+            ->defaultAvatarProvider(InitialsAvatarProvider::class)
             // Nessun font da CDN: Filament usa il proprio font locale (LocalFontProvider) se non se ne imposta un altro
             ->discoverResources(in: app_path('Filament/Resources'), for: 'App\Filament\Resources')
             ->discoverPages(in: app_path('Filament/Pages'), for: 'App\Filament\Pages')
             ->pages([
                 Dashboard::class,
             ])
-            ->discoverWidgets(in: app_path('Filament/Widgets'), for: 'App\Filament\Widgets')
             ->widgets([
+                SiteStatusWidget::class,
                 AccountWidget::class,
             ])
+            ->navigationGroups([
+                NavigationGroup::make(fn (): string => __('admin.nav.cv')),
+                NavigationGroup::make(fn (): string => __('admin.nav.content')),
+                NavigationGroup::make(fn (): string => __('admin.nav.site')),
+            ])
+            ->sidebarCollapsibleOnDesktop()
             ->middleware([
                 EncryptCookies::class,
                 AddQueuedCookiesToResponse::class,

@@ -71,6 +71,15 @@ return [
         'no_expiration' => 'No expiration',
         'credential_id' => 'Credential ID',
         'issuer' => 'Issuer',
+        'types' => [
+            'certification' => 'Certification',
+            'accreditation' => 'Accreditation',
+            'course' => 'Course',
+            'workshop' => 'Workshop',
+            'training_path' => 'Training path',
+            'exam' => 'Exam',
+            'badge' => 'Badge',
+        ],
     ],
 
     'languages' => [

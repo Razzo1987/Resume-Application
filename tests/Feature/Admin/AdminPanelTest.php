@@ -24,6 +24,18 @@ it('loads only local assets in the admin (no CDN, no external fonts)', function 
         ->and($html)->not->toContain('fonts.googleapis.com');
 });
 
+it('loads only local assets once logged in (avatar included)', function () {
+    $html = (string) $this->actingAs(User::factory()->create(['name' => 'Luca Racchetti']))->get('/admin')->getContent();
+
+    preg_match_all('#(?:src|href)="(https?://[^/"]+)#', $html, $matches);
+
+    $hosts = array_unique(array_map(fn (string $url): string => (string) parse_url($url, PHP_URL_HOST), $matches[1]));
+
+    expect($hosts)->each->toBe('localhost')
+        ->and($html)->not->toContain('ui-avatars.com')
+        ->and($html)->toContain('data:image/svg+xml;base64,');
+});
+
 it('lets an administrator open the dashboard', function () {
     $this->actingAs(User::factory()->create())
         ->get('/admin')

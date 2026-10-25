@@ -40,6 +40,27 @@ final class ThemeManager
     }
 
     /**
+     * Temi installati: nome => titolo.
+     *
+     * @return array<string, string>
+     */
+    public function installed(): array
+    {
+        $themes = [];
+
+        foreach (glob($this->themesPath.DIRECTORY_SEPARATOR.'*', GLOB_ONLYDIR) ?: [] as $dir) {
+            if ($this->isInstalled(basename($dir))) {
+                $theme = $this->get(basename($dir));
+                $themes[$theme->name] = $theme->title;
+            }
+        }
+
+        ksort($themes);
+
+        return $themes;
+    }
+
+    /**
      * Temi dal più specifico al più generico: [attivo, ..., base].
      *
      * @return list<Theme>

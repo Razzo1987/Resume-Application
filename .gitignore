@@ -30,3 +30,4 @@ Homestead.yaml
 Thumbs.db
 /public/themes
 /storage/framework/phpstan
+/public/uploads

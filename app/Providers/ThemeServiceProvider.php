@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Providers;
 
+use App\Support\Settings\Settings;
 use App\Themes\ThemeManager;
 use Illuminate\Support\Facades\Lang;
 use Illuminate\Support\Facades\View;
@@ -15,7 +16,8 @@ class ThemeServiceProvider extends ServiceProvider
     {
         $this->app->singleton(ThemeManager::class, fn (): ThemeManager => new ThemeManager(
             themesPath: (string) config('resume.themes.path'),
-            activeName: (string) config('resume.themes.active'),
+            // Tema scelto in admin (impostazioni), altrimenti quello di configurazione
+            activeName: (string) ($this->app->make(Settings::class)->get('site.theme') ?: config('resume.themes.active')),
             baseName: (string) config('resume.themes.base'),
         ));
     }

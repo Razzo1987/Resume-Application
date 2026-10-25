@@ -2,24 +2,21 @@
 
 namespace Database\Seeders;
 
-use App\Models\User;
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
+/**
+ * Dati di base di ogni installazione (lingue, categorie di competenze, sezioni del CV, numeri chiave).
+ * I dati dimostrativi sono a parte: php artisan db:seed --class=DemoSeeder
+ */
 class DatabaseSeeder extends Seeder
 {
-    use WithoutModelEvents;
-
-    /**
-     * Seed the application's database.
-     */
     public function run(): void
     {
-        // User::factory(10)->create();
-
-        User::factory()->create([
-            'name' => 'Test User',
-            'email' => 'test@example.com',
+        $this->call([
+            LanguageSeeder::class,
+            SkillCategorySeeder::class,
+            PageSectionSeeder::class,
+            HighlightSeeder::class,
         ]);
     }
 }

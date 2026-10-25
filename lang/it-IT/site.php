@@ -71,6 +71,15 @@ return [
         'no_expiration' => 'Senza scadenza',
         'credential_id' => 'ID credenziale',
         'issuer' => 'Ente',
+        'types' => [
+            'certification' => 'Certificazione',
+            'accreditation' => 'Accreditamento',
+            'course' => 'Corso',
+            'workshop' => 'Workshop',
+            'training_path' => 'Percorso formativo',
+            'exam' => 'Esame',
+            'badge' => 'Badge',
+        ],
     ],
 
     'languages' => [
