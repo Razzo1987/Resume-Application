@@ -4,6 +4,9 @@ declare(strict_types=1);
 
 namespace App\Filament\Support;
 
+use App\Enums\ExperienceKind;
+use App\Filament\Resources\Experiences\ExperienceResource;
+use App\Filament\Resources\Volunteering\VolunteeringResource;
 use App\Models\Article;
 use App\Models\Experience;
 use App\Models\Project;
@@ -30,6 +33,27 @@ class SiteActions
             ->url(fn (Model $record): ?string => self::url($record))
             ->openUrlInNewTab()
             ->visible(fn (Model $record): bool => self::url($record) !== null);
+    }
+
+    /**
+     * Sposta un'esperienza tra lavoro e volontariato (le due sezioni hanno elenchi separati in admin).
+     */
+    public static function moveExperience(): Action
+    {
+        return Action::make('moveExperience')
+            ->label(fn (Experience $record): string => $record->kind === ExperienceKind::Work
+                ? __('admin.actions.move_to_volunteering')
+                : __('admin.actions.move_to_work'))
+            ->icon(Heroicon::OutlinedArrowsRightLeft)
+            ->color('gray')
+            ->requiresConfirmation()
+            ->action(function (Experience $record, Action $action): void {
+                $record->kind = $record->kind === ExperienceKind::Work ? ExperienceKind::Volunteering : ExperienceKind::Work;
+                $record->save();
+
+                $resource = $record->kind === ExperienceKind::Work ? ExperienceResource::class : VolunteeringResource::class;
+                $action->redirect($resource::getUrl('edit', ['record' => $record]));
+            });
     }
 
     public static function url(Model $record): ?string

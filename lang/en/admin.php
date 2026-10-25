@@ -240,6 +240,8 @@ return [
 
     'actions' => [
         'view_on_site' => 'View on site',
+        'move_to_volunteering' => 'Move to volunteering',
+        'move_to_work' => 'Move to work experience',
         'save' => 'Save',
         'download' => 'Download',
         'make_current' => 'Make current',

@@ -15,6 +15,7 @@ class EditExperience extends EditRecord
     {
         return [
             SiteActions::viewOnSite(),
+            SiteActions::moveExperience(),
             DeleteAction::make(),
         ];
     }

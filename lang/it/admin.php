@@ -240,6 +240,8 @@ return [
 
     'actions' => [
         'view_on_site' => 'Apri nel sito',
+        'move_to_volunteering' => 'Sposta nel volontariato',
+        'move_to_work' => 'Sposta nelle esperienze di lavoro',
         'save' => 'Salva',
         'download' => 'Scarica',
         'make_current' => 'Rendi corrente',

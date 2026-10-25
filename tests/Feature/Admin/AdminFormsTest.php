@@ -5,13 +5,16 @@ use App\Filament\Pages\ManageProfile;
 use App\Filament\Pages\ManageSettings;
 use App\Filament\Resources\CvDocuments\Pages\CreateCvDocument;
 use App\Filament\Resources\Experiences\Pages\CreateExperience;
+use App\Filament\Resources\Experiences\Pages\EditExperience;
 use App\Filament\Resources\Experiences\Pages\ListExperiences;
 use App\Filament\Resources\Languages\Pages\CreateLanguage;
 use App\Filament\Resources\Languages\Pages\EditLanguage;
 use App\Filament\Resources\PageSections\Pages\ManagePageSections;
 use App\Filament\Resources\Projects\Pages\EditProject;
 use App\Filament\Resources\Volunteering\Pages\CreateVolunteering;
+use App\Filament\Resources\Volunteering\Pages\EditVolunteering;
 use App\Filament\Resources\Volunteering\Pages\ListVolunteering;
+use App\Filament\Resources\Volunteering\VolunteeringResource;
 use App\Models\CvDocument;
 use App\Models\Experience;
 use App\Models\Language;
@@ -245,4 +248,19 @@ it('links the edit page to the public page when there is one', function () {
 
     Livewire::test(EditProject::class, ['record' => $withoutPage->getRouteKey()])
         ->assertActionHidden('viewOnSite');
+});
+
+it('moves an experience between work and volunteering', function () {
+    $experience = Experience::query()->create(['kind' => ExperienceKind::Work, 'role' => ['it-IT' => 'Docente'], 'start_date' => '2014-01-01']);
+
+    Livewire::test(EditExperience::class, ['record' => $experience->getRouteKey()])
+        ->callAction('moveExperience')
+        ->assertRedirect(VolunteeringResource::getUrl('edit', ['record' => $experience]));
+
+    expect($experience->fresh()->kind)->toBe(ExperienceKind::Volunteering);
+
+    Livewire::test(EditVolunteering::class, ['record' => $experience->getRouteKey()])
+        ->callAction('moveExperience');
+
+    expect($experience->fresh()->kind)->toBe(ExperienceKind::Work);
 });

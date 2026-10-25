@@ -41,6 +41,7 @@ All notable changes to this project are documented here. The format follows [Kee
 - The inline flag script also marks navigations inside the site (`js-same-site`), so themes do not replay intro animations.
 
 - `php artisan resume:import-v1`: imports the content of version 1 (one row per language, pairs by id) — profile, social profiles, experience and volunteering with organisations, logos and skills, projects linked to the experience of their dates and to their client, education, certifications with badges and PDFs, current CV, footer texts — and redirects the old addresses of PDFs and CVs.
+- Experiences can be moved between work and volunteering from their edit page.
 - Site icon (favicon) from the settings: 32×32 and 180×180 versions generated automatically, `/favicon.ico` redirected to it.
 - Content import from an export zip (*System* → *Tools* → *Import content*): replaces content, images and CVs, keeps users and the installed version, saves a copy of the current content first, refuses exports from newer versions and unexpected files.
 

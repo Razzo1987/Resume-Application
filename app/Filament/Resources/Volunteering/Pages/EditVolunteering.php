@@ -13,6 +13,6 @@ class EditVolunteering extends EditRecord
 
     protected function getHeaderActions(): array
     {
-        return [SiteActions::viewOnSite(), DeleteAction::make()];
+        return [SiteActions::viewOnSite(), SiteActions::moveExperience(), DeleteAction::make()];
     }
 }
