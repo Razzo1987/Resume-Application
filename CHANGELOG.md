@@ -2,10 +2,13 @@
 
 All notable changes to this project are documented here. The format follows [Keep a Changelog](https://keepachangelog.com/) and the project uses [Semantic Versioning](https://semver.org/).
 
-## [Unreleased]
+## [2.0.3] — 2026-10-26
 
 ### Added
-- Base theme icons `cycling` and `ai`, for interests.
+- Updates from the admin (*System* → *Updates*): new versions are checked on GitHub at most every 12 hours (and with *Check now*) and announced on the dashboard with their release notes; the package is downloaded straight to the server (in chunks, SHA-256 verified) or uploaded from the browser in 1 MB chunks (no upload limit); checks before starting (version, PHP and extensions, installed themes, disk space, write permissions); content export, maintenance, extraction in short resumable steps by a script that runs before Laravel, with a progress page for the administrator and a static 503 page for visitors; automatic completion afterwards. From 2.0.3 on, no FTP or File Manager is needed to update.
+- Optional GitHub token for private repositories (fine-grained, read-only), stored encrypted in `core/storage` or set with `RESUME_UPDATE_TOKEN`; `RESUME_UPDATE_REPOSITORY` and `RESUME_UPDATE_API` settings.
+- `core/manifest.json` declares the minimum PHP version and the required extensions.
+- Base theme: 52 more icons for interests and key figures (sport and outdoors, free time and culture, work, skills and sectors), among them `cycling` and `ai`.
 
 ## [2.0.2] — 2026-10-26
 

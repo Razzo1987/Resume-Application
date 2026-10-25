@@ -56,14 +56,19 @@ echo "== Manifest (per rimuovere i file orfani negli aggiornamenti)"
 echo "$VERSION" > "$PKG/core/VERSION"
 ( cd "$PKG" && find . -type f ! -path './core/manifest.json' -print0 | sort -z \
   | xargs -0 sha256sum | sed 's#  \./#  #' ) > "$WORK/sums.txt"
-python3 - "$WORK/sums.txt" "$PKG/core/manifest.json" "$VERSION" <<'PY'
-import json, sys
-sums, out, ver = sys.argv[1:]
+# requires: versione minima di PHP (da composer.json) ed estensioni (come l'installer), controllate dall'admin
+# prima di aggiornare dal pannello
+EXTENSIONS="$(grep -o "EXTENSIONS = \[[^]]*\]" "$PKG/core/app/Support/Install/Requirements.php" | grep -o "'[a-z_]*'" | tr -d "'" | paste -sd, -)"
+python3 - "$WORK/sums.txt" "$PKG/core/manifest.json" "$VERSION" "$PKG/core/composer.json" "$EXTENSIONS" <<'PY'
+import json, re, sys
+sums, out, ver, composer, extensions = sys.argv[1:]
 files = {}
 for line in open(sums, encoding="utf-8"):
     h, p = line.rstrip("\n").split("  ", 1)
     files[p] = h
-json.dump({"name": "resume-app", "version": ver, "files": files}, open(out, "w"), indent=1, sort_keys=True)
+php = re.search(r"(\d+\.\d+(?:\.\d+)?)", json.load(open(composer))["require"]["php"]).group(1)
+requires = {"php": php, "extensions": [e for e in extensions.split(",") if e]}
+json.dump({"name": "resume-app", "version": ver, "requires": requires, "files": files}, open(out, "w"), indent=1, sort_keys=True)
 PY
 
 echo "== Zip"

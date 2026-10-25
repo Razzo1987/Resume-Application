@@ -1,0 +1,76 @@
+<?php
+
+declare(strict_types=1);
+
+namespace App\Http\Controllers\Admin;
+
+use App\Http\Controllers\Controller;
+use App\Support\Update\UpdateStorage;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\File;
+
+/**
+ * Caricamento a blocchi del pacchetto di aggiornamento (pagina Sistema): il browser manda lo zip a pezzi da 1 MB,
+ * così il limite di caricamento dell'hosting (upload_max_filesize, spesso 2 MB) non conta.
+ * Ogni blocco è il corpo grezzo della richiesta; si riprende dal blocco indicato dal server.
+ */
+class UpdateUploadController extends Controller
+{
+    public const int MAX_CHUNKS = 200;
+
+    public function __invoke(Request $request, UpdateStorage $storage): JsonResponse
+    {
+        $id = (string) $request->query('id');
+        $index = (int) $request->query('index', -1);
+        $count = (int) $request->query('count', 0);
+        $name = (string) $request->query('name');
+
+        if (preg_match('/^[a-f0-9]{32}$/', $id) !== 1 || $index < 0 || $count < 1 || $count > self::MAX_CHUNKS || $index >= $count
+            || preg_match('/^[A-Za-z0-9._-]{1,120}\.zip$/', $name) !== 1) {
+            return response()->json(['error' => __('admin.updates.errors.upload_invalid')], 422);
+        }
+
+        File::ensureDirectoryExists($storage->uploadsDirectory());
+        $this->cleanup($storage);
+
+        $part = $storage->uploadsDirectory()."/{$id}.part";
+        $meta = $storage->uploadsDirectory()."/{$id}.json";
+        $state = $index === 0 ? ['next' => 0] : ($storage->readJson($meta) ?? ['next' => 0]);
+
+        if ($index === 0) {
+            File::delete($part);
+        }
+
+        if ($index !== (int) $state['next']) {
+            return response()->json(['next' => (int) $state['next']], 409);
+        }
+
+        file_put_contents($part, $request->getContent(), FILE_APPEND);
+        $state['next'] = $index + 1;
+
+        if ($state['next'] < $count) {
+            $storage->writeJson($meta, $state);
+
+            return response()->json(['next' => $state['next']]);
+        }
+
+        File::ensureDirectoryExists($storage->packagesDirectory());
+        rename($part, $storage->packagesDirectory().'/'.$name);
+        File::delete($meta);
+
+        return response()->json(['done' => true, 'file' => $name]);
+    }
+
+    /**
+     * Caricamenti interrotti da più di un giorno.
+     */
+    private function cleanup(UpdateStorage $storage): void
+    {
+        foreach (glob($storage->uploadsDirectory().'/*') ?: [] as $file) {
+            if (filemtime($file) < time() - 86400) {
+                File::delete($file);
+            }
+        }
+    }
+}

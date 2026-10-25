@@ -3,7 +3,7 @@
 A multilingual CV / résumé web application with a lightweight admin panel, built with **Laravel** and **Filament**.
 It runs on any standard LAMP hosting (including cPanel shared hosting), uses **no cookies** on the public site and loads **no third-party resources** (fonts, scripts and styles are all self-hosted).
 
-> Status: **2.0.2** — admin panel, public site with the open `base` theme, blog, web installer, update page, additional themes and import from version 1.
+> Status: **2.0.3** — admin panel, public site with the open `base` theme, blog, web installer, update page, additional themes and import from version 1.
 
 ## Features (v2.0)
 
@@ -13,7 +13,7 @@ It runs on any standard LAMP hosting (including cPanel shared hosting), uses **n
 - Versioned CV PDF per language, downloaded with a stable file name.
 - Mini blog.
 - Theme system: an open `base` theme (Bootstrap 5 + Font Awesome Free) that other themes can extend.
-- Full-package releases with a web installer and an update page (database migrations, cache, file clean-up).
+- Full-package releases with a web installer and updates from the admin: new versions announced from GitHub releases, package downloaded to the server or uploaded in chunks, checked, extracted and completed (migrations, cache, file clean-up) without FTP.
 
 ## Requirements
 

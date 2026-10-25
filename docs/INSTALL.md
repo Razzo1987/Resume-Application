@@ -67,6 +67,33 @@ Then, in the admin area:
 
 Every release is a **full package**: there are no patches to apply in a specific order.
 
+### From the admin (version 2.0.3 and later)
+
+Admin → *System* → **Updates**:
+
+- the site checks the GitHub releases of `RESUME_UPDATE_REPOSITORY` (default `Razzo1987/Resume-Application`) at most
+  every 12 hours, when the dashboard is opened, and shows "Version x.y.z is available" with its release notes;
+  *Check now* checks immediately;
+- **Download and install** fetches the package straight from GitHub to the server, in 8 MB chunks, and verifies the
+  SHA-256 published with the release; **Upload a package** sends a zip from your computer in 1 MB chunks, so the
+  hosting upload limit does not matter; a zip copied into `core/storage/app/private/updates/packages` with the File
+  Manager is listed too;
+- before starting, the package is checked: it is a Resume App package, not older than the installed version, the
+  server has the required PHP version and extensions, installed themes declare themselves compatible, there is
+  enough disk space and the folders are writable;
+- **Update now** exports the content (safety copy), turns maintenance on and opens a progress page: the files are
+  extracted in short steps by a small script that runs before Laravel (the application is not started while its
+  files are replaced; visitors get a static "Site being updated" page). If a step fails, *Retry* resumes from there;
+- back on the *System* page the update is completed automatically (migrations, caches, `.htaccess` block, version)
+  and maintenance is turned off if it was off before.
+
+While the repository is private, a GitHub token is needed: a **fine-grained personal access token** with access to
+that repository only and the *Contents: Read-only* permission. Enter it with *GitHub token* on the same page (stored
+encrypted with the `APP_KEY` in `core/storage`, never in content exports) or set `RESUME_UPDATE_TOKEN` in
+`core/.env`. Public repositories need no token. If the server cannot reach GitHub, upload the package instead.
+
+### By hand (FTP or File Manager)
+
 1. Admin → *System* → *Start maintenance*, then *Tools* → *Export the content* (or a full backup from cPanel).
 2. Extract the new zip into `public_html`, overwriting the files.
    `core/.env`, `uploads/`, `core/storage/` (CV PDFs) and PRO themes are not part of the package and are never touched.

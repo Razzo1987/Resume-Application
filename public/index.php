@@ -30,6 +30,13 @@ $corePath = match (true) {
 };
 $corePath = rtrim($corePath, '/\\');
 
+// Aggiornamento avviato dall'admin: finché i file vengono sostituiti l'app non si avvia
+// (estrazione a blocchi e pagina "Sito in aggiornamento", vedi resources/update/updater.php)
+if (is_file($corePath.'/storage/framework/resume-update.json') && is_file($corePath.'/storage/framework/resume-updater.php')) {
+    require $corePath.'/storage/framework/resume-updater.php';
+    resume_updater_handle($corePath.'/storage/framework/resume-update.json', __DIR__, $corePath);
+}
+
 if (! is_file($corePath.'/bootstrap/app.php') || ! is_file($corePath.'/vendor/autoload.php')) {
     http_response_code(503);
     header('Content-Type: text/plain; charset=utf-8');

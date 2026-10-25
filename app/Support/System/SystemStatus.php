@@ -4,11 +4,12 @@ declare(strict_types=1);
 
 namespace App\Support\System;
 
+use App\Support\Update\ReleaseChecker;
 use Illuminate\Support\Facades\Cache;
 
 /**
  * Stato del sistema per l'admin: protezione di core/ (verificata al massimo una volta al giorno),
- * manutenzione, aggiornamento da completare.
+ * manutenzione, aggiornamento da completare, nuova versione disponibile.
  */
 class SystemStatus
 {
@@ -18,6 +19,7 @@ class SystemStatus
         private readonly CoreProbe $probe,
         private readonly Maintenance $maintenance,
         private readonly Updater $updater,
+        private readonly ReleaseChecker $releases,
     ) {}
 
     public function coreProtection(bool $refresh = false): string
@@ -48,6 +50,10 @@ class SystemStatus
 
         if ($this->maintenance->isOn()) {
             $alerts['maintenance_on'] = 'warning';
+        }
+
+        if (! $this->updater->isPending() && $this->releases->available() !== null) {
+            $alerts['update_available'] = 'info';
         }
 
         return $alerts;

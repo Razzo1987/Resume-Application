@@ -9,12 +9,18 @@ use App\Support\System\Maintenance;
 use App\Support\System\OrphanFiles;
 use App\Support\System\SystemStatus;
 use App\Support\System\Updater;
+use App\Support\Update\PackageInspector;
+use App\Support\Update\ReleaseChecker;
+use App\Support\Update\ReleaseDownloader;
+use App\Support\Update\UpdateRunner;
+use App\Support\Update\UpdateStorage;
 use App\Themes\ThemeManager;
 use BackedEnum;
 use Filament\Actions\Action;
 use Filament\Actions\ActionGroup;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Select;
+use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
 use Filament\Notifications\Notification;
 use Filament\Pages\Page;
@@ -22,13 +28,16 @@ use Filament\Schemas\Components\Utilities\Get;
 use Filament\Support\Icons\Heroicon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\HtmlString;
+use Illuminate\Support\Str;
 use RuntimeException;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
 use Throwable;
 
 /**
- * Sistema: versione, completamento degli aggiornamenti, manutenzione, cache, .htaccess,
- * protezione di core/, file orfani, esportazione dei contenuti.
+ * Sistema: versione, aggiornamenti (controllo su GitHub, download o caricamento del pacchetto, installazione),
+ * completamento degli aggiornamenti, manutenzione, cache, .htaccess, protezione di core/, file orfani,
+ * esportazione e importazione dei contenuti.
  */
 class ManageSystem extends Page
 {
@@ -42,6 +51,18 @@ class ManageSystem extends Page
 
     /** @var list<string> */
     public array $log = [];
+
+    /**
+     * Ritorno dalla pagina di estrazione (?update=finish): si completa subito l'aggiornamento.
+     */
+    public function mount(): void
+    {
+        $runner = app(UpdateRunner::class);
+
+        if (request()->query('update') === 'finish' && $runner->isExtracted()) {
+            $this->finishUpdate();
+        }
+    }
 
     public static function getNavigationGroup(): ?string
     {
@@ -88,7 +109,171 @@ class ManageSystem extends Page
             'laravel' => app()->version(),
             'database' => $database,
             'paths' => ['core' => base_path(), 'webroot' => public_path()],
+            ...$this->updateViewData(),
         ];
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    private function updateViewData(): array
+    {
+        $releases = app(ReleaseChecker::class);
+        $storage = app(UpdateStorage::class);
+        $status = $releases->status();
+        $available = $releases->available();
+
+        return [
+            'updateCheck' => $status,
+            'updateAvailable' => $available,
+            'updateNotes' => $available !== null && $available->notes !== ''
+                ? new HtmlString(Str::markdown($available->notes, ['html_input' => 'strip', 'allow_unsafe_links' => false]))
+                : null,
+            'updateRepository' => (string) config('resume.updates.repository'),
+            'updateTokenSource' => $storage->tokenSource(),
+            'updatePackages' => $storage->packages(),
+            'updateSupported' => app(PackageInspector::class)->isPackagedInstall(),
+            'updateUploadUrl' => route('filament.admin.update-upload'),
+        ];
+    }
+
+    /**
+     * Scarica il blocco successivo del pacchetto della nuova versione (chiamato a ripetizione dalla pagina).
+     *
+     * @return array{received?: int, total?: int, done?: bool, file?: ?string, error?: string}
+     */
+    public function downloadChunk(): array
+    {
+        $release = app(ReleaseChecker::class)->available();
+
+        if ($release === null) {
+            return ['error' => (string) __('admin.updates.errors.no_release')];
+        }
+
+        try {
+            return app(ReleaseDownloader::class)->next($release);
+        } catch (Throwable $exception) {
+            return ['error' => $exception->getMessage()];
+        }
+    }
+
+    public function checkUpdatesAction(): Action
+    {
+        return Action::make('checkUpdates')
+            ->label(__('admin.updates.check_now'))
+            ->icon(Heroicon::OutlinedArrowPath)
+            ->color('gray')
+            ->size('sm')
+            ->action(function (): void {
+                $status = app(ReleaseChecker::class)->check();
+                $available = app(ReleaseChecker::class)->available();
+
+                $notification = match (true) {
+                    $status['error'] !== null => Notification::make()->danger()->title(__('admin.updates.check_failed'))->body($status['error']),
+                    $available !== null => Notification::make()->info()->title(__('admin.updates.available', ['version' => $available->version])),
+                    default => Notification::make()->success()->title(__('admin.updates.up_to_date')),
+                };
+
+                $notification->send();
+            });
+    }
+
+    public function githubTokenAction(): Action
+    {
+        return Action::make('githubToken')
+            ->label(__('admin.updates.token'))
+            ->icon(Heroicon::OutlinedKey)
+            ->color('gray')
+            ->size('sm')
+            ->modalDescription(new HtmlString(__('admin.updates.token_help', ['repository' => e((string) config('resume.updates.repository'))])))
+            ->schema([
+                TextInput::make('token')
+                    ->label(__('admin.updates.token'))
+                    ->password()
+                    ->revealable()
+                    ->placeholder(fn (): string => app(UpdateStorage::class)->tokenSource() !== null ? __('admin.updates.token_saved') : '')
+                    ->helperText(fn (): ?string => app(UpdateStorage::class)->tokenSource() === 'env' ? __('admin.updates.token_env') : null),
+                Toggle::make('remove')
+                    ->label(__('admin.updates.token_remove'))
+                    ->visible(fn (): bool => app(UpdateStorage::class)->tokenSource() === 'admin'),
+            ])
+            ->action(function (array $data): void {
+                $storage = app(UpdateStorage::class);
+
+                if ($data['remove'] ?? false) {
+                    $storage->setToken(null);
+                } elseif (filled($data['token'] ?? null)) {
+                    $storage->setToken((string) $data['token']);
+                }
+
+                Notification::make()->success()->title(__('admin.messages.saved'))->send();
+            });
+    }
+
+    /**
+     * Controlli sul pacchetto e, se va tutto bene, avvio dell'aggiornamento.
+     */
+    public function installAction(): Action
+    {
+        return Action::make('install')
+            ->label(__('admin.updates.install'))
+            ->icon(Heroicon::OutlinedArrowDownCircle)
+            ->size('sm')
+            ->modalHeading(fn (array $arguments): string => __('admin.updates.install_heading', ['file' => (string) ($arguments['package'] ?? '')]))
+            ->modalContent(function (array $arguments) {
+                $path = app(UpdateStorage::class)->package((string) ($arguments['package'] ?? ''));
+
+                return view('filament.pages.system-update-check', [
+                    'report' => $path !== null ? app(PackageInspector::class)->inspect($path) : null,
+                ]);
+            })
+            ->modalSubmitActionLabel(__('admin.updates.install_submit'))
+            ->action(function (array $arguments): void {
+                $path = app(UpdateStorage::class)->package((string) ($arguments['package'] ?? ''));
+
+                try {
+                    if ($path === null) {
+                        throw new RuntimeException((string) __('admin.updates.problems.not_zip'));
+                    }
+
+                    $url = app(UpdateRunner::class)->start($path, static::getUrl(['update' => 'finish']));
+                    $this->redirect($url);
+                } catch (RuntimeException $exception) {
+                    Notification::make()->danger()->title(__('admin.updates.install_failed'))->body($exception->getMessage())->persistent()->send();
+                }
+            });
+    }
+
+    public function deletePackageAction(): Action
+    {
+        return Action::make('deletePackage')
+            ->label(__('admin.updates.delete_package'))
+            ->icon(Heroicon::OutlinedTrash)
+            ->iconButton()
+            ->color('gray')
+            ->size('sm')
+            ->requiresConfirmation()
+            ->action(function (array $arguments): void {
+                app(UpdateStorage::class)->deletePackage((string) ($arguments['package'] ?? ''));
+            });
+    }
+
+    /**
+     * Completa l'aggiornamento (migrazioni, cache, .htaccess, versione) e, se l'ha avviato l'admin, rimette la
+     * manutenzione com'era e cancella il pacchetto.
+     */
+    private function finishUpdate(): void
+    {
+        $this->log = app(UpdateRunner::class)->finish();
+        $orphans = app(OrphanFiles::class);
+        $count = $orphans->isAvailable() ? count($orphans->find()) : 0;
+
+        Notification::make()
+            ->success()
+            ->title(__('admin.system.update_completed'))
+            ->body($count > 0 ? __('admin.updates.orphans_hint', ['count' => $count]) : null)
+            ->persistent()
+            ->send();
     }
 
     protected function getHeaderActions(): array
@@ -100,10 +285,7 @@ class ManageSystem extends Page
                 ->visible(fn (): bool => app(Updater::class)->isPending())
                 ->requiresConfirmation()
                 ->modalDescription(__('admin.system.complete_update_help'))
-                ->action(function (): void {
-                    $this->log = app(Updater::class)->complete();
-                    Notification::make()->success()->title(__('admin.system.update_completed'))->send();
-                }),
+                ->action(fn () => $this->finishUpdate()),
 
             Action::make('maintenance')
                 ->label(fn (): string => app(Maintenance::class)->isOn() ? __('admin.system.maintenance_off') : __('admin.system.maintenance_on'))

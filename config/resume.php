@@ -26,6 +26,15 @@ return [
         'env_path' => null,
     ],
 
+    // Aggiornamenti: nuove versioni dalle release del repository GitHub (tag vX.Y.Z con lo zip del pacchetto).
+    // Il token serve solo se il repository è privato: di solito si inserisce dall'admin (Sistema), qui ha la precedenza.
+    'updates' => [
+        'repository' => env('RESUME_UPDATE_REPOSITORY', 'Razzo1987/Resume-Application'),
+        'api' => env('RESUME_UPDATE_API', 'https://api.github.com'),
+        'token' => env('RESUME_UPDATE_TOKEN'),
+        'check_every_hours' => 12,
+    ],
+
     'themes' => [
         // Tema attivo. Ogni tema eredita dal tema "base" le view e le stringhe che non ridefinisce.
         'active' => env('RESUME_THEME', 'base'),

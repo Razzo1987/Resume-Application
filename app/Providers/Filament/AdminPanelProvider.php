@@ -6,6 +6,7 @@ use App\Filament\Support\InitialsAvatarProvider;
 use App\Filament\Support\SiteActions;
 use App\Filament\Widgets\SiteStatusWidget;
 use App\Filament\Widgets\SystemAlertsWidget;
+use App\Http\Controllers\Admin\UpdateUploadController;
 use App\Http\Middleware\NoIndex;
 use App\Http\Middleware\SetAdminLocale;
 use Filament\Auth\MultiFactor\App\AppAuthentication;
@@ -26,6 +27,7 @@ use Illuminate\Cookie\Middleware\EncryptCookies;
 use Illuminate\Foundation\Http\Middleware\PreventRequestForgery;
 use Illuminate\Routing\Middleware\SubstituteBindings;
 use Illuminate\Session\Middleware\StartSession;
+use Illuminate\Support\Facades\Route;
 use Illuminate\View\Middleware\ShareErrorsFromSession;
 
 class AdminPanelProvider extends PanelProvider
@@ -67,6 +69,10 @@ class AdminPanelProvider extends PanelProvider
                 NavigationGroup::make(fn (): string => __('admin.nav.site')),
             ])
             ->sidebarCollapsibleOnDesktop()
+            // Caricamento a blocchi del pacchetto di aggiornamento (pagina Sistema)
+            ->authenticatedRoutes(function (): void {
+                Route::post('system/update-upload', UpdateUploadController::class)->name('update-upload');
+            })
             // "Vai al sito" nella barra in alto, prima del menu utente
             ->renderHook(PanelsRenderHook::USER_MENU_BEFORE, fn (): View => view('filament.site-link', ['url' => SiteActions::homeUrl()]))
             ->middleware([
