@@ -190,7 +190,8 @@ return [
         'published_at' => 'A future date schedules the publication.',
         'language_code' => 'language-COUNTRY, e.g. en-GB. Included packs: :packs.',
         'language_name' => 'In the language itself, e.g. "Deutsch".',
-        'is_default' => 'The language of "/" and the fallback when a translation is missing. To change it, make another language the default.',
+        'is_default' => 'The language the main address (/) leads to, and the fallback when a translation is missing. To change it, make another language the default.',
+        'default_language_cache' => 'Note: browsers remember the redirect of "/" for one day. After a change, returning visitors may still land on the previous language for up to 24 hours; new visitors and search engines see the new one straight away.',
         'url_segments' => 'Words used in page URLs. Empty = value of the language pack (shown in grey).',
         'string_overrides' => 'Replace single website texts for this language. The key is the one in site.php (e.g. actions.download_cv).',
         'cv_file' => 'The file is stored with date and time in its name; visitors download it with the standard name set in Settings.',
@@ -241,6 +242,7 @@ return [
 
     'messages' => [
         'saved' => 'Saved',
+        'default_language_changed' => 'Default language changed to :language',
         'cv_now_current' => 'This is now the version downloaded from the website.',
     ],
 

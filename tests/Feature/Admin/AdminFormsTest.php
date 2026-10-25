@@ -199,9 +199,11 @@ it('makes another language the default one', function () {
     $english = Language::query()->where('code', 'en-GB')->sole();
 
     Livewire::test(EditLanguage::class, ['record' => $english->getRouteKey()])
+        ->assertSeeText(__('admin.help.default_language_cache'))
         ->fillForm(['is_default' => true])
         ->call('save')
-        ->assertHasNoFormErrors();
+        ->assertHasNoFormErrors()
+        ->assertNotified(__('admin.messages.default_language_changed', ['language' => 'English']));
 
     expect(Language::query()->where('is_default', true)->pluck('code')->all())->toBe(['en-GB']);
 });

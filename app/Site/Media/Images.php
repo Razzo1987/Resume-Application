@@ -6,6 +6,7 @@ namespace App\Site\Media;
 
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\HtmlString;
 
 /**
  * Immagini caricate dall'admin (disco "uploads", servito dal web server).
@@ -48,6 +49,22 @@ final class Images
 
             return $info === false ? null : [$info[0], $info[1]];
         });
+    }
+
+    /**
+     * Attributi pronti per un tag <img> (src, width, height), con i valori protetti.
+     *
+     * @param  array<string, string|int>  $attributes  risultato di attributes()
+     */
+    public function html(array $attributes): HtmlString
+    {
+        $parts = [];
+
+        foreach ($attributes as $name => $value) {
+            $parts[] = $name.'="'.e((string) $value).'"';
+        }
+
+        return new HtmlString(implode(' ', $parts));
     }
 
     /**

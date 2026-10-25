@@ -12,10 +12,10 @@
                 <li>
                     @if ($certification->verification_url)
                         <a href="{{ $certification->verification_url }}" rel="noopener">
-                            <img @foreach ($badge as $attribute => $value) {{ $attribute }}="{{ $value }}" @endforeach alt="{{ $certification->t('title') }}" loading="lazy" decoding="async">
+                            <img {{ $images->html($badge) }} alt="{{ $certification->t('title') }}" loading="lazy" decoding="async">
                         </a>
                     @else
-                        <img @foreach ($badge as $attribute => $value) {{ $attribute }}="{{ $value }}" @endforeach alt="{{ $certification->t('title') }}" loading="lazy" decoding="async">
+                        <img {{ $images->html($badge) }} alt="{{ $certification->t('title') }}" loading="lazy" decoding="async">
                     @endif
                 </li>
             @endforeach

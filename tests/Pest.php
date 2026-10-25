@@ -23,6 +23,7 @@ pest()->extend(TestCase::class)
 function seedDemo(): void
 {
     Storage::fake('local');
+    Storage::fake('uploads');
     test()->seed(DemoSeeder::class);
 }
 

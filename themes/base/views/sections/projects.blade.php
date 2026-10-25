@@ -11,7 +11,7 @@
             @endphp
             <article class="project-card">
                 @if ($image)
-                    <img class="project-image" @foreach ($image as $attribute => $value) {{ $attribute }}="{{ $value }}" @endforeach alt="{{ $project->t('image_alt') ?? '' }}" loading="lazy" decoding="async">
+                    <img class="project-image" {{ $images->html($image) }} alt="{{ $project->t('image_alt') ?? '' }}" loading="lazy" decoding="async">
                 @endif
                 <div class="project-body">
                     <h3 class="project-title">

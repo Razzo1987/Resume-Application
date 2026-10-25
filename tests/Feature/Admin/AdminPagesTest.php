@@ -19,6 +19,7 @@ $resources = array_map(
 
 beforeEach(function () {
     Storage::fake('local');
+    Storage::fake('uploads');
     $this->seed([DatabaseSeeder::class, DemoSeeder::class]);
     $this->actingAs(User::factory()->create());
     Filament::setCurrentPanel('admin');

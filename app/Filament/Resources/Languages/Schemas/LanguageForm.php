@@ -9,6 +9,7 @@ use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
 use Filament\Schemas\Components\Grid;
 use Filament\Schemas\Components\Section;
+use Filament\Schemas\Components\Text;
 use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Components\Utilities\Set;
 use Filament\Schemas\Schema;
@@ -50,7 +51,11 @@ class LanguageForm
                             ->disabled(fn (?Language $record): bool => (bool) $record?->is_default),
                         Toggle::make('is_default')
                             ->label(__('admin.fields.is_default'))
-                            ->helperText(__('admin.help.is_default'))
+                            // Spiegazione + avviso: il redirect di "/" resta nella cache dei browser per un giorno (RootController)
+                            ->belowContent([
+                                Text::make(__('admin.help.is_default')),
+                                Text::make(__('admin.help.default_language_cache'))->color('warning'),
+                            ])
                             ->disabled(fn (?Language $record): bool => (bool) $record?->is_default),
                     ]),
                 ])

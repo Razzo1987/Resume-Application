@@ -1,14 +1,14 @@
 <header class="site-sidebar">
     <div class="sidebar-inner">
         <div class="profile">
-            @if ($layout->photo)
-                <img class="profile-photo" @foreach ($layout->photo as $attribute => $value) {{ $attribute }}="{{ $value }}" @endforeach alt="{{ $layout->photoAlt }}" fetchpriority="high">
-            @endif
-
             @if ($page->isCv)
                 <h1 class="profile-name">{{ $layout->profile->full_name }}</h1>
             @else
                 <p class="profile-name"><a href="{{ $layout->homeUrl }}">{{ $layout->profile->full_name }}</a></p>
+            @endif
+
+            @if ($layout->photo)
+                <img class="profile-photo" {{ $images->html($layout->photo) }} alt="{{ $layout->photoAlt }}" fetchpriority="high">
             @endif
 
             @if ($layout->headlines)

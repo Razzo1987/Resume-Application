@@ -190,7 +190,8 @@ return [
         'published_at' => 'Una data futura programma la pubblicazione.',
         'language_code' => 'Lingua-PAESE, es. it-IT. Pacchetti inclusi: :packs.',
         'language_name' => 'Nella lingua stessa, es. "Deutsch".',
-        'is_default' => 'La lingua di "/" e quella usata quando manca una traduzione. Per cambiarla, rendi default un\'altra lingua.',
+        'is_default' => 'È la lingua a cui porta l\'indirizzo principale (/) e quella usata quando manca una traduzione. Per cambiarla, rendi default un\'altra lingua.',
+        'default_language_cache' => 'Attenzione: i browser ricordano per un giorno il reindirizzamento di "/". Dopo un cambio, chi ha già visitato il sito può essere portato alla lingua precedente fino a 24 ore; i nuovi visitatori e i motori di ricerca vedono subito quella nuova.',
         'url_segments' => 'Parole usate negli indirizzi delle pagine. Vuoto = valore del pacchetto della lingua (mostrato in grigio).',
         'string_overrides' => 'Sostituisci singoli testi del sito per questa lingua. La chiave è quella del file site.php (es. actions.download_cv).',
         'cv_file' => 'Il file viene salvato con data e ora nel nome; chi lo scarica dal sito riceve il nome standard impostato nelle Impostazioni.',
@@ -242,6 +243,7 @@ return [
     'messages' => [
         'saved' => 'Salvato',
         'cv_now_current' => 'Ora è questa la versione scaricabile dal sito.',
+        'default_language_changed' => 'Lingua di default cambiata in :language',
     ],
 
     'widgets' => [

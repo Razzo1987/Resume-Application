@@ -36,7 +36,7 @@
         </header>
 
         @if ($image)
-            <img class="detail-image" @foreach ($image as $attribute => $value) {{ $attribute }}="{{ $value }}" @endforeach alt="{{ $project->t('image_alt') ?? '' }}" decoding="async">
+            <img class="detail-image" {{ $images->html($image) }} alt="{{ $project->t('image_alt') ?? '' }}" decoding="async">
         @endif
 
         @if ($summary)

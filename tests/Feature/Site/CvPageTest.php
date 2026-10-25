@@ -151,3 +151,9 @@ it('loads the CV with a bounded number of queries', function () {
 
     expect(count(DB::getQueryLog()))->toBeLessThan(40);
 });
+
+it('shows the profile photo right after the name', function () {
+    $html = (string) $this->get('/it-IT')->getContent();
+
+    expect($html)->toMatch('#<h1 class="profile-name">John Doe</h1>\s*<img class="profile-photo" src="http://localhost/[a-z/]+/profile/john-doe-[a-z0-9]{6}\.webp" width="600" height="600" alt="Foto di John Doe"#');
+});

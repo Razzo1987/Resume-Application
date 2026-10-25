@@ -27,6 +27,7 @@ use App\Models\Publication;
 use App\Models\Skill;
 use App\Models\SkillCategory;
 use App\Models\SocialLink;
+use App\Support\Media\ImageOptimizer;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Storage;
 
@@ -41,6 +42,8 @@ class DemoSeeder extends Seeder
 
         Profile::current()->update([
             'full_name' => 'John Doe',
+            'photo' => self::samplePhoto(),
+            'photo_alt' => ['it-IT' => 'Foto di John Doe', 'en-GB' => 'Photo of John Doe'],
             'email' => 'john.doe@example.com',
             'phone' => '+39 000 000 0000',
             'country_code' => 'IT',
@@ -217,6 +220,37 @@ class DemoSeeder extends Seeder
                 'is_current' => true,
                 'note' => 'Demo',
             ]);
+        }
+    }
+
+    /**
+     * Foto profilo di esempio: una sagoma disegnata con GD, salvata come il resto delle immagini (WebP).
+     */
+    public static function samplePhoto(): ?string
+    {
+        if (! function_exists('imagecreatetruecolor')) {
+            return null;
+        }
+
+        $size = 600;
+        $image = imagecreatetruecolor($size, $size);
+
+        if ($image === false) {
+            return null;
+        }
+
+        imagefill($image, 0, 0, (int) imagecolorallocate($image, 219, 228, 238));
+        $figure = (int) imagecolorallocate($image, 122, 146, 172);
+        imagefilledellipse($image, 300, 235, 210, 230, $figure);
+        imagefilledellipse($image, 300, 600, 460, 380, $figure);
+
+        $source = tempnam(sys_get_temp_dir(), 'demo-photo');
+        imagepng($image, $source);
+
+        try {
+            return app(ImageOptimizer::class)->store((string) $source, 'john-doe.png', 'uploads', 'profile', 800);
+        } finally {
+            @unlink((string) $source);
         }
     }
 
