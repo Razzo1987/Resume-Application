@@ -167,3 +167,8 @@ it('gives existing pages an address in a newly activated language', function () 
         ->assertSee('<html lang="de-DE">', escape: false)
         ->assertSee('Zurück zum Lebenslauf');
 });
+
+it('has no static files that would hide the generated ones', function (string $file) {
+    // Apache serve i file esistenti prima di passare a index.php
+    expect(public_path($file))->not->toBeFile();
+})->with(['favicon.ico', 'robots.txt', 'sitemap.xml']);
