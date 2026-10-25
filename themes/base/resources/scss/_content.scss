@@ -393,14 +393,32 @@ details.more {
 .badges {
     display: flex;
     flex-wrap: wrap;
-    gap: 1rem;
+    gap: 1rem 1.25rem;
+    align-items: center;
     padding: 0;
     margin: 0 0 1.25rem;
     list-style: none;
 
+    // Ogni badge sta in una fascia alta 6rem: i quadrati e i tondi occupano tutta l'altezza,
+    // quelli rettangolari (es. banner larghi) arrivano fino a 12rem di larghezza, centrati in verticale
+    li {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 6rem;
+    }
+
+    a {
+        display: block;
+        line-height: 0;
+    }
+
     img {
-        width: 6rem;
+        width: auto;
+        max-width: 12rem;
         height: auto;
+        max-height: 6rem;
+        object-fit: contain;
     }
 }
 

@@ -31,6 +31,21 @@ document.querySelectorAll('.js-cloak').forEach((link) => {
     }
 });
 
+// Link esterni (altri domini) in una nuova scheda; i lettori di schermo lo annunciano (#new-tab-hint)
+document.querySelectorAll('a[href]').forEach((link) => {
+    if (!/^https?:$/.test(link.protocol) || link.host === window.location.host || link.target) {
+        return;
+    }
+
+    link.target = '_blank';
+    link.relList.add('noopener');
+
+    if (document.getElementById('new-tab-hint')) {
+        const described = (link.getAttribute('aria-describedby') ?? '').split(' ').filter(Boolean);
+        link.setAttribute('aria-describedby', [...new Set([...described, 'new-tab-hint'])].join(' '));
+    }
+});
+
 // Pulsante "Stampa" (nascosto senza JavaScript)
 document.querySelectorAll('.js-print').forEach((button) => {
     button.hidden = false;

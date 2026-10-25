@@ -2,6 +2,14 @@
 
 All notable changes to this project are documented here. The format follows [Keep a Changelog](https://keepachangelog.com/) and the project uses [Semantic Versioning](https://semver.org/).
 
+## [2.0.1] — 2026-10-25
+
+### Changed
+- Links to other sites open in a new tab (screen readers announce it); internal links, email and phone are unchanged.
+- The expandable details of education entries (study plans, exams) are not printed.
+- Certification badges of any shape: shown in a 6rem-high band, up to 12rem wide for horizontal badges, vertically aligned; same treatment in the admin list. Badges are stored up to 480 px.
+- Demo data: an education entry with details and two badges (square and horizontal).
+
 ## [2.0.0] — 2026-10-25
 
 ### Added

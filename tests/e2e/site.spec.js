@@ -76,6 +76,19 @@ test.describe('CV', () => {
         await expect(page.locator('.back-to-top')).toBeVisible();
     });
 
+    test('opens external links in a new tab and announces it', async ({ page }) => {
+        await page.goto('/it-IT');
+
+        const social = page.locator('.socials a').first();
+        await expect(social).toHaveAttribute('target', '_blank');
+        await expect(social).toHaveAttribute('rel', /noopener/);
+        await expect(social).toHaveAttribute('aria-describedby', 'new-tab-hint');
+        await expect(page.locator('#new-tab-hint')).toHaveText('(si apre in una nuova scheda)');
+        // link interni ed email restano nella stessa scheda
+        await expect(page.locator('.site-nav a').first()).not.toHaveAttribute('target', /.+/);
+        await expect(page.locator('#about .js-cloak').first()).not.toHaveAttribute('target', /.+/);
+    });
+
     test('switches language to the same page', async ({ page }) => {
         await page.goto('/it-IT/progetti/data-catalog-e-lineage');
 
@@ -101,6 +114,9 @@ test.describe('CV', () => {
         await expect(page.locator('.site-nav')).toBeHidden();
         await expect(page.locator('.sidebar-actions')).toBeHidden();
         await expect(page.locator('#experience')).toBeVisible();
+        // i dettagli della formazione (piano di studi, tesi…) non si stampano
+        await expect(page.locator('#education details.more')).toHaveCount(1);
+        await expect(page.locator('#education details.more')).toBeHidden();
     });
 });
 

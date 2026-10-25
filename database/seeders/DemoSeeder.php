@@ -150,6 +150,10 @@ class DemoSeeder extends Seeder
             'grade_scale' => '110',
             'cum_laude' => true,
             'thesis_title' => ['it-IT' => 'Qualità dei dati aperti', 'en-GB' => 'Open data quality'],
+            'details' => [
+                'it-IT' => '<p>Esami principali: Basi di dati, Data mining, Statistica.</p>',
+                'en-GB' => '<p>Main exams: Databases, Data mining, Statistics.</p>',
+            ],
         ]);
 
         Certification::query()->create([
@@ -158,6 +162,7 @@ class DemoSeeder extends Seeder
             'type' => CertificationType::Certification,
             'issued_on' => '2023-05-10',
             'verification_url' => 'https://example.com/verify/123',
+            'badge' => self::sampleBadge(320, 320),
         ]);
 
         $english = Certification::query()->create([
@@ -165,6 +170,7 @@ class DemoSeeder extends Seeder
             'title' => ['it-IT' => 'Certificazione di inglese', 'en-GB' => 'English certificate'],
             'type' => CertificationType::Exam,
             'issued_on' => '2019-06-01',
+            'badge' => self::sampleBadge(480, 120), // i badge non sono sempre quadrati
         ]);
 
         LanguageSkill::query()->create(['language_code' => 'it', 'is_native' => true, 'sort_order' => 10]);
@@ -262,6 +268,35 @@ class DemoSeeder extends Seeder
     /**
      * Copertina di esempio per l'articolo: barre e linee disegnate con GD.
      */
+    /**
+     * Badge di esempio (forma piena con un bordo), quadrato o rettangolare.
+     */
+    public static function sampleBadge(int $width, int $height): ?string
+    {
+        if (! function_exists('imagecreatetruecolor')) {
+            return null;
+        }
+
+        $image = imagecreatetruecolor($width, $height);
+
+        if ($image === false) {
+            return null;
+        }
+
+        imagefill($image, 0, 0, (int) imagecolorallocate($image, 29, 79, 134));
+        imagefilledrectangle($image, 8, 8, $width - 9, $height - 9, (int) imagecolorallocate($image, 244, 201, 93));
+        imagefilledrectangle($image, 20, 20, $width - 21, $height - 21, (int) imagecolorallocate($image, 255, 255, 255));
+
+        $source = tempnam(sys_get_temp_dir(), 'demo-badge');
+        imagepng($image, $source);
+
+        try {
+            return app(ImageOptimizer::class)->store((string) $source, "badge-{$width}x{$height}.png", 'uploads', 'badges', 480);
+        } finally {
+            @unlink((string) $source);
+        }
+    }
+
     public static function sampleCover(): ?string
     {
         if (! function_exists('imagecreatetruecolor')) {

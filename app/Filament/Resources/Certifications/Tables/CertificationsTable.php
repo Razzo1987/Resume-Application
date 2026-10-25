@@ -22,7 +22,14 @@ class CertificationsTable
         return $table
             ->modifyQueryUsing(self::modifyQuery(...))
             ->columns([
-                ImageColumn::make('badge')->label(__('admin.fields.badge'))->disk('uploads')->imageHeight(32)->toggleable(),
+                ImageColumn::make('badge')
+                    ->label(__('admin.fields.badge'))
+                    ->disk('uploads')
+                    // Stessa "scatola" per tutti: quadrati e rettangolari restano proporzionati e allineati
+                    ->imageWidth(80)
+                    ->imageHeight(40)
+                    ->extraImgAttributes(['style' => 'object-fit: contain; object-position: left center;'])
+                    ->toggleable(),
                 Columns::translated('title'),
                 TextColumn::make('organization.name')->label(__('admin.fields.issuer'))->searchable(),
                 TextColumn::make('type')->label(__('admin.fields.certification_type'))->badge(),

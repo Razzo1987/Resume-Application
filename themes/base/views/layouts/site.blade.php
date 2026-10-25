@@ -30,5 +30,8 @@
         <x-theme-icon name="arrow-up" />
         <span class="visually-hidden">{{ __('site.a11y.back_to_top') }}</span>
     </a>
+
+    {{-- Descrizione dei link esterni, che lo script apre in una nuova scheda --}}
+    <span id="new-tab-hint" hidden>{{ __('site.a11y.opens_new_tab') }}</span>
 </body>
 </html>
