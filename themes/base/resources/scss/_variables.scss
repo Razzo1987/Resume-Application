@@ -1,0 +1,6 @@
+// Variabili del tema base (sovrascrivono i default di Bootstrap).
+// Font di sistema: nessun webfont da scaricare, nessuna richiesta esterna.
+$font-family-sans-serif: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", "Noto Sans", "Liberation Sans", Arial, sans-serif;
+$primary: #2c3e50;
+$enable-shadows: false;
+$enable-negative-margins: true;

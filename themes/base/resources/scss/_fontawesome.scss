@@ -1,0 +1,5 @@
+// Font Awesome Free 7 (moduli Sass). I webfont arrivano da node_modules tramite l'alias Vite "@fa-webfonts".
+@use "@fortawesome/fontawesome-free/scss/variables" with ($font-path: "@fa-webfonts");
+@use "@fortawesome/fontawesome-free/scss/fontawesome";
+@use "@fortawesome/fontawesome-free/scss/solid";
+@use "@fortawesome/fontawesome-free/scss/brands";

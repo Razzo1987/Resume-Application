@@ -1,0 +1,57 @@
+# BEGIN resume-app
+# Blocco gestito da Resume App: viene riscritto da installer e aggiornamenti.
+# Le regole fuori da questo blocco (es. quelle di cPanel per la versione PHP) non vengono toccate.
+<IfModule mod_rewrite.c>
+    <IfModule mod_negotiation.c>
+        Options -MultiViews -Indexes
+    </IfModule>
+
+    RewriteEngine On
+
+    # 1) Codice applicativo e file nascosti mai raggiungibili dal browser
+    RewriteRule ^core(/|$) - [F,L]
+    RewriteRule ^core-path\.php$ - [F,L]
+    RewriteRule (^|/)\.(?!well-known/) - [F,L]
+
+    # 2) HTTPS e dominio senza www (righe incluse dall'installer solo se richiesto)
+    #{{FORCE_HTTPS}}RewriteCond %{HTTPS} !=on
+    #{{FORCE_HTTPS}}RewriteCond %{HTTP:X-Forwarded-Proto} !=https
+    #{{FORCE_HTTPS}}RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+    #{{STRIP_WWW}}RewriteCond %{HTTP_HOST} ^www\.(.+)$ [NC]
+    #{{STRIP_WWW}}RewriteRule ^ %{REQUEST_SCHEME}://%1%{REQUEST_URI} [L,R=301]
+
+    # 3) Header Authorization e X-XSRF-Token verso PHP
+    RewriteCond %{HTTP:Authorization} .
+    RewriteRule .* - [E=HTTP_AUTHORIZATION:%{HTTP:Authorization}]
+    RewriteCond %{HTTP:x-xsrf-token} .
+    RewriteRule .* - [E=HTTP_X_XSRF_TOKEN:%{HTTP:X-XSRF-Token}]
+
+    # 4) Slash finale rimosso (tranne le cartelle reali)
+    RewriteCond %{REQUEST_FILENAME} !-d
+    RewriteCond %{REQUEST_URI} (.+)/$
+    RewriteRule ^ %1 [L,R=301]
+
+    # 5) Tutto il resto al front controller
+    RewriteCond %{REQUEST_FILENAME} !-d
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteRule ^ index.php [L]
+</IfModule>
+
+# Seconda barriera se mod_rewrite mancasse: file sensibili negati comunque
+<FilesMatch "^(\.|core-path\.php$)">
+    <IfModule mod_authz_core.c>
+        Require all denied
+    </IfModule>
+</FilesMatch>
+
+<IfModule mod_headers.c>
+    Header always set X-Content-Type-Options "nosniff"
+    <FilesMatch "\.(css|js|woff2|svg|png|jpe?g|webp|avif|ico)$">
+        Header set Cache-Control "public, max-age=31536000, immutable"
+    </FilesMatch>
+</IfModule>
+
+<IfModule mod_deflate.c>
+    AddOutputFilterByType DEFLATE text/html text/plain text/css text/xml application/xml application/javascript application/json image/svg+xml
+</IfModule>
+# END resume-app

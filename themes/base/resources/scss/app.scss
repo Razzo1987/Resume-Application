@@ -1,0 +1,8 @@
+// Tema base — Bootstrap 5 compilato da sorgente con le variabili del tema.
+// Le personalizzazioni vanno in _variables.scss (prima di Bootstrap) e in file dedicati per componente.
+
+// Font Awesome Free (webfont self-hosted; in M2 diventerà uno sprite SVG con le sole icone usate)
+@use "fontawesome";
+
+@import "variables";
+@import "bootstrap/scss/bootstrap";

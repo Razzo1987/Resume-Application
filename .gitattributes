@@ -1,0 +1,15 @@
+* text=auto eol=lf
+
+*.blade.php diff=html
+*.css diff=css
+*.html diff=html
+*.md diff=markdown
+*.php diff=php
+
+# Esclusi dagli archivi git (git archive), quindi dai pacchetti di rilascio
+/.github export-ignore
+/tests export-ignore
+/.editorconfig export-ignore
+/phpstan.neon export-ignore
+/phpunit.xml export-ignore
+/CLAUDE.md export-ignore
