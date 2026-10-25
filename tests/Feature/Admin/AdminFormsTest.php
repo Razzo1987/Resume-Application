@@ -219,12 +219,12 @@ it('does not offer to delete the default language', function () {
 
 it('refreshes the public pages after reordering the CV sections', function () {
     $this->get('/it-IT');
-    expect(app(PageCache::class)->get('page.'.sha1('http://localhost/it-IT')))->not->toBeNull();
+    expect(app(PageCache::class)->get(app(PageCache::class)->key('http://localhost/it-IT')))->not->toBeNull();
 
     $order = PageSection::query()->orderByDesc('sort_order')->pluck('id')->map(fn ($id) => (string) $id)->all();
 
     Livewire::test(ManagePageSections::class)
         ->call('reorderTable', $order);
 
-    expect(app(PageCache::class)->get('page.'.sha1('http://localhost/it-IT')))->toBeNull();
+    expect(app(PageCache::class)->get(app(PageCache::class)->key('http://localhost/it-IT')))->toBeNull();
 });

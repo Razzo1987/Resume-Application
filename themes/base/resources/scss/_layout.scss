@@ -298,3 +298,10 @@
         transition: none;
     }
 }
+
+// Passaggio morbido tra le pagine (browser che lo supportano), solo se l'utente non ha chiesto meno animazioni
+@media (prefers-reduced-motion: no-preference) {
+    @view-transition {
+        navigation: auto;
+    }
+}

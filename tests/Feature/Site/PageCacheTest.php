@@ -1,6 +1,7 @@
 <?php
 
 use App\Models\Profile;
+use App\Site\Cache\PageCache;
 use App\Support\Settings\Settings;
 
 beforeEach(fn () => seedDemo());
@@ -42,4 +43,14 @@ it('can be turned off', function () {
 
     $this->get('/it-IT');
     $this->get('/it-IT')->assertHeader('X-Page-Cache', 'MISS');
+});
+
+it('does not serve pages cached before an update of the theme assets', function () {
+    $cache = app(PageCache::class);
+    $key = $cache->key('http://localhost/it-IT');
+
+    $other = new PageCache;
+    (fn () => $this->assetsVersion = 'base|0|1.0.0')->call($other);
+
+    expect($other->key('http://localhost/it-IT'))->not->toBe($key);
 });

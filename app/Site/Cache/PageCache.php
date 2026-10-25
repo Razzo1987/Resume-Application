@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Site\Cache;
 
+use App\Themes\ThemeManager;
 use Illuminate\Contracts\Cache\Repository;
 use Illuminate\Support\Facades\Cache;
 use Throwable;
@@ -18,6 +19,8 @@ final class PageCache
     public const string STORE = 'pages';
 
     public const int TTL = 6 * 3600;
+
+    private ?string $assetsVersion = null;
 
     /**
      * @return array{content: string, type: string, etag: string, time: int}|null
@@ -51,6 +54,32 @@ final class PageCache
         }
 
         return $etag;
+    }
+
+    /**
+     * Chiave di una pagina. Include la versione degli asset del tema e dell'applicazione:
+     * dopo un aggiornamento (nuovi file CSS/JS con un altro hash) le pagine vecchie non vengono più servite.
+     */
+    public function key(string $url): string
+    {
+        return 'page.'.sha1($this->assetsVersion().'|'.$url);
+    }
+
+    public function assetsVersion(): string
+    {
+        if ($this->assetsVersion === null) {
+            $theme = app(ThemeManager::class)->active();
+            $manifest = public_path($theme->buildDirectory().'/manifest.json');
+            $version = base_path('VERSION');
+
+            $this->assetsVersion = implode('|', [
+                $theme->name,
+                is_file($manifest) ? (string) filemtime($manifest) : '-',
+                is_file($version) ? trim((string) file_get_contents($version)) : '-',
+            ]);
+        }
+
+        return $this->assetsVersion;
     }
 
     public function flush(): void

@@ -25,7 +25,7 @@ class CacheSitePages
             return $next($request);
         }
 
-        $key = 'page.'.sha1($request->getSchemeAndHttpHost().$request->getBaseUrl().$request->getPathInfo());
+        $key = $this->cache->key($request->getSchemeAndHttpHost().$request->getBaseUrl().$request->getPathInfo());
         $cached = $this->cache->get($key);
 
         if ($cached !== null) {
