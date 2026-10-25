@@ -11,6 +11,7 @@
 set -euo pipefail
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 OUT="${1:-$ROOT/../releases}"
+mkdir -p "$OUT" && OUT="$(cd "$OUT" && pwd)"   # percorso assoluto: lo zip si crea da un'altra cartella
 VERSION="$(tr -d '[:space:]' < "$ROOT/VERSION")"
 NAME="resume-app-${VERSION}"
 WORK="$(mktemp -d)"
@@ -64,7 +65,6 @@ json.dump({"name": "resume-app", "version": ver, "files": files}, open(out, "w")
 PY
 
 echo "== Zip"
-mkdir -p "$OUT"
 ( cd "$PKG" && zip -qr -X "$OUT/$NAME.zip" . )
 ( cd "$OUT" && sha256sum "$NAME.zip" > "$NAME.zip.sha256" )
 echo "Creato $OUT/$NAME.zip ($(du -h "$OUT/$NAME.zip" | cut -f1))"
