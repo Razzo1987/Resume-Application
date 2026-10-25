@@ -16,6 +16,9 @@
 8. **Public pages** get their data from `App\Site\CvData` (eager loaded; lazy loading throws outside production) and their metadata from `App\Site\Pages`. Rich text from the editors is always printed through `$richText->render()` (sanitized). Email and phone are printed only encoded (`App\Site\Contact\Cloak`).
 9. **Page cache**: any model that changes public pages must be listed in `AppServiceProvider::CONTENT_MODELS`; mass updates (`Model::query()->update()`) bypass the cache invalidation.
 10. **CSP**: no inline scripts or styles in theme views (no `style=""`, no `onclick`). JSON-LD blocks are allowed.
+11. **Only the `base` theme is in this repository.** Other themes (commercial icons, private designs) live in their own
+    repositories and are copied into `themes/` (git-ignored) by `scripts/build-theme.sh`. Never commit them, their
+    compiled assets or icon sources here.
 
 ## Before committing
 ```bash

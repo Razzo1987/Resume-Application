@@ -32,6 +32,10 @@ Thumbs.db
 /storage/framework/phpstan
 /public/uploads
 
+# Temi diversi dal base (es. temi PRO copiati da scripts/build-theme.sh): mai nel repository pubblico
+/themes/*
+!/themes/base
+
 # Sprite SVG generato da scripts/build-icons.mjs
 /themes/*/resources/icons/sprite.svg
 

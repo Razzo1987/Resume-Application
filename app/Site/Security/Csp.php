@@ -10,8 +10,12 @@ namespace App\Site\Security;
  */
 final class Csp
 {
-    /** Script in linea del layout: aggiunge la classe "js" a <html> prima del rendering. */
-    public const string JS_FLAG = "document.documentElement.classList.add('js')";
+    /**
+     * Script in linea del layout, prima del rendering: classe "js" su <html> e, se si arriva da un'altra
+     * pagina del sito, anche "js-same-site" (i temi la usano per non ripetere le animazioni d'ingresso).
+     */
+    public const string JS_FLAG = "var h=document.documentElement;h.classList.add('js');"
+        ."try{if(document.referrer&&new URL(document.referrer).origin===location.origin)h.classList.add('js-same-site')}catch(e){}";
 
     public static function header(bool $secure): string
     {

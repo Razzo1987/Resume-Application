@@ -21,11 +21,41 @@ final class ThemeManager
         private readonly string $themesPath,
         private readonly string $activeName,
         private readonly string $baseName,
+        private readonly ?string $publicPath = null,
     ) {}
 
+    /**
+     * Tema attivo; se manca (o mancano i suoi asset compilati) si usa il tema base, così il sito non si rompe.
+     */
     public function active(): Theme
     {
-        return $this->get($this->isInstalled($this->activeName) ? $this->activeName : $this->baseName);
+        if ($this->activeName !== $this->baseName && $this->isInstalled($this->activeName)) {
+            $theme = $this->get($this->activeName);
+
+            if ($theme->hasAssets($this->publicPath())) {
+                return $theme;
+            }
+        }
+
+        return $this->get($this->baseName);
+    }
+
+    public function activeName(): string
+    {
+        return $this->activeName;
+    }
+
+    /**
+     * Webroot che contiene gli asset compilati dei temi (themes/{tema}).
+     */
+    public function publicPath(): string
+    {
+        return $this->publicPath ?? public_path();
+    }
+
+    public function path(string $name): string
+    {
+        return $this->themesPath.DIRECTORY_SEPARATOR.$name;
     }
 
     public function base(): Theme
@@ -35,7 +65,16 @@ final class ThemeManager
 
     public function get(string $name): Theme
     {
-        return $this->loaded[$name] ??= Theme::fromDirectory($this->themesPath.DIRECTORY_SEPARATOR.$name);
+        return $this->loaded[$name] ??= Theme::fromDirectory($this->path($name));
+    }
+
+    /**
+     * Dimentica i temi letti (dopo un'installazione o una rimozione).
+     */
+    public function forget(): void
+    {
+        $this->loaded = [];
+        $this->spriteUrl = null;
     }
 
     public function isInstalled(string $name): bool

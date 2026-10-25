@@ -62,9 +62,24 @@ npx playwright test                 # end-to-end + accessibility (needs the demo
 
 A theme lives in `themes/{name}` with a `theme.json`, Blade views (`views/`), an icon map (`icons.php`) and its assets.
 Themes extend `base`: a view that a theme does not define is taken from `base`, so a theme can override a single
-section (`views/sections/experience.blade.php`) and nothing else. Icons are semantic names (`briefcase`, `email`, …)
-mapped to the theme's icon set; `scripts/build-icons.mjs` builds the SVG sprite from the map
-(`npm run build` does it for the base theme).
+partial (`views/partials/profile-headlines.blade.php`) and nothing else, and reuse the base SCSS partials and
+JavaScript behaviours. Icons are semantic names (`briefcase`, `email`, …) mapped to the theme's icon set;
+`scripts/build-icons.mjs` builds an SVG sprite with only the mapped icons (Font Awesome 5, 6 or 7 classes, one file
+per icon or one sprite per style as source; inherited icons missing from the source fall back to Font Awesome Free).
+
+Other themes (for example commercial ones) are developed **outside this repository** and never committed here
+(`themes/*` except `base` is ignored by git):
+
+```bash
+scripts/build-theme.sh ../my-themes/fancy --icons ../my-themes/fancy/icons --zip ../dist   # copy, icons, assets, zip
+E2E_THEME=fancy npx playwright test       # general end-to-end suite with that theme + the theme's own tests
+```
+
+The zip is installed from the admin (**Themes** → *Install or update a theme*): `theme.json`, views and language
+files go to `core/themes/{name}`, the compiled assets (`dist/`) to `themes/{name}` in the web root. The package is
+validated before anything is written (allowed file types only, no PHP among the public assets, compatible
+`requires.resume-app` version, parent theme installed). If the active theme or its assets go missing, the site falls
+back to `base`.
 
 ## Project layout
 
@@ -74,13 +89,14 @@ mapped to the theme's icon set; `scripts/build-icons.mjs` builds the SVG sprite 
 | `app/Filament` | Admin panel: resources, profile and settings pages, dashboard widget |
 | `app/Support` | Languages and language packs, settings, translations, image optimisation (WebP), installer, system tools (maintenance, updates, backup) |
 | `app/Site` | Public site: URLs, page metadata, JSON-LD, CV data loader, page cache, redirects |
-| `app/Themes` | Theme manager (active theme → `base` inheritance, icon map) |
+| `app/Themes` | Theme manager (active theme → `base` inheritance, icon map), theme installer and version constraints |
 | `themes/base` | Open theme: views, icons, SCSS/JS sources (built into `public/themes/base`) |
 | `lang/{code}` | Language packs: `routes.php` (URL segments) and `site.php` (public site strings) |
 | `routes/site.php` | Public routes — no session, no CSRF, no cookies |
 | `tests/e2e` | Playwright tests (Chromium, Firefox, WebKit, mobile) with axe accessibility checks |
 | `stubs/` | `.htaccess` blocks used by release packages |
 | `scripts/build-release.sh` | Builds the full release zip |
+| `scripts/build-theme.sh` | Builds an additional theme and its installable zip |
 
 ## Deployment (release package)
 

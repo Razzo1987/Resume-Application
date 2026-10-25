@@ -79,6 +79,13 @@ Every release is a **full package**: there are no patches to apply in a specific
 While the site is in maintenance, visitors get a "Site being updated" page (HTTP 503, `Retry-After`), search
 engines are told to come back later, and the admin area keeps working.
 
+## Themes
+
+The package contains the open `base` theme. Additional themes are installed from their zip in the admin:
+**Themes** → *Install or update a theme* → upload → *Activate*. Theme files go to `core/themes/{name}` and the
+compiled assets to `themes/{name}` in the web root; updating the application never touches them. Installing a newer
+zip of the same theme updates it in place. A theme that is not in use can be removed from the same page.
+
 ## The `.htaccess` file
 
 Resume App writes only its own block, between `# BEGIN resume-app` and `# END resume-app`; everything outside it

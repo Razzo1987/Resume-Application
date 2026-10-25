@@ -1,17 +1,23 @@
+import { readFileSync } from 'node:fs';
 import { defineConfig } from 'vite';
 import laravel from 'laravel-vite-plugin';
 
-// Asset del tema base: compilati in public/themes/base (manifest incluso).
-// I temi PRO hanno una build propria nel loro repository.
+// Asset di un tema, compilati in public/themes/{tema} (manifest incluso).
+// Tema "base" di default; un altro tema (copiato in themes/{tema}) con THEME=nome, es. scripts/build-theme.sh.
+const theme = process.env.THEME ?? 'base';
+
+if (!/^[a-z0-9][a-z0-9-]*$/.test(theme)) {
+    throw new Error(`Nome di tema non valido: ${theme}`);
+}
+
+const manifest = JSON.parse(readFileSync(`themes/${theme}/theme.json`, 'utf8'));
+
 export default defineConfig({
     plugins: [
         laravel({
-            input: [
-                'themes/base/resources/scss/app.scss',
-                'themes/base/resources/js/app.js',
-            ],
-            buildDirectory: 'themes/base',
-            refresh: ['themes/base/views/**'],
+            input: manifest.entrypoints,
+            buildDirectory: `themes/${theme}`,
+            refresh: [`themes/${theme}/views/**`, 'themes/base/views/**'],
         }),
     ],
     build: {

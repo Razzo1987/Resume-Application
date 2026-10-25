@@ -6,11 +6,19 @@ import { defineConfig, devices } from '@playwright/test';
  *   php artisan migrate:fresh --seed && php artisan db:seed --class=DemoSeeder && npm run build
  * Poi: npx playwright test (avvia da solo "php artisan serve" sulla porta 8001).
  * Con E2E_BASE_URL si prova un sito già avviato (es. Apache).
+ * Con E2E_THEME=nome si prova un altro tema (copiato in themes/ da scripts/build-theme.sh):
+ * gira la suite generale con quel tema attivo, più i test del tema in themes/{nome}/tests/e2e.
  */
 const baseURL = process.env.E2E_BASE_URL ?? 'http://127.0.0.1:8001';
+const theme = process.env.E2E_THEME;
+const root = process.cwd().replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 
 export default defineConfig({
-    testDir: 'tests/e2e',
+    testDir: theme ? '.' : 'tests/e2e',
+    // con un tema: la suite generale + quella del tema (percorsi assoluti, per non prendere altri tests/e2e)
+    testMatch: theme
+        ? [new RegExp(`^${root}/tests/e2e/.*\\.spec\\.js$`), new RegExp(`^${root}/themes/${theme}/tests/e2e/.*\\.spec\\.js$`)]
+        : '**/*.spec.js',
     fullyParallel: true,
     forbidOnly: !!process.env.CI,
     retries: process.env.CI ? 1 : 0,
@@ -32,5 +40,6 @@ export default defineConfig({
             url: `${baseURL}/robots.txt`,
             reuseExistingServer: !process.env.CI,
             timeout: 60_000,
+            env: theme ? { ...process.env, RESUME_THEME: theme } : undefined,
         },
 });

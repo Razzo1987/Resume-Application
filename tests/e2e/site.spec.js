@@ -108,6 +108,10 @@ test.describe('accessibility (axe, WCAG 2.1 AA)', () => {
     for (const path of ['/it-IT', '/en-GB/experience/data-governance-manager-acme-consulting', '/en-GB/projects/data-catalog-and-lineage', '/it-IT/blog', '/en-GB/blog/why-data-governance-pays-off', '/it-IT/pagina-inesistente']) {
         test(path, async ({ page }) => {
             await page.goto(path);
+            // I temi con animazioni: si analizza la pagina a riposo (testo a opacità piena)
+            await page.evaluate(() => Promise.all(document.getAnimations()
+                .filter((animation) => animation.effect?.getComputedTiming().endTime !== Infinity)
+                .map((animation) => animation.finished.catch(() => null))));
 
             const results = await new AxeBuilder({ page })
                 .withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa'])

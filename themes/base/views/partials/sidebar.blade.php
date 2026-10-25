@@ -11,13 +11,7 @@
                 <img class="profile-photo" {{ $images->html($layout->photo) }} alt="{{ $layout->photoAlt }}" fetchpriority="high">
             @endif
 
-            @if ($layout->headlines)
-                <ul class="profile-headlines">
-                    @foreach ($layout->headlines as $headline)
-                        <li>{{ $headline }}</li>
-                    @endforeach
-                </ul>
-            @endif
+            @include('theme::partials.profile-headlines')
         </div>
 
         @if ($layout->cvUrl || $layout->email || $layout->printEnabled)

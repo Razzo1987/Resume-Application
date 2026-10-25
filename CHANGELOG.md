@@ -36,3 +36,9 @@ All notable changes to this project are documented here. The format follows [Kee
 - Dashboard alerts for an update to be completed, maintenance mode and an exposed `core/` folder.
 - Managed `.htaccess` block (`# BEGIN resume-app` … `# END resume-app`) that leaves the rules added by cPanel untouched; one-year immutable caching for compiled assets and uploads, compression including RSS.
 - Release package pruned of vendor tests and docs; installation and update guide (`docs/INSTALL.md`).
+- Admin *Themes* page: list of installed themes, activation, installation or update from a zip (validated before writing: allowed file types only, no PHP among public assets, version constraint, parent theme), removal of unused themes. The site falls back to the base theme when the active theme or its compiled assets are missing.
+- Theme tooling: `scripts/build-theme.sh` (copy, icon sprite, assets, zip), Vite build per theme (`THEME=name`), icon sprites from Font Awesome 5 classes (`fas`, `fal`, `fad`…) and per-style sprite sources with duotone support, `theme_color` in `theme.json`, `partials/head-extra` and `partials/profile-headlines` extension points, base JavaScript behaviours reusable by other themes, end-to-end suite runnable against another theme (`E2E_THEME`).
+- The inline flag script also marks navigations inside the site (`js-same-site`), so themes do not replay intro animations.
+
+### Changed
+- The menu highlights the section being read with a reading line instead of an intersection band: reliable with short sections and at the bottom of the page.
