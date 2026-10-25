@@ -27,7 +27,9 @@ echo "== Dipendenze di produzione e asset"
   # Se Composer ha dovuto clonare i pacchetti da git (dist non scaricabili), niente cartelle .git nel pacchetto
   find vendor -type d -name .git -prune -exec rm -rf {} +
   # Pulizia di vendor: test, documentazione ed esempi dei pacchetti non servono in produzione
-  find vendor -mindepth 3 -maxdepth 3 -type d \( -iname tests -o -iname test -o -iname docs -o -iname doc -o -iname examples -o -name .github \) -prune -exec rm -rf {} +
+  find vendor -mindepth 3 -maxdepth 3 -type d \( -iname tests -o -iname test -o -iname test_files -o -iname legacy_tests -o -iname docs -o -iname doc -o -iname examples -o -name .github \) -prune -exec rm -rf {} +
+  # Strumenti di manutenzione dei pacchetti (es. il binario splitsh-lite di Laravel, 7 MB)
+  rm -rf vendor/laravel/framework/bin
   find vendor -type f \( -iname '*.md' -o -name 'phpunit.xml*' -o -name 'phpstan.neon*' -o -name '.editorconfig' -o -name '.gitattributes' \) -delete
   npm ci --no-audit --no-fund
   npm run build
