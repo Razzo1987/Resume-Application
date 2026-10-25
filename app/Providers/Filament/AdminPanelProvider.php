@@ -3,6 +3,7 @@
 namespace App\Providers\Filament;
 
 use App\Filament\Support\InitialsAvatarProvider;
+use App\Filament\Support\SiteActions;
 use App\Filament\Widgets\SiteStatusWidget;
 use App\Filament\Widgets\SystemAlertsWidget;
 use App\Http\Middleware\NoIndex;
@@ -17,7 +18,9 @@ use Filament\Pages\Dashboard;
 use Filament\Panel;
 use Filament\PanelProvider;
 use Filament\Support\Colors\Color;
+use Filament\View\PanelsRenderHook;
 use Filament\Widgets\AccountWidget;
+use Illuminate\Contracts\View\View;
 use Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse;
 use Illuminate\Cookie\Middleware\EncryptCookies;
 use Illuminate\Foundation\Http\Middleware\PreventRequestForgery;
@@ -64,6 +67,8 @@ class AdminPanelProvider extends PanelProvider
                 NavigationGroup::make(fn (): string => __('admin.nav.site')),
             ])
             ->sidebarCollapsibleOnDesktop()
+            // "Vai al sito" nella barra in alto, prima del menu utente
+            ->renderHook(PanelsRenderHook::USER_MENU_BEFORE, fn (): View => view('filament.site-link', ['url' => SiteActions::homeUrl()]))
             ->middleware([
                 EncryptCookies::class,
                 AddQueuedCookiesToResponse::class,

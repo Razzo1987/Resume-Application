@@ -20,7 +20,7 @@
                     <a class="btn btn-accent" href="{{ $layout->cvUrl }}" type="application/pdf">
                         <x-theme-icon name="download" />
                         {{ __('site.actions.download_cv') }}
-                        <span class="visually-hidden">— {{ __('site.actions.download_cv_lang', ['language' => $layout->cvLanguageName]) }}</span>
+                        <span class="visually-hidden">- {{ __('site.actions.download_cv_lang', ['language' => $layout->cvLanguageName]) }}</span>
                     </a>
                 @endif
                 @if ($layout->email)

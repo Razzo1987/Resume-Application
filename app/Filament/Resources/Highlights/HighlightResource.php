@@ -5,6 +5,7 @@ namespace App\Filament\Resources\Highlights;
 use App\Enums\HighlightDisplay;
 use App\Enums\HighlightSource;
 use App\Filament\Resources\Highlights\Pages\ManageHighlights;
+use App\Filament\Support\Columns;
 use App\Filament\Support\Fields;
 use App\Filament\Support\HasAdminLabels;
 use App\Filament\Support\Translatable;
@@ -90,6 +91,7 @@ class HighlightResource extends Resource
                     ->label(__('admin.fields.highlight_label'))
                     ->state(fn (Highlight $record): ?string => $record->displayLabel(app(Locales::class)->default())),
                 TextColumn::make('source')->label(__('admin.fields.highlight_source'))->badge()->color('gray'),
+                Columns::missingTranslations(),
                 ToggleColumn::make('is_visible')->label(__('admin.fields.is_visible')),
             ])
             ->recordActions([EditAction::make(), DeleteAction::make()]);

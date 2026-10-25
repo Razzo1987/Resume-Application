@@ -63,7 +63,8 @@ class PageSection extends Model implements Translatable
         foreach (PageSectionKey::cases() as $position => $key) {
             self::query()->firstOrCreate(['key' => $key], [
                 'is_enabled' => $key !== PageSectionKey::LatestArticles,
-                'in_menu' => ! in_array($key, [PageSectionKey::Highlights, PageSectionKey::LatestArticles], true),
+                // Ultimi articoli: la voce "Blog" del menu c'è anche con la sezione spenta nel CV
+                'in_menu' => $key !== PageSectionKey::Highlights,
                 'sort_order' => ($position + 1) * 10,
             ]);
         }

@@ -8,7 +8,7 @@ use Carbon\CarbonInterface;
 use Illuminate\Support\Carbon;
 
 /**
- * Date e durate nella lingua della pagina: "gen 2021 – in corso", "2 anni e 3 mesi".
+ * Date e durate nella lingua della pagina: "gen 2021 - in corso", "2 anni e 3 mesi".
  */
 final class Dates
 {
@@ -23,7 +23,7 @@ final class Dates
     }
 
     /**
-     * Periodo "inizio – fine". Senza fine: "in corso" (se c'è un inizio) oppure solo la data di inizio.
+     * Periodo "inizio - fine". Senza fine: "in corso" (se c'è un inizio) oppure solo la data di inizio.
      */
     public function period(?CarbonInterface $start, ?CarbonInterface $end, bool $ongoingIfOpen = true): string
     {
@@ -33,7 +33,7 @@ final class Dates
 
         if ($end === null) {
             return $ongoingIfOpen
-                ? $this->monthYear($start).' – '.__('site.time.present')
+                ? $this->monthYear($start).' - '.__('site.time.present')
                 : $this->monthYear($start);
         }
 
@@ -41,7 +41,7 @@ final class Dates
             return $this->monthYear($start);
         }
 
-        return $this->monthYear($start).' – '.$this->monthYear($end);
+        return $this->monthYear($start).' - '.$this->monthYear($end);
     }
 
     /**

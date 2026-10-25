@@ -36,6 +36,7 @@ return [
     'pages' => [
         'profile' => ['title' => 'Profile'],
         'system' => ['title' => 'System'],
+        'translations' => ['title' => 'Translations'],
         'themes' => ['title' => 'Themes'],
         'settings' => ['title' => 'Settings'],
     ],
@@ -180,6 +181,8 @@ return [
     ],
 
     'help' => [
+        'theme_on_themes_page' => 'Change it on the Themes page',
+        'blog_menu' => 'For this section the menu item always leads to the blog page, even when the section is hidden on the CV; it only appears when there are published articles in that language.',
         'og_image' => 'Shown when the CV is shared on social networks (Open Graph). 1200×630 recommended; saved as JPG. If missing, the profile photo is used.',
         'site_icon' => 'Square, at least 512×512 (PNG with transparency). Used in the browser tab and when the site is added to the home screen.',
         'is_visible' => 'When off, the item stays here but is not shown on the website.',
@@ -235,7 +238,6 @@ return [
         'pack_custom' => 'custom',
         'redirect_301' => '301 · permanent',
         'redirect_302' => '302 · temporary',
-        'theme_from_config' => 'From configuration (:theme)',
     ],
 
     'actions' => [
@@ -245,6 +247,8 @@ return [
         'save' => 'Save',
         'download' => 'Download',
         'make_current' => 'Make current',
+        'go_to_site' => 'Go to site',
+        'go_to_site_help' => 'Opens the public site in a new tab',
     ],
 
     'themes' => [
@@ -363,6 +367,16 @@ return [
         'cv_now_current' => 'This is now the version downloaded from the website.',
     ],
 
+    'translations' => [
+        'language' => 'Language',
+        'intro' => 'Content written in another language but still empty in this one. On the site, the main language text is shown in its place.',
+        'complete' => 'Everything translated',
+        'complete_help' => 'Nothing is missing in this language.',
+        'items' => '{1} :count item to complete|[2,*] :count items to complete',
+        'edit' => 'Edit',
+        'settings_texts' => 'Site texts (SEO and footer)',
+    ],
+
     'widgets' => [
         'version' => 'Version',
         'content' => 'Experience and projects',
@@ -371,7 +385,7 @@ return [
         'cv_documents_description' => 'Active languages with an uploaded CV',
         'translations' => ':language translations',
         'translations_complete' => 'Everything translated',
-        'translations_missing' => 'Items to complete',
+        'translations_missing' => 'Items to complete: see the list',
     ],
 
     'enums' => [

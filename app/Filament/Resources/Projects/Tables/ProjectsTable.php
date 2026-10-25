@@ -26,7 +26,7 @@ class ProjectsTable
                 TextColumn::make('experience.organization.name')->label(__('admin.fields.experience'))->toggleable(),
                 TextColumn::make('period')
                     ->label(__('admin.fields.period'))
-                    ->state(fn (Project $record): string => $record->start_date->format('m/Y').' – '.($record->end_date?->format('m/Y') ?? __('admin.labels.ongoing'))),
+                    ->state(fn (Project $record): string => $record->start_date->format('m/Y').' - '.($record->end_date?->format('m/Y') ?? __('admin.labels.ongoing'))),
                 ToggleColumn::make('is_featured')->label(__('admin.fields.is_featured'))->toggleable(),
                 ToggleColumn::make('is_visible')->label(__('admin.fields.is_visible')),
                 Columns::missingTranslations(),

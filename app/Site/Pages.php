@@ -55,7 +55,7 @@ final class Pages
         $title = (string) $project->t('title', $locale);
 
         $page = new Page(
-            title: ($project->t('seo_title', $locale) ?? $title).' — '.$this->cv->profile()->full_name,
+            title: ($project->t('seo_title', $locale) ?? $title).' - '.$this->cv->profile()->full_name,
             description: $project->t('seo_description', $locale)
                 ?? $this->excerpt($project->t('summary', $locale) ?? $project->t('details', $locale)),
             canonical: url((string) $this->urls->projectPath($project, $locale)),
@@ -75,11 +75,11 @@ final class Pages
     public function experience(Experience $experience, string $locale): Page
     {
         $role = (string) $experience->t('role', $locale);
-        $heading = $experience->organization !== null ? $role.' — '.$experience->organization->name : $role;
+        $heading = $experience->organization !== null ? $role.' - '.$experience->organization->name : $role;
         $section = $experience->kind === ExperienceKind::Volunteering ? PageSectionKey::Volunteering : PageSectionKey::Experience;
 
         $page = new Page(
-            title: ($experience->t('seo_title', $locale) ?? $heading).' — '.$this->cv->profile()->full_name,
+            title: ($experience->t('seo_title', $locale) ?? $heading).' - '.$this->cv->profile()->full_name,
             description: $experience->t('seo_description', $locale)
                 ?? $this->excerpt($experience->t('summary', $locale) ?? $experience->t('details', $locale)),
             canonical: url((string) $this->urls->experiencePath($experience, $locale)),
@@ -107,7 +107,7 @@ final class Pages
         $path = $this->urls->blogPath($locale);
 
         $page = new Page(
-            title: $title.($pageNumber > 1 ? ' · '.__('site.blog.page', ['page' => $pageNumber]) : '').' — '.$name,
+            title: $title.($pageNumber > 1 ? ' - '.__('site.blog.page', ['page' => $pageNumber]) : '').' - '.$name,
             description: (string) __('site.blog.description', ['name' => $name]),
             canonical: url($path).($pageNumber > 1 ? '?page='.$pageNumber : ''),
             // Le pagine successive alla prima non hanno versioni in altre lingue
@@ -132,7 +132,7 @@ final class Pages
         $title = (string) $article->t('title', $locale);
 
         $page = new Page(
-            title: $title.' — '.$name,
+            title: $title.' - '.$name,
             description: $article->t('excerpt', $locale) ?? $this->excerpt($article->t('body', $locale)),
             canonical: url((string) $this->urls->articlePath($article, $locale)),
             alternates: $this->urls->alternates(fn (string $code): ?string => $this->urls->articlePath($article, $code)),
@@ -155,7 +155,7 @@ final class Pages
     public function maintenance(): Page
     {
         return new Page(
-            title: __('site.errors.maintenance_title').' — '.$this->cv->profile()->full_name,
+            title: __('site.errors.maintenance_title').' - '.$this->cv->profile()->full_name,
             robots: 'noindex',
         );
     }
@@ -163,7 +163,7 @@ final class Pages
     public function notFound(): Page
     {
         return new Page(
-            title: __('site.errors.not_found_title').' — '.$this->cv->profile()->full_name,
+            title: __('site.errors.not_found_title').' - '.$this->cv->profile()->full_name,
             robots: 'noindex',
         );
     }
@@ -185,7 +185,7 @@ final class Pages
         $profile = $this->cv->profile();
         $headline = $profile->headlineList($locale)[0] ?? null;
 
-        return $headline !== null ? $profile->full_name.' — '.$headline : $profile->full_name;
+        return $headline !== null ? $profile->full_name.' - '.$headline : $profile->full_name;
     }
 
     /**

@@ -60,7 +60,7 @@ final class RichText
         $text = html_entity_decode(strip_tags($text), ENT_QUOTES | ENT_HTML5, 'UTF-8');
         $text = trim((string) preg_replace('/\s+/u', ' ', $text));
 
-        return $limit > 0 ? Str::limit($text, $limit, '…', preserveWords: true) : $text;
+        return $limit > 0 ? Str::limit($text, $limit, '...', preserveWords: true) : $text;
     }
 
     public function hasText(?string $html): bool

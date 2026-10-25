@@ -9,6 +9,7 @@ use App\Filament\Resources\Experiences\ExperienceResource;
 use App\Filament\Resources\Volunteering\VolunteeringResource;
 use App\Models\Article;
 use App\Models\Experience;
+use App\Models\Language;
 use App\Models\Project;
 use App\Site\SiteUrls;
 use App\Support\Languages\Locales;
@@ -54,6 +55,22 @@ class SiteActions
                 $resource = $record->kind === ExperienceKind::Work ? ExperienceResource::class : VolunteeringResource::class;
                 $action->redirect($resource::getUrl('edit', ['record' => $record]));
             });
+    }
+
+    /**
+     * Home del sito per il pulsante "Vai al sito" della barra in alto: nella lingua dell'admin se è attiva sul sito
+     * ("it" → it-IT), altrimenti nella lingua di default.
+     */
+    public static function homeUrl(): string
+    {
+        $locales = app(Locales::class);
+        $admin = strtolower((string) config('resume.admin_locale', 'it'));
+
+        $match = $locales->activeLanguages()
+            ->map(fn (Language $language): string => $language->code)
+            ->first(fn (string $code): bool => strcasecmp($code, $admin) === 0 || str_starts_with(strtolower($code), $admin.'-'));
+
+        return url(app(SiteUrls::class)->homePath($match ?? $locales->default()));
     }
 
     public static function url(Model $record): ?string

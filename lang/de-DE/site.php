@@ -90,12 +90,12 @@ return [
         'comprehension' => 'Verstehen',
         'cefr' => 'Gemeinsamer Europäischer Referenzrahmen (GER)',
         'levels' => [
-            'A1' => 'A1 – Anfänger',
-            'A2' => 'A2 – Grundlegende Kenntnisse',
-            'B1' => 'B1 – Fortgeschrittene Sprachverwendung',
-            'B2' => 'B2 – Selbstständige Sprachverwendung',
-            'C1' => 'C1 – Fachkundige Sprachkenntnisse',
-            'C2' => 'C2 – Annähernd muttersprachliche Kenntnisse',
+            'A1' => 'A1 - Anfänger',
+            'A2' => 'A2 - Grundlegende Kenntnisse',
+            'B1' => 'B1 - Fortgeschrittene Sprachverwendung',
+            'B2' => 'B2 - Selbstständige Sprachverwendung',
+            'C1' => 'C1 - Fachkundige Sprachkenntnisse',
+            'C2' => 'C2 - Annähernd muttersprachliche Kenntnisse',
         ],
     ],
 

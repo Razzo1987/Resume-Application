@@ -34,5 +34,5 @@ it('treats empty editor content as missing', function () {
 
 it('extracts plain text for descriptions', function () {
     expect(app(RichText::class)->plain('<p>Uno</p><p>Due &amp; tre</p><ul><li>quattro</li></ul>'))->toBe('Uno Due & tre quattro')
-        ->and(app(RichText::class)->plain('<p>'.str_repeat('parola ', 50).'</p>', 30))->toBe('parola parola parola parola…');
+        ->and(app(RichText::class)->plain('<p>'.str_repeat('parola ', 50).'</p>', 30))->toBe('parola parola parola parola...');
 });

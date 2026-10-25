@@ -52,7 +52,7 @@ If your hosting lets you keep files outside the web root, you can move `core/` t
 Then, in the admin area:
 
 - user menu → *Profile*: turn on two-factor authentication;
-- *Settings* → choose the theme, the CV file name and the other options;
+- *Themes* → choose the theme; *Settings* → the CV file name and the other options;
 - fill in *Profile* and the CV sections, upload the CV PDF of each language.
 
 ### Safety checks done by the installer

@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\PageSections;
 
+use App\Enums\PageSectionKey;
 use App\Filament\Resources\PageSections\Pages\ManagePageSections;
 use App\Filament\Support\HasAdminLabels;
 use App\Filament\Support\Translatable;
@@ -53,7 +54,9 @@ class PageSectionResource extends Resource
         return $schema->components([
             Grid::make(2)->schema([
                 Toggle::make('is_enabled')->label(__('admin.fields.is_enabled')),
-                Toggle::make('in_menu')->label(__('admin.fields.in_menu')),
+                Toggle::make('in_menu')
+                    ->label(__('admin.fields.in_menu'))
+                    ->helperText(fn (?PageSection $record): ?string => $record?->key === PageSectionKey::LatestArticles ? __('admin.help.blog_menu') : null),
             ]),
             Translatable::tabs(fn (string $locale): array => [
                 TextInput::make("title.{$locale}")
@@ -77,7 +80,9 @@ class PageSectionResource extends Resource
                     ->label(__('admin.fields.section_title'))
                     ->state(fn (PageSection $record): string => $record->displayTitle(app(Locales::class)->default())),
                 ToggleColumn::make('is_enabled')->label(__('admin.fields.is_enabled')),
-                ToggleColumn::make('in_menu')->label(__('admin.fields.in_menu')),
+                ToggleColumn::make('in_menu')
+                    ->label(__('admin.fields.in_menu'))
+                    ->tooltip(fn (PageSection $record): ?string => $record->key === PageSectionKey::LatestArticles ? __('admin.help.blog_menu') : null),
             ])
             ->recordActions([EditAction::make()]);
     }

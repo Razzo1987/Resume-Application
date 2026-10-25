@@ -33,7 +33,13 @@ class Backup
 
         $directory = $this->directory();
         File::ensureDirectoryExists($directory);
-        $path = $directory.'/resume-backup-'.now()->format('Ymd-His').'.zip';
+        $name = 'resume-backup-'.now()->format('Ymd-His');
+        $path = "{$directory}/{$name}.zip";
+
+        // Due esportazioni nello stesso secondo (es. la copia di sicurezza prima di importare) non si sovrascrivono
+        for ($copy = 2; file_exists($path); $copy++) {
+            $path = "{$directory}/{$name}-{$copy}.zip";
+        }
 
         $zip = new ZipArchive;
 
@@ -136,7 +142,7 @@ class Backup
 
             /** @var array<string, list<array<string, mixed>>> $tables */
             $tables = $data['tables'];
-            $this->checkSchema($tables['migrations'] ?? []);
+            $notExported = $this->checkSchema($tables['migrations'] ?? []);
 
             // Percorsi dei file: solo uploads/… e cv/…, senza risalite
             $files = [];
@@ -163,7 +169,7 @@ class Backup
             Schema::disableForeignKeyConstraints();
 
             try {
-                DB::transaction(function () use ($tables, $current, &$rows): void {
+                DB::transaction(function () use ($tables, $current, $notExported, &$rows): void {
                     foreach ($tables as $table => $records) {
                         if ($table === 'migrations' || in_array($table, self::SKIP, true) || ! in_array($table, $current, true)) {
                             continue;
@@ -180,6 +186,8 @@ class Backup
                             $rows += count($chunk);
                         }
                     }
+
+                    $this->replay($notExported);
                 });
             } finally {
                 Schema::enableForeignKeyConstraints();
@@ -220,16 +228,44 @@ class Backup
 
     /**
      * Un'esportazione fatta con una versione più recente (migrazioni sconosciute) non si importa.
+     * Restituisce le migrazioni eseguite qui ma non ancora quando è stata fatta l'esportazione.
      *
      * @param  mixed  $migrations  righe della tabella migrations nell'esportazione
+     * @return list<string>
      */
-    private function checkSchema(mixed $migrations): void
+    private function checkSchema(mixed $migrations): array
     {
         $known = DB::table('migrations')->pluck('migration')->all();
         $incoming = array_column(is_array($migrations) ? $migrations : [], 'migration');
 
         if (array_diff($incoming, $known) !== []) {
             throw new RuntimeException((string) __('admin.system.restore_errors.newer'));
+        }
+
+        // Senza elenco delle migrazioni non si sa da che versione venga: non si ripete niente
+        return $incoming === [] ? [] : array_values(array_diff($known, $incoming));
+    }
+
+    /**
+     * Ripete sui contenuti importati le migrazioni di dati che l'esportazione non aveva ancora (es. la voce "Blog"
+     * del menu nella 2.0.2): senza, importare un'esportazione più vecchia annullerebbe quelle modifiche.
+     *
+     * @param  list<string>  $migrations
+     */
+    private function replay(array $migrations): void
+    {
+        foreach ($migrations as $name) {
+            $path = database_path("migrations/{$name}.php");
+
+            if (! is_file($path)) {
+                continue;
+            }
+
+            $migration = require $path;
+
+            if ($migration instanceof ReplaysOnImport) {
+                $migration->replay();
+            }
         }
     }
 }

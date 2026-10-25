@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Site;
 
+use App\Enums\PageSectionKey;
 use App\Models\Language;
 use App\Models\PageSection;
 use App\Models\SocialLink;
@@ -51,18 +52,21 @@ final class LayoutFactory
         $updated = $this->settings->bool('footer.show_last_updated') ? $this->lastUpdated->date() : null;
         $hasBlog = $this->blog->hasArticles($locale);
 
-        $menu = $this->cv->menu()->map(fn (PageSection $section): array => [
-            'key' => $section->key->value,
-            'title' => $section->displayTitle($locale),
-            // Nella pagina CV basta l'ancora; dalle altre pagine si torna al CV
-            'url' => $page->isCv ? '#'.$section->key->value : url($this->urls->sectionPath($locale, $section->key->value)),
-            'current' => $page->section === $section->key->value,
-        ])->values()->all();
-
-        // Il blog ha una pagina sua: voce di menu se ci sono articoli in questa lingua
-        if ($hasBlog) {
-            $menu[] = ['key' => 'blog', 'title' => (string) __('site.sections.blog'), 'url' => url($this->urls->blogPath($locale)), 'current' => $page->section === 'blog'];
-        }
+        $menu = $this->cv->menu()->map(fn (PageSection $section): array => $section->key === PageSectionKey::LatestArticles
+            // Il blog ha una pagina sua: la voce porta sempre lì, anche dal CV
+            ? [
+                'key' => 'blog',
+                'title' => $section->displayTitle($locale),
+                'url' => url($this->urls->blogPath($locale)),
+                'current' => $page->section === 'blog',
+            ]
+            : [
+                'key' => $section->key->value,
+                'title' => $section->displayTitle($locale),
+                // Nella pagina CV basta l'ancora; dalle altre pagine si torna al CV
+                'url' => $page->isCv ? '#'.$section->key->value : url($this->urls->sectionPath($locale, $section->key->value)),
+                'current' => $page->section === $section->key->value,
+            ])->values()->all();
 
         return new Layout(
             locale: $locale,

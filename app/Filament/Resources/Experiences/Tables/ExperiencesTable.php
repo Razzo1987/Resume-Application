@@ -24,7 +24,7 @@ class ExperiencesTable
                 TextColumn::make('organization.name')->label(__('admin.fields.organization'))->searchable(),
                 TextColumn::make('period')
                     ->label(__('admin.fields.period'))
-                    ->state(fn (Experience $record): string => $record->start_date->format('m/Y').' – '.($record->end_date?->format('m/Y') ?? __('admin.labels.ongoing'))),
+                    ->state(fn (Experience $record): string => $record->start_date->format('m/Y').' - '.($record->end_date?->format('m/Y') ?? __('admin.labels.ongoing'))),
                 ToggleColumn::make('is_visible')->label(__('admin.fields.is_visible')),
                 Columns::missingTranslations(),
             ])

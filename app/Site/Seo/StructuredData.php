@@ -169,7 +169,7 @@ final class StructuredData
                 self::clean([
                     '@type' => 'BlogPosting',
                     '@id' => $page->canonical.'#article',
-                    'headline' => mb_strlen($title) > 110 ? mb_substr($title, 0, 109).'…' : $title,
+                    'headline' => mb_strlen($title) > 110 ? mb_substr($title, 0, 107).'...' : $title,
                     'description' => $page->description,
                     'url' => $page->canonical,
                     'mainEntityOfPage' => $page->canonical,

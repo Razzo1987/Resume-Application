@@ -91,6 +91,27 @@ class Settings
         return null;
     }
 
+    /**
+     * Testi delle impostazioni scritti in almeno una lingua ma mancanti in quella indicata.
+     *
+     * @return list<string> chiavi, es. "seo.title"
+     */
+    public function missingTranslations(string $locale): array
+    {
+        $missing = [];
+
+        foreach (self::TRANSLATABLE as $key) {
+            $values = $this->get($key, []);
+            $filled = is_array($values) ? array_filter($values, fn (mixed $value): bool => is_string($value) && trim($value) !== '') : [];
+
+            if ($filled !== [] && ! isset($filled[$locale])) {
+                $missing[] = $key;
+            }
+        }
+
+        return $missing;
+    }
+
     public function set(string $key, mixed $value): void
     {
         $this->setMany([$key => $value]);

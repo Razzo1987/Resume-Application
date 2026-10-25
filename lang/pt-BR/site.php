@@ -90,12 +90,12 @@ return [
         'comprehension' => 'Compreensão',
         'cefr' => 'Quadro Europeu Comum de Referência (QECR)',
         'levels' => [
-            'A1' => 'A1 – Iniciante',
-            'A2' => 'A2 – Básico',
-            'B1' => 'B1 – Intermediário',
-            'B2' => 'B2 – Intermediário superior',
-            'C1' => 'C1 – Avançado',
-            'C2' => 'C2 – Proficiente',
+            'A1' => 'A1 - Iniciante',
+            'A2' => 'A2 - Básico',
+            'B1' => 'B1 - Intermediário',
+            'B2' => 'B2 - Intermediário superior',
+            'C1' => 'C1 - Avançado',
+            'C2' => 'C2 - Proficiente',
         ],
     ],
 

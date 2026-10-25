@@ -4,6 +4,7 @@ namespace App\Filament\Resources\LanguageSkills;
 
 use App\Enums\CefrLevel;
 use App\Filament\Resources\LanguageSkills\Pages\ManageLanguageSkills;
+use App\Filament\Support\Columns;
 use App\Filament\Support\Fields;
 use App\Filament\Support\HasAdminLabels;
 use App\Filament\Support\Translatable;
@@ -84,6 +85,7 @@ class LanguageSkillResource extends Resource
                 TextColumn::make('oral')->label(__('admin.fields.oral'))->badge(),
                 TextColumn::make('written')->label(__('admin.fields.written'))->badge(),
                 TextColumn::make('comprehension')->label(__('admin.fields.comprehension'))->badge()->toggleable(),
+                Columns::missingTranslations(),
                 ToggleColumn::make('is_visible')->label(__('admin.fields.is_visible')),
             ])
             ->recordActions([EditAction::make(), DeleteAction::make()]);

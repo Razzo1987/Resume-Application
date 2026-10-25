@@ -243,6 +243,8 @@
 .site-main,
 .site-footer {
     max-width: 54rem;
+    // Sugli schermi larghi il contenuto sta al centro dello spazio a destra della barra laterale
+    margin-inline: auto;
 }
 
 .site-main:focus {

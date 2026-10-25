@@ -74,11 +74,23 @@ final class CvData
     /**
      * Voci del menu: sezioni attive, non vuote e segnate "nel menu".
      *
+     * Il blog ha una sola voce, che porta alla sua pagina: la decide la sezione "Ultimi articoli" (nel menu sì o no,
+     * posizione, titolo), anche quando la sezione non è mostrata nel CV, purché ci siano articoli in questa lingua.
+     *
      * @return BaseCollection<int, PageSection>
      */
     public function menu(): BaseCollection
     {
-        return $this->sections()->filter(fn (PageSection $section): bool => $section->in_menu)->values();
+        return $this->remember('menu', function (): BaseCollection {
+            $items = $this->sections()->filter(fn (PageSection $section): bool => $section->in_menu && $section->key !== PageSectionKey::LatestArticles);
+            $blog = $this->allSections()->get(PageSectionKey::LatestArticles->value);
+
+            if ($blog instanceof PageSection && $blog->in_menu && $this->hasContent(PageSectionKey::LatestArticles)) {
+                $items->push($blog);
+            }
+
+            return $items->sortBy(fn (PageSection $section): array => [$section->sort_order, $section->id])->values();
+        });
     }
 
     /**
@@ -86,10 +98,19 @@ final class CvData
      */
     public function sectionTitle(PageSectionKey $key): string
     {
-        $sections = $this->remember('allSections', fn (): Collection => PageSection::query()->get()->keyBy(fn (PageSection $section): string => $section->key->value));
-        $section = $sections->get($key->value);
+        $section = $this->allSections()->get($key->value);
 
         return $section instanceof PageSection ? $section->displayTitle() : (string) __($key->siteStringKey());
+    }
+
+    /**
+     * Tutte le sezioni, anche quelle spente, per chiave.
+     *
+     * @return Collection<string, PageSection>
+     */
+    private function allSections(): Collection
+    {
+        return $this->remember('allSections', fn (): Collection => PageSection::query()->get()->keyBy(fn (PageSection $section): string => $section->key->value));
     }
 
     public function hasContent(PageSectionKey $key): bool

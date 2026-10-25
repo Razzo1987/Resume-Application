@@ -93,12 +93,12 @@ it('formats dates, durations and key figures in the page language', function () 
     Carbon::setTestNow('2026-10-25');
 
     $this->get('/it-IT')
-        ->assertSee('gen 2021 – in corso')
+        ->assertSee('gen 2021 - in corso')
         ->assertSee('5 anni e 10 mesi')
         ->assertSee('460+');
 
     $this->get('/en-GB')
-        ->assertSee('Jan 2021 – present')
+        ->assertSee('Jan 2021 - present')
         ->assertSee('5 years and 10 months')
         ->assertSee('data quality rules migrated');
 });

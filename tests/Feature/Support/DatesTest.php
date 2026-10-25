@@ -12,9 +12,9 @@ it('formats periods in the current language', function (string $locale, string $
     expect($dates->period(Carbon::parse('2019-03-01'), Carbon::parse('2020-12-31')))->toBe($closed)
         ->and($dates->period(Carbon::parse('2021-01-01'), null))->toBe($open);
 })->with([
-    ['it-IT', 'mar 2019 – dic 2020', 'gen 2021 – in corso'],
-    ['en-GB', 'Mar 2019 – Dec 2020', 'Jan 2021 – present'],
-    ['de-DE', 'Mär 2019 – Dez 2020', 'Jan 2021 – heute'],
+    ['it-IT', 'mar 2019 - dic 2020', 'gen 2021 - in corso'],
+    ['en-GB', 'Mar 2019 - Dec 2020', 'Jan 2021 - present'],
+    ['de-DE', 'Mär 2019 - Dez 2020', 'Jan 2021 - heute'],
 ]);
 
 it('counts durations including the first and last month', function () {

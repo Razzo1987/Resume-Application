@@ -90,12 +90,12 @@ return [
         'comprehension' => 'Compréhension',
         'cefr' => 'Cadre européen commun de référence (CECRL)',
         'levels' => [
-            'A1' => 'A1 – Débutant',
-            'A2' => 'A2 – Élémentaire',
-            'B1' => 'B1 – Intermédiaire',
-            'B2' => 'B2 – Intermédiaire avancé',
-            'C1' => 'C1 – Avancé',
-            'C2' => 'C2 – Maîtrise',
+            'A1' => 'A1 - Débutant',
+            'A2' => 'A2 - Élémentaire',
+            'B1' => 'B1 - Intermédiaire',
+            'B2' => 'B2 - Intermédiaire avancé',
+            'C1' => 'C1 - Avancé',
+            'C2' => 'C2 - Maîtrise',
         ],
     ],
 

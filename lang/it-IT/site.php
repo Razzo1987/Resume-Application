@@ -89,12 +89,12 @@ return [
         'comprehension' => 'Comprensione',
         'cefr' => 'Quadro comune europeo di riferimento (QCER)',
         'levels' => [
-            'A1' => 'A1 – Base',
-            'A2' => 'A2 – Elementare',
-            'B1' => 'B1 – Intermedio',
-            'B2' => 'B2 – Intermedio superiore',
-            'C1' => 'C1 – Avanzato',
-            'C2' => 'C2 – Padronanza',
+            'A1' => 'A1 - Base',
+            'A2' => 'A2 - Elementare',
+            'B1' => 'B1 - Intermedio',
+            'B2' => 'B2 - Intermedio superiore',
+            'C1' => 'C1 - Avanzato',
+            'C2' => 'C2 - Padronanza',
         ],
     ],
 

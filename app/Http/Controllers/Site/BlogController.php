@@ -60,7 +60,7 @@ class BlogController extends Controller
         $name = $cv->profile()->full_name;
 
         $xml = view('feed', [
-            'title' => __('site.sections.blog').' — '.$name,
+            'title' => __('site.sections.blog').' - '.$name,
             'description' => __('site.blog.description', ['name' => $name]),
             'locale' => $locale,
             'link' => url($this->urls->blogPath($locale)),

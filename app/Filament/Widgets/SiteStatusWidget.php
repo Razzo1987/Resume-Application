@@ -2,6 +2,7 @@
 
 namespace App\Filament\Widgets;
 
+use App\Filament\Pages\Translations;
 use App\Models\CvDocument;
 use App\Models\Experience;
 use App\Models\Project;
@@ -42,7 +43,10 @@ class SiteStatusWidget extends StatsOverviewWidget
         foreach (app(TranslationReport::class)->missingByLocale() as $locale => $missing) {
             $stats[] = Stat::make(__('admin.widgets.translations', ['language' => $locale]), $missing === 0 ? '✓' : (string) $missing)
                 ->description($missing === 0 ? __('admin.widgets.translations_complete') : __('admin.widgets.translations_missing'))
-                ->color($missing === 0 ? 'success' : 'warning');
+                ->descriptionIcon($missing === 0 ? null : 'heroicon-m-arrow-right')
+                ->color($missing === 0 ? 'success' : 'warning')
+                // Elenco di cosa manca, con il link per modificarlo
+                ->url(Translations::getUrl(['locale' => $locale]));
         }
 
         return $stats;

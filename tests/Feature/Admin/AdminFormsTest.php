@@ -3,6 +3,7 @@
 use App\Enums\ExperienceKind;
 use App\Filament\Pages\ManageProfile;
 use App\Filament\Pages\ManageSettings;
+use App\Filament\Pages\ManageThemes;
 use App\Filament\Resources\CvDocuments\Pages\CreateCvDocument;
 use App\Filament\Resources\Experiences\Pages\CreateExperience;
 use App\Filament\Resources\Experiences\Pages\EditExperience;
@@ -164,6 +165,19 @@ it('saves the settings, dropping empty translations', function () {
         ->and($settings->bool('jsonld.include_phone'))->toBeFalse()
         ->and($settings->get('seo.title'))->toBe(['it-IT' => 'Il mio CV'])
         ->and($settings->translated('seo.title', 'en-GB'))->toBe('Il mio CV');
+});
+
+it('shows the active theme in the settings, chosen only from the themes page', function () {
+    app(Settings::class)->set('site.theme', 'base');
+
+    Livewire::test(ManageSettings::class)
+        ->assertSee(__('admin.help.theme_on_themes_page'))
+        ->assertSeeHtml('href="'.e(ManageThemes::getUrl()).'"')
+        ->fillForm(['cv' => ['filename_pattern' => 'CV {name}.pdf']])
+        ->call('save')
+        ->assertHasNoFormErrors();
+
+    expect(app(Settings::class)->get('site.theme'))->toBe('base');
 });
 
 it('saves the profile data', function () {

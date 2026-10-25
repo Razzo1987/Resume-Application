@@ -90,12 +90,12 @@ return [
         'comprehension' => 'Begrijpen',
         'cefr' => 'Europees Referentiekader (ERK)',
         'levels' => [
-            'A1' => 'A1 – Beginner',
-            'A2' => 'A2 – Elementair',
-            'B1' => 'B1 – Gemiddeld',
-            'B2' => 'B2 – Hoger gemiddeld',
-            'C1' => 'C1 – Gevorderd',
-            'C2' => 'C2 – Zeer gevorderd',
+            'A1' => 'A1 - Beginner',
+            'A2' => 'A2 - Elementair',
+            'B1' => 'B1 - Gemiddeld',
+            'B2' => 'B2 - Hoger gemiddeld',
+            'C1' => 'C1 - Gevorderd',
+            'C2' => 'C2 - Zeer gevorderd',
         ],
     ],
 
@@ -138,7 +138,7 @@ return [
 
     'footer' => [
         'last_updated' => 'Cv bijgewerkt op :date',
-        'images_owners' => 'Afbeeldingen en logo’s zijn eigendom van hun respectieve eigenaren.',
+        'images_owners' => 'Afbeeldingen en logo\'s zijn eigendom van hun respectieve eigenaren.',
         'made_with' => 'Gemaakt met Resume App',
     ],
 

@@ -2,6 +2,7 @@
 
 use App\Filament\Pages\ManageSystem;
 use App\Models\Experience;
+use App\Models\PageSection;
 use App\Models\Profile;
 use App\Models\User;
 use App\Support\Settings\Settings;
@@ -146,6 +147,34 @@ it('restores an export, keeping users and the installed version', function () {
 
     @unlink($export);
     @unlink(storage_path('app/private/backups/'.$result['backup']));
+});
+
+it('repeats on an older export the data changes of the migrations it did not have', function () {
+    $export = app(Backup::class)->create();
+
+    // Esportazione "di una 2.0.1": senza la migrazione della voce Blog, con la sezione fuori dal menu
+    $zip = new ZipArchive;
+    $zip->open($export);
+    $data = json_decode((string) $zip->getFromName('database.json'), true);
+    $data['tables']['migrations'] = array_values(array_filter($data['tables']['migrations'], fn (array $row): bool => $row['migration'] !== '2026_10_26_000100_blog_menu_entry'));
+    $data['tables']['page_sections'] = array_map(fn (array $row): array => $row['key'] === 'latest_articles' ? ['in_menu' => 0] + $row : $row, $data['tables']['page_sections']);
+    $zip->addFromString('database.json', (string) json_encode($data));
+    $zip->close();
+
+    $result = app(Backup::class)->restore($export);
+
+    expect(PageSection::query()->where('key', 'latest_articles')->value('in_menu'))->toBeTruthy();
+
+    // Un'esportazione della stessa versione resta com'è
+    PageSection::query()->where('key', 'latest_articles')->first()->update(['in_menu' => false]);
+    $current = app(Backup::class)->create();
+    $second = app(Backup::class)->restore($current);
+
+    expect(PageSection::query()->where('key', 'latest_articles')->value('in_menu'))->toBeFalsy();
+
+    foreach ([$export, $current, storage_path('app/private/backups/'.$result['backup']), storage_path('app/private/backups/'.$second['backup'])] as $file) {
+        @unlink($file);
+    }
 });
 
 it('refuses exports that are not valid or come from a newer version', function (array $entries) {

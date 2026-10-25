@@ -1,6 +1,8 @@
 <?php
 
+use App\Models\Language;
 use App\Models\User;
+use App\Support\Languages\Locales;
 use Database\Seeders\DatabaseSeeder;
 use Database\Seeders\DemoSeeder;
 use Filament\Facades\Filament;
@@ -43,7 +45,7 @@ it('opens the list, create and edit pages', function (string $resource) {
 
 it('opens the dashboard, the profile and the settings pages', function (string $path) {
     $this->get('/admin'.$path)->assertOk();
-})->with(['', '/profile-data', '/settings', '/system', '/themes']);
+})->with(['', '/profile-data', '/settings', '/system', '/themes', '/translations']);
 
 it('shows the admin in English when configured', function () {
     config(['resume.admin_locale' => 'en']);
@@ -52,3 +54,19 @@ it('shows the admin in English when configured', function () {
         ->assertOk()
         ->assertSee('Settings');
 });
+
+it('links the public site from the top bar, in the admin language when the site has it', function (string $adminLocale, bool $englishActive, string $path, string $label) {
+    config(['resume.admin_locale' => $adminLocale]);
+    Language::query()->where('code', 'en-GB')->update(['is_active' => $englishActive]);
+    app(Locales::class)->flush();
+
+    $this->get('/admin')
+        ->assertOk()
+        ->assertSeeHtml('href="'.url($path).'"')
+        ->assertSeeHtml('target="_blank"')
+        ->assertSee($label);
+})->with([
+    'admin in italiano' => ['it', true, '/it-IT', 'Vai al sito'],
+    'admin in inglese' => ['en', true, '/en-GB', 'Go to site'],
+    'inglese non attivo sul sito' => ['en', false, '/it-IT', 'Go to site'],
+]);

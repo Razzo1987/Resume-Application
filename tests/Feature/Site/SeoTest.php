@@ -35,7 +35,7 @@ it('omits inactive languages from hreflang and the language switcher', function 
 });
 
 it('uses the SEO title and description from the settings, with a default', function () {
-    $this->get('/it-IT')->assertSee('<title>John Doe — Data Governance</title>', escape: false);
+    $this->get('/it-IT')->assertSee('<title>John Doe - Data Governance</title>', escape: false);
 
     app(Settings::class)->setMany([
         'seo.title' => ['it-IT' => 'John Doe | Consulente dati'],

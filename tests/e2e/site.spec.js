@@ -66,6 +66,26 @@ test.describe('CV', () => {
         }
     });
 
+    test('has a single blog item in the menu, pointing to the blog page', async ({ page }) => {
+        await page.goto('/it-IT');
+
+        await expect(page.locator('.site-nav a[href$="/it-IT/blog"]')).toHaveCount(1);
+        await expect(page.locator('.site-nav a[href="#latest_articles"]')).toHaveCount(0);
+    });
+
+    test('centres the content on wide screens', async ({ page, isMobile }) => {
+        test.skip(isMobile, 'solo schermi larghi');
+        await page.setViewportSize({ width: 1920, height: 1080 });
+        await page.goto('/it-IT');
+
+        const body = await page.locator('.site-body').boundingBox();
+        const main = await page.locator('.site-main').boundingBox();
+        const left = main.x - body.x;
+        const right = body.x + body.width - (main.x + main.width);
+
+        expect(Math.abs(left - right)).toBeLessThan(4);
+    });
+
     test('shows the back-to-top button after scrolling', async ({ page }) => {
         await page.goto('/it-IT');
 

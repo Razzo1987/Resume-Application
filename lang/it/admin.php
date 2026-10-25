@@ -36,6 +36,7 @@ return [
     'pages' => [
         'profile' => ['title' => 'Profilo'],
         'system' => ['title' => 'Sistema'],
+        'translations' => ['title' => 'Traduzioni'],
         'themes' => ['title' => 'Temi'],
         'settings' => ['title' => 'Impostazioni'],
     ],
@@ -180,6 +181,8 @@ return [
     ],
 
     'help' => [
+        'theme_on_themes_page' => 'Si cambia dalla pagina Temi',
+        'blog_menu' => 'Per questa sezione la voce del menu porta sempre alla pagina del blog, anche se la sezione è spenta nel CV; compare solo se ci sono articoli pubblicati in quella lingua.',
         'og_image' => 'Mostrata quando il CV viene condiviso sui social (Open Graph). Consigliata 1200×630; salvata in JPG. Se manca si usa la foto del profilo.',
         'site_icon' => 'Quadrata, almeno 512×512 (PNG con trasparenza). Usata nella scheda del browser e quando il sito viene aggiunto alla schermata Home.',
         'is_visible' => 'Se spento, l\'elemento resta qui ma non compare sul sito.',
@@ -235,7 +238,6 @@ return [
         'pack_custom' => 'personalizzata',
         'redirect_301' => '301 · permanente',
         'redirect_302' => '302 · temporaneo',
-        'theme_from_config' => 'Da configurazione (:theme)',
     ],
 
     'actions' => [
@@ -245,6 +247,8 @@ return [
         'save' => 'Salva',
         'download' => 'Scarica',
         'make_current' => 'Rendi corrente',
+        'go_to_site' => 'Vai al sito',
+        'go_to_site_help' => 'Apre il sito pubblico in una nuova scheda',
     ],
 
     'themes' => [
@@ -363,6 +367,16 @@ return [
         'default_language_changed' => 'Lingua di default cambiata in :language',
     ],
 
+    'translations' => [
+        'language' => 'Lingua',
+        'intro' => 'Contenuti scritti in un\'altra lingua ma ancora vuoti in questa. Sul sito al loro posto compare il testo della lingua principale.',
+        'complete' => 'Tutto tradotto',
+        'complete_help' => 'In questa lingua non manca nessun testo.',
+        'items' => '{1} :count contenuto da completare|[2,*] :count contenuti da completare',
+        'edit' => 'Modifica',
+        'settings_texts' => 'Testi del sito (SEO e footer)',
+    ],
+
     'widgets' => [
         'version' => 'Versione',
         'content' => 'Esperienze e progetti',
@@ -371,7 +385,7 @@ return [
         'cv_documents_description' => 'Lingue attive con un CV caricato',
         'translations' => 'Traduzioni :language',
         'translations_complete' => 'Tutto tradotto',
-        'translations_missing' => 'Contenuti da completare',
+        'translations_missing' => 'Contenuti da completare: vedi l\'elenco',
     ],
 
     'enums' => [

@@ -24,7 +24,7 @@ class EducationTable
                 TextColumn::make('organization.name')->label(__('admin.fields.institution'))->searchable(),
                 TextColumn::make('period')
                     ->label(__('admin.fields.period'))
-                    ->state(fn (Education $record): string => ($record->start_date?->format('m/Y') ?? '…').' – '.($record->end_date?->format('m/Y') ?? __('admin.labels.ongoing'))),
+                    ->state(fn (Education $record): string => ($record->start_date?->format('m/Y') ?? '...').' - '.($record->end_date?->format('m/Y') ?? __('admin.labels.ongoing'))),
                 TextColumn::make('grade')
                     ->label(__('admin.fields.grade'))
                     ->state(fn (Education $record): ?string => $record->grade === null ? null : $record->grade.($record->grade_scale ? '/'.$record->grade_scale : '').($record->cum_laude ? ' L' : '')),

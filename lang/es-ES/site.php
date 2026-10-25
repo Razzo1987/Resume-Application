@@ -90,12 +90,12 @@ return [
         'comprehension' => 'Comprensión',
         'cefr' => 'Marco Común Europeo de Referencia (MCER)',
         'levels' => [
-            'A1' => 'A1 – Acceso',
-            'A2' => 'A2 – Plataforma',
-            'B1' => 'B1 – Umbral',
-            'B2' => 'B2 – Avanzado',
-            'C1' => 'C1 – Dominio operativo eficaz',
-            'C2' => 'C2 – Maestría',
+            'A1' => 'A1 - Acceso',
+            'A2' => 'A2 - Plataforma',
+            'B1' => 'B1 - Umbral',
+            'B2' => 'B2 - Avanzado',
+            'C1' => 'C1 - Dominio operativo eficaz',
+            'C2' => 'C2 - Maestría',
         ],
     ],
 

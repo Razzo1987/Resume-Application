@@ -8,10 +8,10 @@ use App\Support\Settings\Settings;
 use App\Themes\ThemeManager;
 use BackedEnum;
 use Filament\Actions\Action;
-use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
+use Filament\Infolists\Components\TextEntry;
 use Filament\Notifications\Notification;
 use Filament\Pages\Page;
 use Filament\Schemas\Components\Actions;
@@ -68,10 +68,14 @@ class ManageSettings extends Page
             ->components([
                 Section::make(__('admin.sections.appearance'))
                     ->schema([
-                        Select::make('site.theme')
+                        // Il tema si sceglie solo nella pagina Temi (versioni, anteprima delle informazioni, Attiva)
+                        TextEntry::make('active_theme')
                             ->label(__('admin.fields.theme'))
-                            ->options(fn (): array => $themes->installed())
-                            ->placeholder(__('admin.labels.theme_from_config', ['theme' => config('resume.themes.active')])),
+                            ->state(fn (): string => $themes->active()->title)
+                            ->url(fn (): string => ManageThemes::getUrl())
+                            ->color('primary')
+                            ->icon(Heroicon::OutlinedSwatch)
+                            ->hint(__('admin.help.theme_on_themes_page')),
                         Toggle::make('print.enabled')->label(__('admin.fields.print_enabled'))->helperText(__('admin.help.print_enabled')),
                         Toggle::make('footer.show_last_updated')->label(__('admin.fields.show_last_updated'))->helperText(__('admin.help.show_last_updated')),
                     ])

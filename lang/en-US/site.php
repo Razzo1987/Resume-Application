@@ -89,12 +89,12 @@ return [
         'comprehension' => 'Understanding',
         'cefr' => 'Common European Framework of Reference (CEFR)',
         'levels' => [
-            'A1' => 'A1 – Beginner',
-            'A2' => 'A2 – Elementary',
-            'B1' => 'B1 – Intermediate',
-            'B2' => 'B2 – Upper intermediate',
-            'C1' => 'C1 – Advanced',
-            'C2' => 'C2 – Proficient',
+            'A1' => 'A1 - Beginner',
+            'A2' => 'A2 - Elementary',
+            'B1' => 'B1 - Intermediate',
+            'B2' => 'B2 - Upper intermediate',
+            'C1' => 'C1 - Advanced',
+            'C2' => 'C2 - Proficient',
         ],
     ],
 

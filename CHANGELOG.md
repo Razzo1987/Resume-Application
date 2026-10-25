@@ -2,6 +2,24 @@
 
 All notable changes to this project are documented here. The format follows [Keep a Changelog](https://keepachangelog.com/) and the project uses [Semantic Versioning](https://semver.org/).
 
+## [2.0.2] — 2026-10-26
+
+### Added
+- Admin *Translations* page: for each active language, the content written in another language but still empty in this one (CV entries, custom section titles, SEO and footer texts), with a link to edit each item. The "Translations" figures on the dashboard open it.
+- "Missing translations" column also in the key figures and spoken languages lists.
+- "Go to site" button in the admin top bar, between search and the user menu: opens the public site in a new tab, in the admin language when the site has it (icon only on small screens).
+
+### Changed
+- Blog menu entry: a single item, always pointing to the blog page. Whether it is shown, its position and its title come from the "Latest articles" section of the CV layout (*In menu*), even when the section itself is hidden on the CV; it appears only when there are articles in that language. Previously the section added a second "Blog" item pointing to its anchor on the CV page. Existing sites keep the entry (the update turns *In menu* on for that section).
+- The theme is chosen only on the *Themes* page; *Settings* shows the active theme with a link to it.
+- Plain hyphen instead of en and em dashes in what the site prints: date ranges ("Jan 2021 - present"), CEFR levels ("B2 - Upper intermediate"), page titles ("Name - Headline"); three dots instead of the ellipsis character in excerpts. Same for date ranges in the admin lists.
+- Base theme: on wide screens the content is centred in the space next to the sidebar.
+- Base theme: blog cover thumbnails keep the 1200 x 630 proportion of sharing images, so titles drawn on a cover are not cropped.
+
+### Fixed
+- Importing content exported with an earlier version repeats the data changes made by the updates since then (for example the Blog menu entry above), instead of undoing them.
+- Two exports created in the same second (such as the safety copy made before an import) no longer overwrite each other.
+
 ## [2.0.1] — 2026-10-25
 
 ### Changed
