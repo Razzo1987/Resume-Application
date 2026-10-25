@@ -81,6 +81,7 @@ class ManageThemes extends Page
                 ->schema([
                     FileUpload::make('package')
                         ->label(__('admin.themes.package'))
+                        ->helperText(__('admin.themes.upload_limit', ['size' => ini_get('upload_max_filesize') ?: '?']))
                         ->disk('local')
                         ->directory('theme-uploads')
                         ->acceptedFileTypes(['application/zip', 'application/x-zip-compressed'])

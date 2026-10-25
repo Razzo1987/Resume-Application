@@ -184,3 +184,21 @@ it('imports an export from the system page', function () {
     @unlink($export);
     array_map('unlink', glob(storage_path('app/private/backups/resume-backup-*.zip')) ?: []);
 });
+
+it('imports an export already on the server, chosen from the list', function () {
+    $export = app(Backup::class)->create();
+    $name = basename($export);
+    Experience::query()->get()->each->delete();
+
+    expect(app(Backup::class)->available())->toHaveKey($name)
+        ->and(app(Backup::class)->find('../'.$name))->toBeNull();
+
+    Livewire::test(ManageSystem::class)
+        ->callAction('restore', ['existing' => $name])
+        ->assertHasNoActionErrors()
+        ->assertNotified();
+
+    expect(Experience::query()->count())->toBeGreaterThan(0);
+
+    array_map('unlink', glob(storage_path('app/private/backups/resume-backup-*.zip')) ?: []);
+});

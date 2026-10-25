@@ -11,6 +11,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Number;
 use RuntimeException;
 use ZipArchive;
 
@@ -30,7 +31,7 @@ class Backup
             throw new RuntimeException('Estensione PHP zip non disponibile.');
         }
 
-        $directory = storage_path('app/private/backups');
+        $directory = $this->directory();
         File::ensureDirectoryExists($directory);
         $path = $directory.'/resume-backup-'.now()->format('Ymd-His').'.zip';
 
@@ -59,6 +60,43 @@ class Backup
         $zip->close();
 
         return $path;
+    }
+
+    /**
+     * Cartella delle esportazioni sul server (anche quelle copiate a mano con il File Manager).
+     */
+    public function directory(): string
+    {
+        return storage_path('app/private/backups');
+    }
+
+    /**
+     * Esportazioni presenti sul server, dalla più recente: nome file => descrizione.
+     *
+     * @return array<string, string>
+     */
+    public function available(): array
+    {
+        $files = glob($this->directory().'/*.zip') ?: [];
+        usort($files, fn (string $a, string $b): int => filemtime($b) <=> filemtime($a));
+
+        $list = [];
+
+        foreach ($files as $file) {
+            $list[basename($file)] = sprintf('%s — %s, %s', basename($file), date('d/m/Y H:i', (int) filemtime($file)), Number::fileSize((int) filesize($file), 1));
+        }
+
+        return $list;
+    }
+
+    /**
+     * Percorso di un'esportazione presente sul server (solo il nome del file, mai percorsi).
+     */
+    public function find(string $name): ?string
+    {
+        $path = $this->directory().'/'.basename($name);
+
+        return basename($name) === $name && str_ends_with($name, '.zip') && is_file($path) ? $path : null;
     }
 
     /**

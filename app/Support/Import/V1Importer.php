@@ -488,7 +488,7 @@ class V1Importer
             return;
         }
 
-        $this->settings->set('site.icon', $this->images->store($this->files.'/'.$source, 'icon.png', 'uploads', 'site', 512, 'png'));
+        $this->settings->set('site.icon', $this->images->store($this->files.'/'.$source, 'icon.png', 'uploads', 'site', 256, 'png'));
         $this->note('Icona del sito: '.basename($source));
     }
 

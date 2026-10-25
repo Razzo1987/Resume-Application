@@ -14,9 +14,11 @@ use BackedEnum;
 use Filament\Actions\Action;
 use Filament\Actions\ActionGroup;
 use Filament\Forms\Components\FileUpload;
+use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Toggle;
 use Filament\Notifications\Notification;
 use Filament\Pages\Page;
+use Filament\Schemas\Components\Utilities\Get;
 use Filament\Support\Icons\Heroicon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
@@ -174,25 +176,38 @@ class ManageSystem extends Page
                     ->schema([
                         FileUpload::make('package')
                             ->label(__('admin.system.restore_file'))
+                            ->helperText(__('admin.system.upload_limit', ['size' => ini_get('upload_max_filesize') ?: '?', 'path' => 'core/storage/app/private/backups']))
                             ->disk('local')
                             ->directory('restore-uploads')
                             ->acceptedFileTypes(['application/zip', 'application/x-zip-compressed'])
                             ->maxSize(50 * 1024)
-                            ->required(),
+                            ->required(fn (Get $get): bool => blank($get('existing'))),
+                        Select::make('existing')
+                            ->label(__('admin.system.restore_existing'))
+                            ->options(fn (): array => app(Backup::class)->available())
+                            ->placeholder(__('admin.system.restore_existing_none')),
                     ])
                     ->modalSubmitActionLabel(__('admin.system.restore_submit'))
                     ->action(function (array $data): void {
-                        $path = (string) $data['package'];
+                        $backup = app(Backup::class);
                         $disk = Storage::disk('local');
+                        $upload = filled($data['package'] ?? null) ? (string) $data['package'] : null;
+                        $path = $upload !== null ? $disk->path($upload) : $backup->find((string) ($data['existing'] ?? ''));
 
                         try {
-                            $result = app(Backup::class)->restore($disk->path($path));
+                            if ($path === null) {
+                                throw new RuntimeException((string) __('admin.system.restore_errors.not_zip'));
+                            }
+
+                            $result = $backup->restore($path);
                             $this->log = [__('admin.system.restore_done', $result)];
                             Notification::make()->success()->title(__('admin.system.restore_done', $result))->persistent()->send();
                         } catch (RuntimeException $exception) {
                             Notification::make()->danger()->title(__('admin.system.restore_failed'))->body($exception->getMessage())->persistent()->send();
                         } finally {
-                            $disk->delete($path);
+                            if ($upload !== null) {
+                                $disk->delete($upload);
+                            }
                         }
                     }),
             ])
