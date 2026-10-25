@@ -64,6 +64,8 @@ return [
     'running' => 'fa-solid fa-person-running',
     'chess' => 'fa-solid fa-chess',
     'reading' => 'fa-solid fa-book-open',
+    'cycling' => 'fa-solid fa-person-biking',
+    'ai' => 'fa-solid fa-robot',
 
     // Social
     'linkedin' => 'fa-brands fa-linkedin',

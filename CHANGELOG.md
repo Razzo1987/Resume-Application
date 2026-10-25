@@ -2,6 +2,11 @@
 
 All notable changes to this project are documented here. The format follows [Keep a Changelog](https://keepachangelog.com/) and the project uses [Semantic Versioning](https://semver.org/).
 
+## [Unreleased]
+
+### Added
+- Base theme icons `cycling` and `ai`, for interests.
+
 ## [2.0.2] — 2026-10-26
 
 ### Added
