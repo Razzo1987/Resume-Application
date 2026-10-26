@@ -27,11 +27,12 @@ function installData(array $overrides = []): array
         'admin_path' => 'gestione',
         'default_language' => 'it-IT',
         'languages' => ['en-GB'],
-        'db_host' => '127.0.0.1',
-        'db_port' => 3306,
-        'db_database' => 'resume_app_test',
-        'db_username' => 'resume',
-        'db_password' => 'resume',
+        // Il database dei test (phpunit.xml o variabili d'ambiente della CI)
+        'db_host' => (string) config('database.connections.mysql.host'),
+        'db_port' => (int) config('database.connections.mysql.port'),
+        'db_database' => (string) config('database.connections.mysql.database'),
+        'db_username' => (string) config('database.connections.mysql.username'),
+        'db_password' => (string) config('database.connections.mysql.password'),
         ...$overrides,
     ];
 }

@@ -2,6 +2,12 @@
 
 All notable changes to this project are documented here. The format follows [Keep a Changelog](https://keepachangelog.com/) and the project uses [Semantic Versioning](https://semver.org/).
 
+## [Unreleased]
+
+### Fixed
+- CI: the installer tests use the database configured for the test run instead of fixed credentials.
+- GitHub Actions updated to `actions/checkout@v5` and `actions/setup-node@v5` (Node.js 24).
+
 ## [2.0.3] — 2026-10-26
 
 ### Added
