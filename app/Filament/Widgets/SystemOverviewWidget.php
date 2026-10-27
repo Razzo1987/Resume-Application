@@ -51,7 +51,7 @@ class SystemOverviewWidget extends StatsOverviewWidget
                     : __('admin.dashboard.cron_missing_help'))
                 ->color($cron->isActive() ? 'success' : 'warning')
                 ->url($system.'#cron'),
-            Stat::make(__('admin.updates.auto.title'), __('admin.updates.auto.levels.'.$auto->level()))
+            Stat::make(__('admin.updates.auto.title'), __('admin.updates.auto.short.'.$auto->level()))
                 ->description($event !== null
                     ? __('admin.updates.auto.last_event.'.$event['type'], ['version' => $event['version'], 'when' => $event['at']->diffForHumans()])
                     : __('admin.updates.auto.descriptions.'.$auto->level()))

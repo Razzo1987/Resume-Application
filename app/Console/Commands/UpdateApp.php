@@ -4,10 +4,12 @@ declare(strict_types=1);
 
 namespace App\Console\Commands;
 
+use App\Support\Cron\Cron;
 use App\Support\Update\AutoUpdate;
 use App\Support\Update\ReleaseChecker;
 use App\Support\Update\UpdateRunner;
 use Illuminate\Console\Command;
+use Throwable;
 
 /**
  * Aggiornamento da riga di comando.
@@ -25,7 +27,7 @@ class UpdateApp extends Command
 
     protected $description = 'Controlla o completa un aggiornamento di Resume App';
 
-    public function handle(ReleaseChecker $checker, UpdateRunner $runner, AutoUpdate $auto): int
+    public function handle(ReleaseChecker $checker, UpdateRunner $runner, AutoUpdate $auto, Cron $cron): int
     {
         if ($this->option('finish')) {
             if (! $runner->isExtracted()) {
@@ -34,9 +36,25 @@ class UpdateApp extends Command
                 return self::SUCCESS;
             }
 
-            $this->line(($runner->current()['mode'] ?? null) === 'auto' ? $auto->finish() : implode("\n", $runner->finish()));
+            if (($runner->current()['mode'] ?? null) !== 'auto') {
+                $this->line(implode("\n", $runner->finish()));
 
-            return self::SUCCESS;
+                return self::SUCCESS;
+            }
+
+            // Completamento di un aggiornamento automatico: l'esito va anche tra i lavori programmati
+            try {
+                $result = $auto->finish();
+                $cron->recordResult('updates', true, $result);
+                $this->line($result);
+
+                return self::SUCCESS;
+            } catch (Throwable $exception) {
+                $cron->recordResult('updates', false, $exception->getMessage());
+                $this->error($exception->getMessage());
+
+                return self::FAILURE;
+            }
         }
 
         $status = $checker->check();

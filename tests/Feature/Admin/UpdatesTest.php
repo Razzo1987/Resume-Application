@@ -3,6 +3,7 @@
 use App\Filament\Pages\ManageSystem;
 use App\Models\User;
 use App\Support\Cron\Cron;
+use App\Support\Cron\CronJobs;
 use App\Support\Languages\Locales;
 use App\Support\Settings\Settings;
 use App\Support\System\Maintenance;
@@ -17,6 +18,7 @@ use App\Support\Update\UpdateStorage;
 use App\Themes\ThemeManager;
 use Filament\Facades\Filament;
 use Illuminate\Http\Client\Request;
+use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Http;
 use Livewire\Livewire;
@@ -495,6 +497,7 @@ function fakeGitHubWithPackage(string $version): void
 function autoUpdate(string $level): AutoUpdate
 {
     app()->instance(Cron::class, $cron = new Cron(test()->core.'/storage'));
+    CronJobs::register($cron);
     $cron->rememberWebRuntime();
     app(Settings::class)->set(AutoUpdate::SETTING, $level);
     app(Settings::class)->set(Updater::VERSION_KEY, app(Updater::class)->codeVersion());
@@ -573,7 +576,8 @@ it('installs a fix release from the cron job and completes it in a new process',
     // Giro successivo (o "resume:update --finish"): migrazioni, cache, fine della manutenzione
     app(Settings::class)->set(Updater::VERSION_KEY, '2.0.1');
 
-    expect($auto->run(fromCron: true))->toBe('installed '.UPDATES_FIX)
+    expect(Artisan::call('resume:update', ['--finish' => true]))->toBe(0)
+        ->and(app(Cron::class)->jobs()['updates']['message'])->toBe('installed '.UPDATES_FIX)
         ->and(app(Maintenance::class)->isOn())->toBeFalse()
         ->and(app(UpdateStorage::class)->runFile())->not->toBeFile()
         ->and($auto->lastEvent()['type'])->toBe('installed')

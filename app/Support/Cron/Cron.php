@@ -220,6 +220,61 @@ class Cron
     }
 
     /**
+     * Annota l'esito di un lavoro finito altrove (es. "resume:update --finish" avviato dopo l'estrazione).
+     */
+    public function recordResult(string $name, bool $ok, ?string $message): void
+    {
+        $this->update(function (array $state) use ($name, $ok, $message): array {
+            $state['jobs'][$name] = [...(is_array($state['jobs'][$name] ?? null) ? $state['jobs'][$name] : []), 'at' => now()->toAtomString(), 'ok' => $ok, 'message' => $message];
+
+            return $state;
+        });
+    }
+
+    /** Esiti dei lavori (in inglese nel registro) → testo per l'admin */
+    private const array RESULTS = [
+        '/^off$/' => 'off',
+        '/^up to date$/' => 'up_to_date',
+        '/^development copy$/' => 'development',
+        '/^extracting$/' => 'extracting',
+        '/^available (?<version>\S+)$/' => 'available',
+        '/^downloaded (?<version>\S+)$/' => 'downloaded',
+        '/^extracted (?<version>\S+)$/' => 'extracted',
+        '/^installed (?<version>\S+)$/' => 'installed',
+        '/^not installed (?<version>\S+): (?<reason>.*)$/s' => 'not_installed',
+        '/^skipped (?<version>\S+) \(too many attempts\)$/' => 'skipped',
+        '/^extraction failed: (?<reason>.*)$/s' => 'extraction_failed',
+        '/^deleted (?<count>\d+)$/' => 'deleted',
+        '/^days (?<days>\d+), deleted (?<visits>\d+) visits, (?<ips>\d+) admin IPs$/' => 'stats',
+        '/^update available$/' => 'geoip_available',
+        '/^no MaxMind account$/' => 'no_account',
+        '/^updated (?<editions>.+)$/' => 'geoip_updated',
+        '/^busy$/' => 'busy',
+    ];
+
+    /**
+     * Esito di un lavoro scritto per l'admin (gli errori restano come sono).
+     */
+    public static function describe(?string $message): string
+    {
+        if ($message === null || $message === '') {
+            return '';
+        }
+
+        foreach (self::RESULTS as $pattern => $key) {
+            if (preg_match($pattern, $message, $match) === 1) {
+                $params = array_filter($match, is_string(...), ARRAY_FILTER_USE_KEY);
+
+                return isset($params['count'])
+                    ? trans_choice('admin.cron.results.'.$key, (int) $params['count'], $params)
+                    : (string) __('admin.cron.results.'.$key, $params);
+            }
+        }
+
+        return $message;
+    }
+
+    /**
      * Riga da inserire nei cron job di cPanel (ogni 5 minuti).
      */
     public function command(): string

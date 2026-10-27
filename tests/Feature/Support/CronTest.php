@@ -132,9 +132,25 @@ it('shows the cron status and the command to add on the system page', function (
         ->assertSee('Lavori programmati (cron)')
         ->assertSee('non configurato')
         ->assertSee('schedule:run')
-        ->assertSee('Nuove versioni e aggiornamenti automatici');
+        ->assertSee('Nuove versioni e aggiornamenti automatici')
+        ->assertSee('24 ore')
+        ->assertDontSee('[2,*]');
 
     $this->cron->run(fromCron: true);
 
     $this->get('/admin/system')->assertOk()->assertSee('attivo')->assertDontSee('Come attivarlo');
 });
+
+it('describes the job results in the admin language', function (string $message, string $text) {
+    app()->setLocale('it');
+
+    expect(Cron::describe($message))->toBe($text);
+})->with([
+    ['off', 'spento'],
+    ['available 2.1.1', 'disponibile la versione 2.1.1'],
+    ['deleted 0', 'niente da eliminare'],
+    ['deleted 3', '3 file eliminati'],
+    ['days 2, deleted 5 visits, 1 admin IPs', 'totali di 2 giorni aggiornati, 5 visite vecchie e 1 IP admin scaduti eliminati'],
+    ['not installed 2.1.1: PHP too old', 'versione 2.1.1 non installata: PHP too old'],
+    ['GitHub is down', 'GitHub is down'],
+]);

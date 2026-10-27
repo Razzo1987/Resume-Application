@@ -49,16 +49,16 @@ class ContentOverviewWidget extends StatsOverviewWidget
 
         return [
             Stat::make(__('admin.dashboard.experiences'), (string) $work)
-                ->description(__('admin.dashboard.volunteering', ['count' => $volunteering]))
+                ->description(trans_choice('admin.dashboard.volunteering', $volunteering, ['count' => $volunteering]))
                 ->url(ExperienceResource::getUrl()),
             Stat::make(__('admin.dashboard.projects'), (string) $projects->count())
-                ->description(__('admin.dashboard.projects_with_page', ['count' => $withPage]))
+                ->description(trans_choice('admin.dashboard.projects_with_page', $withPage, ['count' => $withPage]))
                 ->url(ProjectResource::getUrl()),
             Stat::make(__('admin.dashboard.articles'), (string) $published)
                 ->description(__('admin.dashboard.articles_detail', ['drafts' => $drafts, 'scheduled' => $scheduled]))
                 ->url(ArticleResource::getUrl()),
             Stat::make(__('admin.dashboard.sections'), $shown.'/'.$enabled)
-                ->description($empty > 0 ? __('admin.dashboard.sections_empty', ['count' => $empty]) : __('admin.dashboard.sections_ok'))
+                ->description($empty > 0 ? trans_choice('admin.dashboard.sections_empty', $empty, ['count' => $empty]) : __('admin.dashboard.sections_ok'))
                 ->color($empty > 0 ? 'warning' : 'gray')
                 ->url(PageSectionResource::getUrl()),
         ];

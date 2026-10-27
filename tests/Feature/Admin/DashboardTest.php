@@ -25,7 +25,7 @@ it('groups the dashboard by type: system, languages, content, CV and statistics'
 
     Livewire::test(SystemOverviewWidget::class)->assertSee('Sistema')->assertSee('Non configurato')->assertSee('Ultima copia dei contenuti');
     Livewire::test(LanguagesOverviewWidget::class)->assertSee('Lingue del sito')->assertSee('Traduzioni it-IT');
-    Livewire::test(ContentOverviewWidget::class)->assertSee('Esperienze di lavoro')->assertSee('con pagina dedicata')->assertSee('Articoli pubblicati');
+    Livewire::test(ContentOverviewWidget::class)->assertSee('Esperienze di lavoro')->assertSee('1 con pagina dedicata')->assertSee('più 1 di volontariato')->assertDontSee('{0}')->assertSee('Articoli pubblicati');
     Livewire::test(CvOverviewWidget::class)->assertSee('CV Italiano')->assertSee('Caricato il');
     Livewire::test(StatisticsOverviewWidget::class)->assertSee('Spente')->assertSee('Attivale per vedere visite');
 });

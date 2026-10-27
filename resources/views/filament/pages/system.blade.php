@@ -189,9 +189,9 @@
                     @foreach ($cronJobs as $name => $job)
                         <tr>
                             <td>{{ __('admin.cron.names.'.$name) }}@unless ($job['light']) <span class="resume-cron-tag">{{ __('admin.cron.cron_only') }}</span>@endunless</td>
-                            <td>{{ $job['every'] >= 60 ? __('admin.cron.hours', ['count' => intdiv($job['every'], 60)]) : __('admin.cron.minutes', ['count' => $job['every']]) }}</td>
+                            <td>{{ $job['every'] >= 60 ? trans_choice('admin.cron.hours', intdiv($job['every'], 60), ['count' => intdiv($job['every'], 60)]) : __('admin.cron.minutes', ['count' => $job['every']]) }}</td>
                             <td>{{ $job['at'] ? $job['at']->diffForHumans() : __('admin.updates.never') }}</td>
-                            <td @class(['resume-update-problem' => ! $job['ok']])>{{ $job['message'] ?? '' }}</td>
+                            <td @class(['resume-update-problem' => ! $job['ok']])>{{ \App\Support\Cron\Cron::describe($job['message']) }}</td>
                         </tr>
                     @endforeach
                 </tbody>
