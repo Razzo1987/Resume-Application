@@ -1,4 +1,4 @@
-{{-- Horizontal bar ranking: $title, $items (key, label, views), $filter (click = filter by page), $empty --}}
+{{-- Horizontal bar ranking: $title, $items (key, label, views), $filter (click = filter: "page" or a StatsQuery filter), $empty --}}
 @php($max = max([1, ...array_column($items, 'views')]))
 <x-filament::section compact>
     <x-slot name="heading">{{ $title }}</x-slot>
@@ -7,8 +7,10 @@
             @foreach ($items as $item)
                 <li>
                     <span class="resume-stats-bar" style="width: {{ round($item['views'] / $max * 100, 1) }}%"></span>
-                    @if ($filter ?? false)
+                    @if (($filter ?? null) === 'page')
                         <button type="button" class="resume-stats-label" wire:click="filterPage(@js($item['key']))" title="{{ $item['label'] }}">{{ $item['label'] }}</button>
+                    @elseif ($filter ?? null)
+                        <button type="button" class="resume-stats-label" wire:click="addFilter(@js($filter), @js($item['key']))" title="{{ $item['label'] }}">{{ $item['label'] }}</button>
                     @else
                         <span class="resume-stats-label" title="{{ $item['label'] }}">{{ $item['label'] }}</span>
                     @endif

@@ -38,6 +38,45 @@
         </label>
     </div>
 
+    <details class="resume-stats-more" @if ($activeFilters) open @endif>
+        <summary>{{ __('admin.stats.filters.more') }}@if ($activeFilters) ({{ count($activeFilters) }})@endif</summary>
+        <p class="resume-stats-note">{{ __('admin.stats.filters.hint') }}</p>
+        <div class="resume-stats-filter-grid">
+            @foreach ($filterOptions as $name => $options)
+                <label>
+                    <span>{{ __('admin.stats.filters.names.'.$name) }}</span>
+                    <x-filament::input.wrapper :disabled="$options === []">
+                        <x-filament::input.select wire:model.live="filters.{{ $name }}" :disabled="$options === []">
+                            <option value="">{{ __('admin.stats.filters.any') }}</option>
+                            @foreach ($options as $value => $label)
+                                <option value="{{ $value }}">{{ $label }}</option>
+                            @endforeach
+                        </x-filament::input.select>
+                    </x-filament::input.wrapper>
+                </label>
+            @endforeach
+        </div>
+    </details>
+
+    @if ($activeFilters || $pageLabel)
+        <div class="resume-stats-active" role="group" aria-label="{{ __('admin.stats.filters.active') }}">
+            @if ($pageLabel)
+                <x-filament::badge color="info" tag="button" type="button" icon="heroicon-m-x-mark" icon-position="after" wire:click="$set('pageFilter', '')" :tooltip="__('admin.stats.filters.remove')" aria-label="{{ __('admin.stats.filters.remove_named', ['filter' => __('admin.stats.page').': '.$pageLabel]) }}">
+                    {{ __('admin.stats.page') }}: {{ $pageLabel }}
+                </x-filament::badge>
+            @endif
+            @foreach ($activeFilters as $filter)
+                <x-filament::badge color="info" tag="button" type="button" icon="heroicon-m-x-mark" icon-position="after" wire:click="removeFilter(@js($filter['name']))" :tooltip="__('admin.stats.filters.remove')" aria-label="{{ __('admin.stats.filters.remove_named', ['filter' => $filter['label'].': '.$filter['value']]) }}">
+                    {{ $filter['label'] }}: {{ $filter['value'] }}
+                </x-filament::badge>
+            @endforeach
+            <x-filament::link tag="button" size="sm" wire:click="clearFilters">{{ __('admin.stats.filters.clear') }}</x-filament::link>
+        </div>
+        @if ($detailed)
+            <p class="resume-stats-note">{{ __('admin.stats.filters.detailed', ['months' => $retention]) }}</p>
+        @endif
+    @endif
+
     <div class="resume-stats-kpis">
         @if ($pageFilter !== \App\Support\Stats\StatsQuery::DOWNLOAD)
             <div class="resume-stats-kpi"><span>{{ __('admin.stats.views') }}</span><strong>{{ \Illuminate\Support\Number::format($totals['views']) }}</strong></div>
@@ -51,19 +90,22 @@
         @endif
     </div>
 
-    @livewire(\App\Filament\Widgets\StatsTimelineChart::class, ['period' => $period, 'pageFilter' => $pageFilter], key('stats-timeline'))
+    @livewire(\App\Filament\Widgets\StatsTimelineChart::class, ['period' => $period, 'pageFilter' => $pageFilter, 'filters' => $filters], key('stats-timeline'))
 
     <div class="resume-stats-grid">
         @if ($pageFilter === '')
-            @include('filament.pages.statistics-list', ['title' => __('admin.stats.lists.pages'), 'items' => $lists['pages'], 'filter' => true])
+            @include('filament.pages.statistics-list', ['title' => __('admin.stats.lists.pages'), 'items' => $lists['pages'], 'filter' => 'page'])
         @endif
-        @include('filament.pages.statistics-list', ['title' => __('admin.stats.lists.referrer'), 'items' => $lists['referrer'], 'empty' => __('admin.stats.lists.referrer_empty')])
-        @include('filament.pages.statistics-list', ['title' => __('admin.stats.lists.utm_campaign'), 'items' => $lists['utm_campaign']])
-        @include('filament.pages.statistics-list', ['title' => __('admin.stats.lists.utm_source'), 'items' => $lists['utm_source']])
+        @include('filament.pages.statistics-list', ['title' => __('admin.stats.lists.referrer'), 'items' => $lists['referrer'], 'filter' => 'referrer', 'empty' => __('admin.stats.lists.referrer_empty')])
+        @include('filament.pages.statistics-list', ['title' => __('admin.stats.lists.utm_campaign'), 'items' => $lists['utm_campaign'], 'filter' => 'utm_campaign'])
+        @include('filament.pages.statistics-list', ['title' => __('admin.stats.lists.utm_source'), 'items' => $lists['utm_source'], 'filter' => 'utm_source'])
+        @if ($lists['utm_medium'])
+            @include('filament.pages.statistics-list', ['title' => __('admin.stats.lists.utm_medium'), 'items' => $lists['utm_medium'], 'filter' => 'utm_medium'])
+        @endif
         @if ($lists['click_source'])
-            @include('filament.pages.statistics-list', ['title' => __('admin.stats.lists.click_source'), 'items' => $lists['click_source']])
+            @include('filament.pages.statistics-list', ['title' => __('admin.stats.lists.click_source'), 'items' => $lists['click_source'], 'filter' => 'click_source'])
         @endif
-        @include('filament.pages.statistics-list', ['title' => __('admin.stats.lists.locale'), 'items' => $lists['locale']])
+        @include('filament.pages.statistics-list', ['title' => __('admin.stats.lists.locale'), 'items' => $lists['locale'], 'filter' => 'locale'])
     </div>
 
     <x-filament::section>
@@ -77,16 +119,17 @@
             <p>{{ __('admin.stats.geoip.missing') }}</p>
         @endif
         <div class="resume-stats-grid resume-stats-grid-inner">
-            @include('filament.pages.statistics-list', ['title' => __('admin.stats.lists.country'), 'items' => $lists['country']])
-            @include('filament.pages.statistics-list', ['title' => __('admin.stats.lists.city'), 'items' => $lists['city']])
-            @include('filament.pages.statistics-list', ['title' => __('admin.stats.lists.asn'), 'items' => $lists['asn']])
+            @include('filament.pages.statistics-list', ['title' => __('admin.stats.lists.country'), 'items' => $lists['country'], 'filter' => 'country'])
+            @include('filament.pages.statistics-list', ['title' => __('admin.stats.lists.city'), 'items' => $lists['city'], 'filter' => 'city'])
+            @include('filament.pages.statistics-list', ['title' => __('admin.stats.lists.asn'), 'items' => $lists['asn'], 'filter' => 'asn'])
         </div>
     </x-filament::section>
 
     <div class="resume-stats-grid">
-        @include('filament.pages.statistics-list', ['title' => __('admin.stats.lists.device'), 'items' => $lists['device']])
-        @include('filament.pages.statistics-list', ['title' => __('admin.stats.lists.os'), 'items' => $lists['os']])
-        @include('filament.pages.statistics-list', ['title' => __('admin.stats.lists.browser'), 'items' => $lists['browser']])
+        @include('filament.pages.statistics-list', ['title' => __('admin.stats.lists.device'), 'items' => $lists['device'], 'filter' => 'device'])
+        @include('filament.pages.statistics-list', ['title' => __('admin.stats.lists.os'), 'items' => $lists['os'], 'filter' => 'os'])
+        @include('filament.pages.statistics-list', ['title' => __('admin.stats.lists.browser'), 'items' => $lists['browser'], 'filter' => 'browser'])
+        @include('filament.pages.statistics-list', ['title' => __('admin.stats.lists.ip'), 'items' => $lists['ip'], 'filter' => 'ip'])
     </div>
 
     {{ $this->table }}
@@ -162,6 +205,10 @@
         .resume-stats-filters { display: flex; gap: 1rem; flex-wrap: wrap; align-items: end; }
         .resume-stats-filters label { display: grid; gap: .35rem; font-size: .875rem; font-weight: 500; }
         .resume-stats-page { flex: 1; min-width: 16rem; max-width: 36rem; }
+        .resume-stats-more summary { cursor: pointer; font-size: .875rem; font-weight: 600; }
+        .resume-stats-filter-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(14rem, 1fr)); gap: .75rem 1rem; margin-top: .75rem; }
+        .resume-stats-filter-grid label { display: grid; gap: .35rem; font-size: .875rem; font-weight: 500; }
+        .resume-stats-active { display: flex; flex-wrap: wrap; gap: .5rem; align-items: center; }
         .resume-stats-kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(10rem, 1fr)); gap: 1rem; }
         .resume-stats-kpi { display: grid; gap: .25rem; padding: 1rem 1.25rem; border-radius: .75rem; background: white; box-shadow: 0 1px 2px rgb(0 0 0 / .05); outline: 1px solid rgb(0 0 0 / .05); }
         .dark .resume-stats-kpi { background: rgb(255 255 255 / .05); outline-color: rgb(255 255 255 / .1); }

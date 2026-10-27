@@ -17,6 +17,7 @@ use App\Support\Stats\StatsQuery;
 use App\Support\Stats\WorldMap;
 use BackedEnum;
 use Filament\Actions\Action;
+use Filament\Actions\BulkAction;
 use Filament\Forms\Components\CheckboxList;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
@@ -28,6 +29,8 @@ use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Concerns\InteractsWithTable;
 use Filament\Tables\Contracts\HasTable;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Lang;
 use Illuminate\Support\HtmlString;
 use Illuminate\Support\Str;
@@ -60,6 +63,14 @@ class Statistics extends Page implements HasTable
     /** Page (e.g. "article:3"), empty = whole site */
     #[Url(as: 'page_filter')]
     public string $pageFilter = '';
+
+    /**
+     * Other filters: referrer, UTM parameters, country, city, device, IP... (see StatsQuery::FILTERS)
+     *
+     * @var array<string, string>
+     */
+    #[Url(as: 'filter')]
+    public array $filters = [];
 
     public static function getNavigationLabel(): string
     {
@@ -96,6 +107,39 @@ class Statistics extends Page implements HasTable
         $this->resetTable();
     }
 
+    public function updatedFilters(): void
+    {
+        $this->filters = StatsQuery::clean($this->filters);
+        $this->resetTable();
+    }
+
+    /**
+     * Adds (or replaces) a filter, e.g. from a click on a ranking or on an IP address in the latest visits.
+     */
+    public function addFilter(string $name, string $value): void
+    {
+        $this->filters = StatsQuery::clean([...$this->filters, $name => $value]);
+        $this->resetTable();
+    }
+
+    public function removeFilter(string $name): void
+    {
+        unset($this->filters[$name]);
+        $this->resetTable();
+    }
+
+    public function clearFilters(): void
+    {
+        $this->filters = [];
+        $this->pageFilter = '';
+        $this->resetTable();
+    }
+
+    private function query(): StatsQuery
+    {
+        return StatsQuery::forPeriod($this->period, $this->pageFilter, $this->filters);
+    }
+
     /**
      * @return array<string, mixed>
      */
@@ -103,7 +147,7 @@ class Statistics extends Page implements HasTable
     {
         $settings = app(Settings::class);
         $enabled = $settings->bool('stats.enabled');
-        $query = StatsQuery::forPeriod($this->period, $this->pageFilter);
+        $query = $this->query();
         $pages = app(PageResolver::class);
         $locale = app()->getLocale();
         $countries = $query->top('country', 300);
@@ -114,15 +158,33 @@ class Statistics extends Page implements HasTable
             'referrer' => $this->labelled($query->top('referrer'), fn (string $host): string => $host),
             'utm_source' => $this->labelled($query->top('utm_source'), fn (string $value): string => $value),
             'utm_campaign' => $this->labelled($query->top('utm_campaign'), fn (string $value): string => $value),
+            'utm_medium' => $this->labelled($query->top('utm_medium'), fn (string $value): string => $value),
             'click_source' => $this->labelled($query->top('click_source'), fn (string $value): string => Str::headline($value)),
-            'country' => $this->labelled(array_slice($countries, 0, 10, true), fn (string $code): string => (Locale::getDisplayRegion('-'.$code, $locale) ?: $code)),
-            'city' => $this->labelled(array_slice(array_column(array_map(fn (array $city): array => ['label' => $city['city'].' ('.$city['country'].')', 'views' => $city['views']], $cities), 'views', 'label'), 0, 10, true), fn (string $label): string => $label),
-            'device' => $this->labelled($query->top('device'), fn (string $device): string => Lang::has('admin.stats.devices.'.$device) ? (string) __('admin.stats.devices.'.$device) : Str::ucfirst($device)),
+            'country' => $this->labelled(array_slice($countries, 0, 10, true), fn (string $code): string => $this->filterLabel('country', $code)),
+            'city' => $this->labelled(array_slice(array_column(array_map(fn (array $city): array => ['key' => $city['country'].'|'.$city['city'], 'views' => $city['views']], $cities), 'views', 'key'), 0, 10, true), fn (string $key): string => $this->filterLabel('city', $key)),
+            'device' => $this->labelled($query->top('device'), fn (string $device): string => $this->filterLabel('device', $device)),
             'os' => $this->labelled($query->top('os'), fn (string $value): string => $value),
             'browser' => $this->labelled($query->top('browser'), fn (string $value): string => $value),
-            'locale' => $this->labelled($query->top('locale'), fn (string $code): string => (Locale::getDisplayName($code, $locale) ?: $code)),
+            'locale' => $this->labelled($query->top('locale'), fn (string $code): string => $this->filterLabel('locale', $code)),
             'asn' => $this->labelled($query->top('asn'), fn (string $value): string => $value),
+            'ip' => $this->labelled($query->top('ip'), fn (string $value): string => $value),
         ];
+
+        // Menus of the filters: values seen in the period, the most frequent first
+        $filterOptions = [];
+
+        foreach (self::FILTER_MENUS as $name) {
+            $filterOptions[$name] = [];
+
+            foreach ($query->options($name) as $value => $visits) {
+                $filterOptions[$name][(string) $value] = $this->filterLabel($name, (string) $value).' ('.$visits.')';
+            }
+
+            // a filter set from a link keeps its value in the menu even if it is not in this period
+            if (isset($this->filters[$name]) && ! isset($filterOptions[$name][$this->filters[$name]])) {
+                $filterOptions[$name][$this->filters[$name]] = $this->filterLabel($name, $this->filters[$name]);
+            }
+        }
 
         return [
             'enabled' => $enabled,
@@ -140,7 +202,34 @@ class Statistics extends Page implements HasTable
             'geoipStatus' => app(GeoIpUpdater::class)->status(),
             'retention' => (int) $settings->get('stats.retention_months', 12),
             'proxyNote' => $this->proxyNote(),
+            'detailed' => $query->isDetailed(),
+            'activeFilters' => array_map(fn (string $value, string $name): array => [
+                'name' => $name,
+                'label' => (string) __('admin.stats.filters.names.'.$name),
+                'value' => $this->filterLabel($name, $value),
+            ], $query->filters, array_keys($query->filters)),
+            'filterOptions' => $filterOptions,
         ];
+    }
+
+    /** Filters offered as menus (the others, such as utm_term, can be set from a link) */
+    public const array FILTER_MENUS = ['referrer', 'utm_source', 'utm_medium', 'utm_campaign', 'click_source', 'country', 'city', 'device', 'os', 'browser', 'locale', 'asn', 'ip'];
+
+    /**
+     * Readable value of a filter: country and language names, device types, "Milan (IT)".
+     */
+    private function filterLabel(string $name, string $value): string
+    {
+        $locale = app()->getLocale();
+
+        return match ($name) {
+            'country' => Locale::getDisplayRegion('-'.$value, $locale) ?: $value,
+            'city' => (fn (array $parts): string => $parts[1].' ('.$parts[0].')')(array_pad(explode('|', $value, 2), 2, '')),
+            'locale' => Locale::getDisplayName($value, $locale) ?: $value,
+            'device' => Lang::has('admin.stats.devices.'.$value) ? (string) __('admin.stats.devices.'.$value) : Str::ucfirst($value),
+            'click_source' => Str::headline($value),
+            default => $value,
+        };
     }
 
     /**
@@ -162,12 +251,9 @@ class Statistics extends Page implements HasTable
     public function table(Table $table): Table
     {
         $pages = app(PageResolver::class);
-        $query = StatsQuery::forPeriod($this->period, $this->pageFilter);
 
         return $table
-            ->query(fn () => StatVisit::query()
-                ->whereBetween('day', [$query->from->toDateString(), $query->to->toDateString()])
-                ->when($this->pageFilter !== '', fn ($builder) => $builder->where('page', $this->pageFilter)))
+            ->query(fn () => $this->query()->visits())
             ->defaultSort('visited_at', 'desc')
             ->heading(__('admin.stats.visits'))
             ->description(fn (): string => __('admin.stats.visits_help', ['months' => (int) app(Settings::class)->get('stats.retention_months', 12)]))
@@ -190,7 +276,31 @@ class Statistics extends Page implements HasTable
                     ->formatStateUsing(fn (StatVisit $record): string => implode(' · ', array_filter([$record->browser.($record->browser_version ? ' '.$record->browser_version : ''), $record->os])))
                     ->description(fn (StatVisit $record): ?string => $record->device !== null && Lang::has('admin.stats.devices.'.$record->device) ? (string) __('admin.stats.devices.'.$record->device) : $record->device)
                     ->default('-'),
-                TextColumn::make('ip')->label('IP')->fontFamily('mono')->size('sm'),
+                TextColumn::make('ip')->label('IP')->fontFamily('mono')->size('sm')
+                    ->tooltip(__('admin.stats.filters.by_ip'))
+                    ->action(fn (StatVisit $record) => $this->addFilter('ip', $record->ip)),
+            ])
+            ->toolbarActions([
+                BulkAction::make('delete')
+                    ->label(__('admin.stats.delete.label'))
+                    ->icon(Heroicon::OutlinedTrash)
+                    ->color('danger')
+                    ->requiresConfirmation()
+                    ->modalHeading(__('admin.stats.delete.heading'))
+                    ->modalDescription(__('admin.stats.delete.help'))
+                    ->action(function (Collection $records): void {
+                        $ids = $records->modelKeys();
+                        $days = StatVisit::query()->whereKey($ids)->toBase()->distinct()->pluck('day');
+                        StatVisit::query()->whereKey($ids)->delete();
+
+                        // the daily totals of those days are recalculated without them
+                        foreach ($days as $day) {
+                            app(Aggregator::class)->aggregate(Carbon::parse((string) $day));
+                        }
+
+                        Notification::make()->success()->title(trans_choice('admin.stats.delete.done', $records->count(), ['count' => $records->count()]))->send();
+                    })
+                    ->deselectRecordsAfterCompletion(),
             ])
             ->paginated([25, 50, 100])
             ->emptyStateHeading(__('admin.stats.no_visits'));

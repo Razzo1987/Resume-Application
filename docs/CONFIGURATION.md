@@ -97,9 +97,18 @@ the sign-in page, `RESUME_ADMIN_LOCALE` applies.
   `RESUME_GEOIP_LICENSE_KEY` in `core/.env`). *Update the databases* downloads them; with the cron job they are
   checked every day and updated by themselves, as the GeoLite terms ask. Without the databases everything works
   except country, city, network and the map.
-- **The page**: period and page filters (for example a single blog article), totals, visits over time, most viewed
-  pages, referring sites, campaigns, languages, a world map with countries and cities, networks, devices, systems,
-  browsers, and the list of the latest visits.
+- **The page**: totals, visits over time, most viewed pages, referring sites, campaigns, languages, a world map with
+  countries and cities, networks, devices, systems, browsers, shortened IP addresses, and the list of the latest
+  visits.
+- **Filters**: period and page (for example a single blog article), and under *More filters* referring site, UTM
+  source, medium and campaign, platform click, country, city, network, device, system, browser, language and
+  shortened IP address. Filters add up (for example: the pages seen from one campaign, or everything one address
+  looked at), and a click on an entry of a ranking or on an IP address in the latest visits sets it. The filters are
+  in the page address, so a filtered view can be bookmarked. With filters other than period and page the data comes
+  from the single visits, so it goes back as far as they are kept (12 months by default).
+- **Deleting visits**: select them in the latest visits (for example after filtering by your IP address) and
+  *Delete*; the totals of their days are recalculated. Useful for your own visits made while not signed in to the
+  admin.
 - Turning statistics on also turns on the **Privacy page** (see [Settings](#settings)), with a section describing them.
   Statistics are never part of content exports.
 

@@ -64,9 +64,9 @@ can be imported (see [docs/INSTALL.md](docs/INSTALL.md#from-version-1)).
 - **Privacy by default**: no cookies for visitors, no external requests, strict Content Security Policy; email and
   phone are encoded in the HTML; email, phone and birth date stay out of the structured data unless you enable them.
 - **Visit statistics without cookies** (optional): page views and CV downloads, sources and campaigns (UTM),
-  devices, browsers, countries and cities on a world map, for the whole site or a single page. The IP address is
-  shortened straight away and located with the free MaxMind GeoLite2 databases installed on your server; bots and
-  your own visits do not count. No cookie banner needed; a **Privacy page** (template in 9 languages, editable)
+  devices, browsers, countries and cities on a world map, with filters that add up (page, referring site, campaign,
+  country, device, IP...). The IP address is shortened straight away and located with the free MaxMind GeoLite2
+  databases installed on your server; bots and your own visits do not count. No cookie banner needed; a **Privacy page** (template in 9 languages, editable)
   explains it to visitors.
 - HTML page cache cleared on every change, ETags, a reduced Bootstrap build and an SVG icon sprite with only the
   icons in use. Lighthouse 100 on the demo data, WCAG 2.1 AA checked with axe on the site and the admin pages.

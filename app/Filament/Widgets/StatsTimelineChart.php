@@ -20,6 +20,10 @@ class StatsTimelineChart extends ChartWidget
     #[Reactive]
     public string $pageFilter = '';
 
+    /** @var array<string, string> */
+    #[Reactive]
+    public array $filters = [];
+
     protected int|string|array $columnSpan = 'full';
 
     protected ?string $maxHeight = '260px';
@@ -43,7 +47,7 @@ class StatsTimelineChart extends ChartWidget
      */
     protected function getData(): array
     {
-        $timeline = StatsQuery::forPeriod($this->period, $this->pageFilter)->timeline();
+        $timeline = StatsQuery::forPeriod($this->period, $this->pageFilter, $this->filters)->timeline();
         $long = count($timeline['labels']) > 120;
 
         $datasets = [[

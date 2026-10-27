@@ -380,3 +380,81 @@ it('explains on the statistics page when the visitor address is not available', 
     $this->withServerVariables(['REMOTE_ADDR' => '93.44.12.7', 'HTTP_X_FORWARDED_FOR' => '81.2.69.160'])->get('/admin/statistics')
         ->assertOk()->assertSee('RESUME_TRUSTED_PROXIES');
 });
+
+it('filters the statistics by campaign, referrer, IP and the other details, also combined', function () {
+    $project = Project::query()->firstOrFail();
+    $projectPath = '/en-GB/projects/'.$project->t('slug', 'en-GB');
+
+    pageView('/it-IT?utm_source=linkedin&utm_medium=social&utm_campaign=autunno', ['REMOTE_ADDR' => '81.2.69.160']);
+    pageView($projectPath.'?utm_source=linkedin&utm_campaign=autunno', ['REMOTE_ADDR' => '81.2.69.160']);
+    pageView('/it-IT?utm_campaign=newsletter', ['REMOTE_ADDR' => '93.44.12.7', 'HTTP_USER_AGENT' => IPHONE]);
+    pageView('/it-IT', ['REMOTE_ADDR' => '2a01:4f8:c0c::1', 'HTTP_REFERER' => 'https://www.google.com/']);
+
+    $campaign = StatsQuery::forPeriod('7', null, ['utm_campaign' => 'autunno', 'unknown' => 'x', 'ip' => '']);
+
+    expect($campaign->filters)->toBe(['utm_campaign' => 'autunno'])
+        ->and($campaign->isDetailed())->toBeTrue()
+        ->and($campaign->totals()['views'])->toBe(2)
+        ->and($campaign->pages())->toBe(['cv' => 1, 'project:'.$project->id => 1])
+        ->and($campaign->top('utm_medium'))->toBe(['social' => 1])
+        ->and($campaign->top('ip'))->toBe(['81.2.69.x' => 2])
+        ->and(StatsQuery::forPeriod('7', 'cv', ['utm_campaign' => 'autunno'])->totals()['views'])->toBe(1)
+        ->and(StatsQuery::forPeriod('7', null, ['utm_source' => 'linkedin', 'ip' => '93.44.12.x'])->totals()['views'])->toBe(0)
+        ->and(StatsQuery::forPeriod('7', null, ['referrer' => 'google.com'])->top('ip'))->toBe(['2a01:4f8:c0c::' => 1])
+        ->and(StatsQuery::forPeriod('7', null, ['device' => 'smartphone'])->top('utm_campaign'))->toBe(['newsletter' => 1])
+        ->and(StatsQuery::forPeriod('7')->options('utm_campaign'))->toBe(['autunno' => 2, 'newsletter' => 1]);
+});
+
+it('filters the statistics page from the menus, the rankings and the IP of a visit', function () {
+    pageView('/it-IT?utm_campaign=autunno', ['REMOTE_ADDR' => '81.2.69.160']);
+    pageView('/en-GB?utm_campaign=newsletter', ['REMOTE_ADDR' => '93.44.12.7', 'HTTP_REFERER' => 'https://news.ycombinator.com/']);
+    $autumn = StatVisit::query()->where('utm_campaign', 'autunno')->get();
+    $newsletter = StatVisit::query()->where('utm_campaign', 'newsletter')->get();
+
+    app()->setLocale('it'); // the public pages change the locale of the application
+    $this->actingAs(User::factory()->create());
+    Filament::setCurrentPanel('admin');
+
+    Livewire::test(Statistics::class)
+        ->assertSee('Altri filtri')
+        ->call('addFilter', 'utm_campaign', 'autunno')
+        ->assertSet('filters', ['utm_campaign' => 'autunno'])
+        ->assertSee('Campagna (utm_campaign): autunno')
+        ->assertViewHas('lists', fn (array $lists): bool => $lists['referrer'] === [] && array_column($lists['ip'], 'key') === ['81.2.69.x'])
+        ->assertViewHas('detailed', true)
+        ->assertCanSeeTableRecords($autumn)
+        ->assertCanNotSeeTableRecords($newsletter)
+        ->call('removeFilter', 'utm_campaign')
+        ->assertCanSeeTableRecords($newsletter)
+        ->set('filters.ip', '93.44.12.x')
+        ->assertCanSeeTableRecords($newsletter)
+        ->assertCanNotSeeTableRecords($autumn)
+        ->call('addFilter', 'not-a-filter', 'x')
+        ->assertSet('filters', ['ip' => '93.44.12.x'])
+        ->call('clearFilters')
+        ->assertSet('filters', [])
+        ->callTableColumnAction('ip', $autumn->first())
+        ->assertSet('filters', ['ip' => '81.2.69.x']);
+
+    $this->get('/admin/statistics?filter[utm_campaign]=newsletter')->assertOk()->assertSee('Campagna (utm_campaign): newsletter');
+});
+
+it('deletes the selected visits and recalculates the totals of their days', function () {
+    pageView('/it-IT', ['REMOTE_ADDR' => '81.2.69.160']);
+    pageView('/it-IT', ['REMOTE_ADDR' => '93.44.12.7']);
+    app(Aggregator::class)->aggregate(StatsQuery::today());
+    $mine = StatVisit::query()->where('ip', '93.44.12.x')->get();
+
+    expect(StatsQuery::forPeriod('7')->totals()['views'])->toBe(2);
+
+    app()->setLocale('it');
+    $this->actingAs(User::factory()->create());
+    Filament::setCurrentPanel('admin');
+
+    Livewire::test(Statistics::class)
+        ->callTableBulkAction('delete', $mine)
+        ->assertNotified('Eliminata 1 visita');
+
+    expect(StatVisit::query()->pluck('ip')->all())->toBe(['81.2.69.x'])
+        ->and(StatsQuery::forPeriod('7')->totals()['views'])->toBe(1);
+});
