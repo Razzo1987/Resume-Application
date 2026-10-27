@@ -23,8 +23,8 @@ it('normalizes language codes, trailing slashes and short codes', function (stri
 })->with([
     'lowercase' => ['/it-it', '/it-IT'],
     'uppercase' => ['/EN-GB', '/en-GB'],
-    'deep path' => ['/en-gb/projects/data-catalog-and-lineage', '/en-GB/projects/data-catalog-and-lineage'],
-    'double slash' => ['/it-IT//progetti/data-catalog-e-lineage', '/it-IT/progetti/data-catalog-e-lineage'],
+    'deep path' => ['/en-gb/projects/booking-portal', '/en-GB/projects/booking-portal'],
+    'double slash' => ['/it-IT//progetti/portale-prenotazioni', '/it-IT/progetti/portale-prenotazioni'],
     'short code' => ['/en', '/en-GB'],
     'query kept' => ['/it-it?utm_source=x', '/it-IT?utm_source=x'],
 ]);
@@ -51,28 +51,28 @@ it('returns 404 for inactive or unknown languages', function () {
 it('serves detail pages only at their canonical address', function (string $from, string $to) {
     $this->get($from)->assertStatus(301)->assertRedirect('http://localhost'.$to);
 })->with([
-    'uppercase slug' => ['/it-IT/progetti/Data-Catalog-E-Lineage', '/it-IT/progetti/data-catalog-e-lineage'],
-    'segment of another language' => ['/en-GB/progetti/data-catalog-and-lineage', '/en-GB/projects/data-catalog-and-lineage'],
-    'slug of another language' => ['/en-GB/projects/data-catalog-e-lineage', '/en-GB/projects/data-catalog-and-lineage'],
+    'uppercase slug' => ['/it-IT/progetti/Portale-Prenotazioni', '/it-IT/progetti/portale-prenotazioni'],
+    'segment of another language' => ['/en-GB/progetti/booking-portal', '/en-GB/projects/booking-portal'],
+    'slug of another language' => ['/en-GB/projects/portale-prenotazioni', '/en-GB/projects/booking-portal'],
 ]);
 
 it('opens project and experience pages', function () {
-    $this->get('/it-IT/progetti/data-catalog-e-lineage')
+    $this->get('/it-IT/progetti/portale-prenotazioni')
         ->assertOk()
-        ->assertSee('<h1 class="detail-title">Data Catalog e lineage</h1>', escape: false)
-        ->assertSee('1.200 dataset documentati');
+        ->assertSee('<h1 class="detail-title">Portale prenotazioni</h1>', escape: false)
+        ->assertSee('300.000 prenotazioni nel primo anno');
 
-    $this->get('/en-GB/experience/data-governance-manager-acme-consulting')
+    $this->get('/en-GB/experience/tech-lead-brightline-software')
         ->assertOk()
         ->assertSee('Projects in this role');
 });
 
 it('has no page for items without details, hidden items or unknown slugs', function () {
     // progetto senza testo di dettaglio né immagine
-    $this->get('/it-IT/progetti/regole-di-data-quality')->assertNotFound();
+    $this->get('/it-IT/progetti/app-per-i-biglietti')->assertNotFound();
 
-    Project::query()->where('slug->it-IT', 'data-catalog-e-lineage')->update(['is_visible' => false]);
-    $this->get('/it-IT/progetti/data-catalog-e-lineage')->assertNotFound();
+    Project::query()->where('slug->it-IT', 'portale-prenotazioni')->update(['is_visible' => false]);
+    $this->get('/it-IT/progetti/portale-prenotazioni')->assertNotFound();
 
     $this->get('/it-IT/progetti/non-esiste')->assertNotFound();
     $this->get('/it-IT/sconosciuto/qualcosa')->assertNotFound();
@@ -85,11 +85,11 @@ it('sends listing segments to the CV section', function () {
 });
 
 it('keeps old addresses working when a slug changes', function () {
-    $project = Project::query()->where('slug->it-IT', 'data-catalog-e-lineage')->sole();
+    $project = Project::query()->where('slug->it-IT', 'portale-prenotazioni')->sole();
     $project->setTranslation('slug', 'it-IT', 'catalogo-dati');
     $project->save();
 
-    $this->get('/it-IT/progetti/data-catalog-e-lineage')
+    $this->get('/it-IT/progetti/portale-prenotazioni')
         ->assertStatus(301)
         ->assertRedirect('http://localhost/it-IT/progetti/catalogo-dati');
 
@@ -100,7 +100,7 @@ it('keeps old addresses working when a slug changes', function () {
     $project->save();
 
     expect(Redirect::query()->pluck('to_path', 'from_path')->all())->toEqual([
-        '/it-IT/progetti/data-catalog-e-lineage' => '/it-IT/progetti/catalogo',
+        '/it-IT/progetti/portale-prenotazioni' => '/it-IT/progetti/catalogo',
         '/it-IT/progetti/catalogo-dati' => '/it-IT/progetti/catalogo',
     ]);
 });
@@ -109,11 +109,11 @@ it('keeps old addresses working when a URL segment changes', function () {
     $italian = Language::query()->where('code', 'it-IT')->sole();
     $italian->update(['url_segments' => ['projects' => 'lavori']]);
 
-    $this->get('/it-IT/progetti/data-catalog-e-lineage')
+    $this->get('/it-IT/progetti/portale-prenotazioni')
         ->assertStatus(301)
-        ->assertRedirect('http://localhost/it-IT/lavori/data-catalog-e-lineage');
+        ->assertRedirect('http://localhost/it-IT/lavori/portale-prenotazioni');
 
-    $this->get('/it-IT/lavori/data-catalog-e-lineage')->assertOk();
+    $this->get('/it-IT/lavori/portale-prenotazioni')->assertOk();
 });
 
 it('applies the redirects managed in the admin, also to sub-paths', function () {
@@ -138,9 +138,9 @@ it('lists every public page with its language versions in the sitemap', function
     expect($locations)->toContain(
         'http://localhost/it-IT',
         'http://localhost/en-GB',
-        'http://localhost/it-IT/progetti/data-catalog-e-lineage',
-        'http://localhost/en-GB/experience/data-governance-manager-acme-consulting',
-    )->not->toContain('http://localhost/it-IT/progetti/regole-di-data-quality')
+        'http://localhost/it-IT/progetti/portale-prenotazioni',
+        'http://localhost/en-GB/experience/tech-lead-brightline-software',
+    )->not->toContain('http://localhost/it-IT/progetti/app-per-i-biglietti')
         ->and($xml->xpath('//s:url[s:loc="http://localhost/en-GB"]/x:link[@hreflang="x-default"]/@href')[0]->__toString())
         ->toBe('http://localhost/it-IT');
 });
@@ -156,13 +156,13 @@ it('publishes a robots.txt that points to the sitemap and hides the admin path',
 it('gives existing pages an address in a newly activated language', function () {
     Language::query()->create(['code' => 'de-DE', 'name' => 'Deutsch']);
 
-    $project = Project::query()->where('slug->it-IT', 'data-catalog-e-lineage')->sole();
+    $project = Project::query()->where('slug->it-IT', 'portale-prenotazioni')->sole();
 
     // contenuto non ancora tradotto in tedesco: lo slug nasce dal titolo nella lingua di default
-    expect($project->t('slug', 'de-DE', false))->toBe('data-catalog-e-lineage')
+    expect($project->t('slug', 'de-DE', false))->toBe('portale-prenotazioni')
         ->and(Redirect::query()->count())->toBe(0);
 
-    $this->get('/de-DE/projekte/data-catalog-e-lineage')
+    $this->get('/de-DE/projekte/portale-prenotazioni')
         ->assertOk()
         ->assertSee('<html lang="de-DE">', escape: false)
         ->assertSee('Zurück zum Lebenslauf');

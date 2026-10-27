@@ -30,14 +30,14 @@ it('lists the published articles written in the page language', function () {
     $this->get('/it-IT/blog')
         ->assertOk()
         ->assertSee('Solo in italiano')
-        ->assertSee('Perché la Data Governance conviene')
+        ->assertSee('Tre regole per un sito accessibile')
         ->assertDontSee('Bozza')
         ->assertDontSee('Programmato')
         ->assertSee('3 minuti di lettura');
 
     $this->get('/en-GB/blog')
         ->assertOk()
-        ->assertSee('Why data governance pays off')
+        ->assertSee('Three rules for an accessible website')
         ->assertDontSee('Solo in italiano');
 });
 
@@ -107,14 +107,14 @@ it('returns 404 for the blog of a language without articles', function () {
 });
 
 it('describes articles as BlogPosting and links the feed', function () {
-    $html = (string) $this->get('/en-GB/blog/why-data-governance-pays-off')->getContent();
+    $html = (string) $this->get('/en-GB/blog/three-rules-for-an-accessible-website')->getContent();
     $posting = collect(jsonLdNodes($html))->firstWhere('@type', 'BlogPosting');
 
-    expect($posting['headline'])->toBe('Why data governance pays off')
+    expect($posting['headline'])->toBe('Three rules for an accessible website')
         ->and($posting['author'])->toBe(['@id' => 'http://localhost/#person'])
         ->and($posting['inLanguage'])->toBe('en-GB')
         ->and($html)->toContain('<link rel="alternate" type="application/rss+xml"')
-        ->and($html)->toContain('<link rel="alternate" hreflang="it-IT" href="http://localhost/it-IT/blog/perche-la-data-governance-conviene">');
+        ->and($html)->toContain('<link rel="alternate" hreflang="it-IT" href="http://localhost/it-IT/blog/tre-regole-per-un-sito-accessibile">');
 });
 
 it('publishes an RSS feed per language', function () {
@@ -125,8 +125,8 @@ it('publishes an RSS feed per language', function () {
     $xml = simplexml_load_string((string) $response->getContent());
 
     expect((string) $xml->channel->language)->toBe('it-IT')
-        ->and((string) $xml->channel->item[0]->title)->toBe('Perché la Data Governance conviene')
-        ->and((string) $xml->channel->item[0]->link)->toBe('http://localhost/it-IT/blog/perche-la-data-governance-conviene');
+        ->and((string) $xml->channel->item[0]->title)->toBe('Tre regole per un sito accessibile')
+        ->and((string) $xml->channel->item[0]->link)->toBe('http://localhost/it-IT/blog/tre-regole-per-un-sito-accessibile');
 });
 
 it('shows the latest articles on the CV when the section is enabled, and the blog in the menu', function () {
@@ -138,22 +138,22 @@ it('shows the latest articles on the CV when the section is enabled, and the blo
 
     $this->get('/it-IT')
         ->assertSee('id="latest_articles"', escape: false)
-        ->assertSee('Perché la Data Governance conviene');
+        ->assertSee('Tre regole per un sito accessibile');
 });
 
 it('lists the blog and its articles in the sitemap', function () {
     $xml = (string) $this->get('/sitemap.xml')->getContent();
 
     expect($xml)->toContain('<loc>http://localhost/it-IT/blog</loc>')
-        ->toContain('<loc>http://localhost/en-GB/blog/why-data-governance-pays-off</loc>');
+        ->toContain('<loc>http://localhost/en-GB/blog/three-rules-for-an-accessible-website</loc>');
 });
 
 it('redirects the old address when an article slug changes', function () {
     $article = Article::query()->firstOrFail();
-    $article->setTranslation('slug', 'it-IT', 'data-governance');
+    $article->setTranslation('slug', 'it-IT', 'accessibilita');
     $article->save();
 
-    $this->get('/it-IT/blog/perche-la-data-governance-conviene')->assertRedirect('http://localhost/it-IT/blog/data-governance');
+    $this->get('/it-IT/blog/tre-regole-per-un-sito-accessibile')->assertRedirect('http://localhost/it-IT/blog/accessibilita');
     expect(Redirect::query()->count())->toBe(1);
 });
 

@@ -1,6 +1,7 @@
 // Screenshot del sito e dell'admin con i dati dimostrativi, per il README e la pagina docs/SCREENSHOTS.md.
 // Gira solo su richiesta, con un amministratore già creato:
 //   php artisan make:filament-user --name=Demo --email=demo@example.com --password=demo-password
+//   php artisan db:seed --class=DemoStatsSeeder   (statistiche dimostrative)
 //   SCREENSHOTS=1 npx playwright test screenshots --project=chromium
 // Le immagini finiscono in screenshots/ (ignorata da git); in CI sono un artefatto del workflow.
 import { devices, expect, test } from '@playwright/test';
@@ -27,10 +28,10 @@ test.describe('screenshots', () => {
         const shots = [
             ['cv-desktop', '/en-GB'],
             ['cv-desktop-it', '/it-IT'],
-            ['project', '/en-GB/projects/data-catalog-and-lineage'],
-            ['experience', '/en-GB/experience/data-governance-manager-acme-consulting'],
+            ['project', '/en-GB/projects/booking-portal'],
+            ['experience', '/en-GB/experience/tech-lead-brightline-software'],
             ['blog', '/en-GB/blog'],
-            ['article', '/en-GB/blog/why-data-governance-pays-off'],
+            ['article', '/en-GB/blog/three-rules-for-an-accessible-website'],
         ];
 
         for (const [name, path] of shots) {
@@ -74,6 +75,14 @@ test.describe('screenshots', () => {
             await page.waitForTimeout(500); // widget caricati dopo la pagina
             await page.screenshot({ path: `${dir}/${name}.png` });
         }
+
+        // Statistiche (con DemoStatsSeeder): la parte alta e la mappa
+        await page.goto(`/${admin.path}/statistics`, { waitUntil: 'networkidle' });
+        await page.waitForTimeout(1000);
+        await page.screenshot({ path: `${dir}/admin-statistics.png` });
+        // la barra in alto resta fissa e coprirebbe il riquadro
+        await page.addStyleTag({ content: '.fi-topbar { display: none !important; }' });
+        await page.locator('.resume-stats-map').locator('xpath=ancestor::section[1]').screenshot({ path: `${dir}/admin-statistics-map.png` });
 
         // Sistema: solo il riquadro degli aggiornamenti (il resto mostra i percorsi del server)
         await page.goto(`/${admin.path}/system`, { waitUntil: 'networkidle' });

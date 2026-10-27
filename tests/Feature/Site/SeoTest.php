@@ -22,10 +22,10 @@ it('declares canonical address and language versions on the CV', function () {
 });
 
 it('links the translated address of a detail page in every language', function () {
-    $this->get('/it-IT/progetti/data-catalog-e-lineage')
-        ->assertSee('<link rel="canonical" href="http://localhost/it-IT/progetti/data-catalog-e-lineage">', escape: false)
-        ->assertSee('<link rel="alternate" hreflang="en-GB" href="http://localhost/en-GB/projects/data-catalog-and-lineage">', escape: false)
-        ->assertSee('<a href="http://localhost/en-GB/projects/data-catalog-and-lineage" hreflang="en-GB" lang="en-GB"', escape: false);
+    $this->get('/it-IT/progetti/portale-prenotazioni')
+        ->assertSee('<link rel="canonical" href="http://localhost/it-IT/progetti/portale-prenotazioni">', escape: false)
+        ->assertSee('<link rel="alternate" hreflang="en-GB" href="http://localhost/en-GB/projects/booking-portal">', escape: false)
+        ->assertSee('<a href="http://localhost/en-GB/projects/booking-portal" hreflang="en-GB" lang="en-GB"', escape: false);
 });
 
 it('omits inactive languages from hreflang and the language switcher', function () {
@@ -35,7 +35,7 @@ it('omits inactive languages from hreflang and the language switcher', function 
 });
 
 it('uses the SEO title and description from the settings, with a default', function () {
-    $this->get('/it-IT')->assertSee('<title>John Doe - Data Governance</title>', escape: false);
+    $this->get('/it-IT')->assertSee('<title>John Doe - Sviluppatore full-stack</title>', escape: false);
 
     app(Settings::class)->setMany([
         'seo.title' => ['it-IT' => 'John Doe | Consulente dati'],
@@ -58,10 +58,10 @@ it('describes the person in JSON-LD without personal contact data by default', f
         ->and($person['@id'])->toBe('http://localhost/#person')
         ->and($person['name'])->toBe('John Doe')
         ->and($person['sameAs'])->toBe(['https://www.linkedin.com/in/example', 'https://github.com/example'])
-        ->and($person['worksFor'][0]['name'])->toBe('Acme Consulting')
+        ->and($person['worksFor'][0]['name'])->toBe('Brightline Software')
         ->and($person['alumniOf'][0]['@type'])->toBe('EducationalOrganization')
         ->and(collect($person['knowsLanguage'])->pluck('alternateName')->all())->toBe(['it', 'en'])
-        ->and($person['address'])->toBe(['@type' => 'PostalAddress', 'addressLocality' => 'Milano', 'addressCountry' => 'IT'])
+        ->and($person['address'])->toBe(['@type' => 'PostalAddress', 'addressLocality' => 'Torino', 'addressCountry' => 'IT'])
         ->and($person)->not->toHaveKeys(['email', 'telephone', 'birthDate']);
 });
 
@@ -82,10 +82,10 @@ it('adds email, phone and birth date to JSON-LD only when enabled', function () 
 });
 
 it('adds breadcrumbs to detail pages', function () {
-    $nodes = collect(jsonLdNodes((string) $this->get('/en-GB/projects/data-catalog-and-lineage')->getContent()));
+    $nodes = collect(jsonLdNodes((string) $this->get('/en-GB/projects/booking-portal')->getContent()));
     $breadcrumbs = $nodes->firstWhere('@type', 'BreadcrumbList');
 
-    expect(collect($breadcrumbs['itemListElement'])->pluck('name')->all())->toBe(['John Doe', 'Projects', 'Data catalog and lineage'])
+    expect(collect($breadcrumbs['itemListElement'])->pluck('name')->all())->toBe(['John Doe', 'Projects', 'Booking portal'])
         ->and($breadcrumbs['itemListElement'][1]['item'])->toBe('http://localhost/en-GB#projects')
         ->and($nodes->firstWhere('@type', 'WebPage')['inLanguage'])->toBe('en-GB');
 });

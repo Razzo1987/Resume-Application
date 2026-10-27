@@ -30,13 +30,17 @@ Every change made in the admin is online immediately: the page cache is cleared 
 
 ## First steps
 
-1. user menu → *Profile*: turn on **two-factor authentication** and save the recovery codes;
-2. *Website* → *Site languages*: default language and active languages;
-3. *Résumé* → *Profile*, then the CV sections;
-4. *Content* → *CV PDFs*: one CV for each language;
-5. *Website* → *Settings*: SEO title and description, sharing image, site icon, privacy;
-6. *Website* → *CV layout*: section order and menu;
-7. *Go to site* (top bar) to check the result in every language.
+1. user menu → *Profile*: turn on **two-factor authentication** and save the recovery codes (and choose the admin
+   language);
+2. *Website* → *System* → *Scheduled jobs*: add the **cron job** in cPanel (one line, shown on the page), so updates
+   and statistics work by themselves;
+3. *Website* → *Site languages*: default language and active languages;
+4. *Résumé* → *Profile*, then the CV sections;
+5. *Content* → *CV PDFs*: one CV for each language;
+6. *Website* → *Settings*: SEO title and description, sharing image, site icon, privacy notice;
+7. *Website* → *CV layout*: section order and menu;
+8. *Statistics* (optional): turn them on and set the MaxMind account for countries and cities;
+9. *Go to site* (top bar) to check the result in every language.
 
 If you installed the sample CV, edit or delete its content: everything belongs to the fictional "John Doe".
 
@@ -49,8 +53,48 @@ options are the same for every language and are entered once.
 The address of the admin area is the one chosen during the installation (`RESUME_ADMIN_PATH`). The top bar has
 *Go to site*, which opens the public site in the admin language when the site has it.
 
-The dashboard shows alerts (update available, update to complete, maintenance on, `core/` folder reachable from the
-browser), the version, the content count, the CV PDFs uploaded and the missing translations per language.
+The dashboard shows alerts (update available or downloaded, automatic update done or failed, update to complete,
+maintenance on, `core/` folder reachable from the browser) and then one group of cards per type, each linking to
+where you act:
+
+- **System**: version and available update, cron job, automatic updates, date of the last content export;
+- **Languages**: site languages and, for each one, the texts still to translate;
+- **Content**: work experience and volunteering, projects with a page of their own, published, draft and scheduled
+  articles, active CV sections that stay hidden because they are empty;
+- **CV**: the PDF of each language with its upload date (and what visitors get when it is missing);
+- **Statistics**: views and CV downloads of the last 7 days with the change on the week before, most viewed page,
+  main source and country (or how to turn statistics on).
+
+Each administrator chooses the **admin language** in the profile (user menu → *Profile*); without a choice, and on
+the sign-in page, `RESUME_ADMIN_LOCALE` applies.
+
+### Statistics
+
+*Statistics* (right below the dashboard) is off until you turn it on with *Settings* on that page.
+
+- **What is recorded**, for every page view and CV download: date and time, page, language, referring site, campaign
+  parameters (`utm_source`, `utm_medium`, `utm_campaign`, `utm_term`, `utm_content`), the platform of the click when
+  the address has a click ID (`fbclid` is stored as "facebook", the ID itself never), device, operating system,
+  browser, and from the IP address country, region, city and network (provider or company).
+- **What is not**: no cookies and nothing read from the device, so no cookie banner is needed. The IP address is
+  shortened straight away (`93.44.12.x`, IPv6 to the first 48 bits) and never stored in full. Bots, scripts (curl,
+  libraries), browser previews (prefetch) and visits from the IP address of an administrator do not count.
+- **Your own visits**: the address you use the admin from is excluded for 14 days after your last access (change it in
+  *Settings*; *Excluded IPs* lists and removes them). With a shared address (office, mobile network) other people
+  would be excluded too: that is why the exclusion expires.
+- **How long**: single visits are deleted after 12 months (configurable); the daily totals per page stay, so the
+  charts keep working for older periods.
+- **Location**: the free MaxMind GeoLite2 City and ASN databases, installed on the server (the IP address is not sent
+  to anyone). Create a free account at [maxmind.com](https://www.maxmind.com/en/geolite2/signup), generate a license
+  key, then *MaxMind account* on the *Statistics* page (or `RESUME_GEOIP_ACCOUNT_ID` and
+  `RESUME_GEOIP_LICENSE_KEY` in `core/.env`). *Update the databases* downloads them; with the cron job they are
+  checked every day and updated by themselves, as the GeoLite terms ask. Without the databases everything works
+  except country, city, network and the map.
+- **The page**: period and page filters (for example a single blog article), totals, visits over time, most viewed
+  pages, referring sites, campaigns, languages, a world map with countries and cities, networks, devices, systems,
+  browsers, and the list of the latest visits.
+- Turning statistics on also turns on the **Privacy page** (see [Settings](#settings)), with a section describing them.
+  Statistics are never part of content exports.
 
 ### Résumé
 
@@ -67,7 +111,7 @@ browser), the version, the content count, the CV PDFs uploaded and the missing t
 | **Publications and talks** | Articles, papers, theses, books, talks, webinars, presentations, podcasts: venue, date, co-authors, link or PDF. |
 | **Organisations** | Companies, clients, universities, certifiers, associations: name, type, website, logo. Used by experience, projects, education and certifications (they can also be created on the fly from those forms). |
 | **Interests** | Name, short description and an [icon](#icons). |
-| **Skills** and **Skill categories** | Skills grouped by category (for example "Data governance", "Tools", "Soft skills"), linked to experience and projects; "featured" skills stand out. |
+| **Skills** and **Skill categories** | Skills grouped by category (for example "Expertise", "Tools", "Soft skills"), linked to experience and projects; "featured" skills stand out. |
 
 Every list can be reordered by dragging the rows (where order matters) and every item has a *Visible on the site*
 switch, so things can be prepared and published later. Items with a public page have *View on site*.
@@ -90,12 +134,12 @@ switch, so things can be prepared and published later. Items with a public page 
 | **Redirects** | Old addresses that must lead to new ones (301 or 302), for example after moving from another site. Changing a slug or a URL word creates the redirect by itself. |
 | **Settings** | See [Settings](#settings). |
 | **Themes** | Installed themes with their version: *Activate*, *Install or update a theme* (zip), remove the ones not in use. |
-| **System** | Version, updates, maintenance and tools: clear caches, check the protection of `core/`, `.htaccess` rules, delete files left by older versions, export and import the content. Updates are described in [INSTALL.md](INSTALL.md#updating). |
+| **System** | Version, updates (also automatic), scheduled jobs (cron), maintenance and tools: clear caches, check the protection of `core/`, `.htaccess` rules, delete files left by older versions, export and import the content. Updates are described in [INSTALL.md](INSTALL.md#updating). |
 
 ## Languages and translations
 
 - **Language codes** are full locale codes (`it-IT`, `en-GB`) and are also the first part of every address:
-  `/it-IT`, `/en-GB/projects/data-catalog`. `/` sends visitors to the default language.
+  `/it-IT`, `/en-GB/projects/booking-portal`. `/` sends visitors to the default language.
 - **Language packs** (`core/lang/{code}/site.php` and `routes.php`) contain the site texts and the URL words. The
   package includes it-IT, en-GB, en-US, de-DE, fr-FR, es-ES, pt-PT, pt-BR and nl-NL (the last six are drafts to be
   reviewed by native speakers). A language without a pack uses the English texts.
@@ -115,6 +159,7 @@ switch, so things can be prepared and published later. Items with a public page 
 | **CV download** | Name of the downloaded file, with the placeholders `{name}` (full name), `{lang}` (IT, EN...) and `{locale}` (it-IT, en-GB...), e.g. `CV {name} - {lang}.pdf`; whether a language without its own CV offers the one of the default language. |
 | **Contact details on the page** | Show email, phone and birth date on the CV. Email and phone are encoded in the HTML and revealed by the page script, which keeps most spam bots away. |
 | **Structured data (JSON-LD)** | Include email, phone and birth date in the data read by search engines. Off by default: turn them on only if you want them to appear in search results. |
+| **Privacy notice** | The Privacy page (`/{language}/privacy`) and its link in the footer, off by default and always on with visit statistics. For each language write your own text, or start from the template (*Use the template*) and edit it; a language without a text of its own shows the template. `{name}` becomes the profile name and `{email}` your email, encoded as in the rest of the site. With statistics on, a section describing them (data, shortened IP, legitimate interest, months of retention, GeoLite) is added by itself. The template is not legal advice: check it for your case. |
 | **SEO** | Sharing image (Open Graph, 1200 x 630), site icon (square PNG, at least 512 px), and for each language the page title, the description and the footer text (for example copyright and data processing consent). |
 
 ## Key figures
@@ -159,13 +204,14 @@ to the next request (if they do not, *System* → *Tools* → *Clear caches*).
 | `APP_KEY` | generated | encryption key (sessions, two-factor secrets, GitHub token); changing it logs everybody out |
 | `APP_LOCALE`, `APP_FALLBACK_LOCALE` | from the installer | languages used before the database is ready; the site languages are managed from the admin |
 | `RESUME_ADMIN_PATH` | `admin` | address of the admin area (`/admin`) |
-| `RESUME_ADMIN_LOCALE` | `it` or `en` | language of the admin interface |
+| `RESUME_ADMIN_LOCALE` | `it` or `en` | default language of the admin interface (each administrator can choose another one in the profile) |
 | `RESUME_THEME` | `base` | theme used when none is active in the admin (for example after a failed theme installation) |
 | `RESUME_PAGE_CACHE` | `true` | HTML cache of the public pages; turn it off only to debug |
 | `RESUME_TRUSTED_PROXIES` | empty | only when the site is behind a proxy that changes the request address (CDN or tunnel such as Cloudflare, GitHub Codespaces): `*` for any proxy, or a comma-separated list of IP addresses or networks. Address, protocol and visitor IP are then read from the `X-Forwarded-*` headers. Leave it empty otherwise: with `*` and no proxy in front, anybody could fake those headers |
 | `RESUME_UPDATE_REPOSITORY` | `Razzo1987/Resume-Application` | GitHub repository whose releases are offered as updates |
 | `RESUME_UPDATE_TOKEN` | empty | GitHub token for a private repository (it can also be entered from *System*) |
 | `RESUME_UPDATE_API` | `https://api.github.com` | GitHub API address (GitHub Enterprise or tests) |
+| `RESUME_GEOIP_ACCOUNT_ID`, `RESUME_GEOIP_LICENSE_KEY` | empty | MaxMind account for the GeoLite databases of the statistics (they can also be entered from *Statistics*) |
 | `DB_HOST`, `DB_PORT`, `DB_DATABASE`, `DB_USERNAME`, `DB_PASSWORD` | from the installer | database connection |
 | `MAIL_MAILER`, `MAIL_FROM_ADDRESS`, `MAIL_FROM_NAME` | `sendmail`, `noreply@your-domain`, your name | emails sent by the admin (password reset). If the hosting needs SMTP, set `MAIL_MAILER=smtp` with `MAIL_HOST`, `MAIL_PORT`, `MAIL_USERNAME`, `MAIL_PASSWORD` |
 | `LOG_CHANNEL`, `LOG_LEVEL` | `daily`, `warning` | error logs in `core/storage/logs` |
@@ -178,7 +224,8 @@ to the next request (if they do not, *System* → *Tools* → *Clear caches*).
   (Google Authenticator, 1Password...) and recovery codes.
 - `core/` is denied to browsers by `.htaccess`; the dashboard warns you if the server does not apply it.
 - Uploaded images are resized and converted to WebP; CV PDFs are stored outside the web root.
-- Content exports contain no users, passwords, `.env` or GitHub token.
+- Visit statistics (off by default) use no cookies and store the IP address only shortened; see [Statistics](#statistics).
+- Content exports contain no users, passwords, `.env`, GitHub token, MaxMind account or statistics.
 
 ## Backups
 

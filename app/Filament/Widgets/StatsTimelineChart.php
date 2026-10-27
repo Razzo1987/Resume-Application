@@ -52,6 +52,8 @@ class StatsTimelineChart extends ChartWidget
             'fill' => true,
             'tension' => 0.25,
             'pointRadius' => $long ? 0 : 2,
+            // disegnata per prima: il riempimento non deve coprire la linea dei download
+            'order' => 2,
         ]];
 
         if ($this->pageFilter === '') {
@@ -63,6 +65,7 @@ class StatsTimelineChart extends ChartWidget
                 'backgroundColor' => 'rgba(245, 158, 11, 0.15)',
                 'tension' => 0.25,
                 'pointRadius' => $long ? 0 : 2,
+                'order' => 1,
             ];
         }
 
@@ -79,7 +82,7 @@ class StatsTimelineChart extends ChartWidget
     {
         return [
             'scales' => ['y' => ['beginAtZero' => true, 'ticks' => ['precision' => 0]]],
-            'plugins' => ['legend' => ['display' => $this->pageFilter === '']],
+            'plugins' => ['legend' => ['display' => $this->pageFilter === '', 'reverse' => true]],
             'interaction' => ['intersect' => false, 'mode' => 'index'],
         ];
     }

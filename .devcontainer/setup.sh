@@ -27,6 +27,7 @@ done
 
 php artisan migrate:fresh --seed --force
 php artisan db:seed --class=DemoSeeder --force
+php artisan db:seed --class=DemoStatsSeeder --force   # visite finte per vedere la pagina Statistiche
 # Versione registrata come dopo l'installer (altrimenti l'admin chiede di completare l'aggiornamento)
 php artisan tinker --execute='app(App\Support\System\Updater::class)->complete();' >/dev/null
 php artisan make:filament-user --name="Demo" --email=demo@example.com --password=demo-password

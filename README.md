@@ -63,6 +63,11 @@ can be imported (see [docs/INSTALL.md](docs/INSTALL.md#from-version-1)).
 - Permanent redirects when a slug or a URL word changes, plus your own redirects for old addresses.
 - **Privacy by default**: no cookies for visitors, no external requests, strict Content Security Policy; email and
   phone are encoded in the HTML; email, phone and birth date stay out of the structured data unless you enable them.
+- **Visit statistics without cookies** (optional): page views and CV downloads, sources and campaigns (UTM),
+  devices, browsers, countries and cities on a world map, for the whole site or a single page. The IP address is
+  shortened straight away and located with the free MaxMind GeoLite2 databases installed on your server; bots and
+  your own visits do not count. No cookie banner needed; a **Privacy page** (template in 9 languages, editable)
+  explains it to visitors.
 - HTML page cache cleared on every change, ETags, a reduced Bootstrap build and an SVG icon sprite with only the
   icons in use. Lighthouse 100 on the demo data, WCAG 2.1 AA checked with axe.
 
@@ -70,7 +75,9 @@ can be imported (see [docs/INSTALL.md](docs/INSTALL.md#from-version-1)).
 - One form per item with a **tab for each language**; a *Translations* page lists what is still missing.
 - Images resized and converted to WebP on upload; organisation logos, certification badges, project images.
 - Key figures computed for you (years of experience, projects, certifications...) or written by hand.
-- Two-factor authentication, configurable admin address, interface in Italian or English.
+- A **dashboard** grouped by system, languages, content, CV and statistics, each card linking to where you act.
+- Two-factor authentication, configurable admin address, interface in Italian or English (each administrator
+  chooses).
 - **Content export and import** (zip) to back up the site or move it to another server.
 
 ### 📦 Installation and updates
@@ -78,12 +85,18 @@ can be imported (see [docs/INSTALL.md](docs/INSTALL.md#from-version-1)).
 - **Updates from the admin**: new versions are announced from the GitHub releases; the package is downloaded
   straight to the server (or uploaded from your computer, with no upload-size limit), checked, installed in a few
   seconds and completed automatically. No FTP needed.
+- **Scheduled jobs** with one cPanel cron line: update check, **automatic updates** (off, download and notify, or
+  install fix releases by themselves), GeoLite updates, statistics summaries and clean-up.
 
 ## 📸 Screenshots
 
 | Admin panel | Project page |
 |---|---|
 | ![Editing an experience](docs/screenshots/admin-experience.webp) | ![Project page](docs/screenshots/project.webp) |
+
+| Visit statistics (no cookies) | Where visits come from |
+|---|---|
+| ![Statistics](docs/screenshots/admin-statistics.webp) | ![Statistics map](docs/screenshots/admin-statistics-map.webp) |
 
 More in **[docs/SCREENSHOTS.md](docs/SCREENSHOTS.md)**: CV, detail pages, blog, phone layout and the admin pages.
 
@@ -152,6 +165,10 @@ From version 2.0.3 the site updates itself from the admin: *System* → *Updates
    computer).
 3. **Update now**: content backup, maintenance, files replaced in a few seconds (visitors see a "Site being updated"
    page), database and caches updated, maintenance off.
+
+With the cron job set up (*System* → *Scheduled jobs* shows the line to paste in cPanel) the new package is
+downloaded by itself, and fix releases (2.1.0 → 2.1.1) can also install themselves; you get the result on the
+dashboard and by email.
 
 Updating by hand (extract the zip over the previous version, then *Complete the update*) still works. Details in
 [docs/INSTALL.md](docs/INSTALL.md#updating).

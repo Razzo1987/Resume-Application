@@ -148,6 +148,33 @@ that repository only and the *Contents: Read-only* permission. Enter it with *Gi
 encrypted with the `APP_KEY` in `core/storage`, never in content exports) or set `RESUME_UPDATE_TOKEN` in
 `core/.env`. Public repositories need no token. If the server cannot reach GitHub, upload the package instead.
 
+### Scheduled jobs (cron) and automatic updates
+
+One cron job runs everything that has to happen by itself: the update check, automatic updates, the GeoLite
+databases of the statistics, the daily statistics summaries and the clean-up of temporary files.
+
+1. Admin → *System* → **Scheduled jobs**: the page shows the exact line, with the PHP path of your server, e.g.
+   `*/5 * * * * /opt/cpanel/ea-php85/root/usr/bin/php /home/user/public_html/core/artisan schedule:run >/dev/null 2>&1`.
+2. cPanel → **Cron Jobs** → *Common settings*: once per five minutes → paste the command → *Add new cron job*.
+3. Within a few minutes the page shows "active" with the PHP version used by the cron job: it must be the same as the
+   site's (on cPanel the command line PHP can be a different version: change the path in the command if needed).
+
+Without the cron job the site works anyway: the light jobs (update check, statistics summaries) start from the admin
+at most once an hour, and downloads are done from the admin pages.
+
+**Automatic updates** (*System* → *Updates* → *Change*), with the cron job active:
+
+- **Off**: only the notice on the dashboard;
+- **Download and notify** (default): the package is downloaded to the server and checked; you press *Check and
+  install*;
+- **Install fix releases automatically**: fix releases (same x.y, e.g. 2.1.0 → 2.1.1) install themselves, with the same
+  checks and content export as from the admin (the PHP version and extensions of the web server are checked too);
+  releases with new features (2.2.0) are only downloaded, because they can change content or themes.
+
+The result is shown on the dashboard and emailed to the administrators. If an automatic update stops halfway, the
+cron job retries it; the email also contains a link to continue it from the browser. From the command line:
+`php core/artisan resume:update --check` and `php core/artisan resume:update --finish`.
+
 ### By hand (FTP or File Manager)
 
 1. Admin → *System* → *Start maintenance*, then *Tools* → *Export the content* (or a full backup from cPanel).

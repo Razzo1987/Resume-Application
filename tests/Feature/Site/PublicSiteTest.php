@@ -9,8 +9,8 @@ beforeEach(fn () => seedDemo());
 dataset('public pages', [
     'CV (it)' => '/it-IT',
     'CV (en)' => '/en-GB',
-    'experience page' => '/it-IT/esperienze/data-governance-manager-acme-consulting',
-    'project page' => '/en-GB/projects/data-catalog-and-lineage',
+    'experience page' => '/it-IT/esperienze/tech-lead-brightline-software',
+    'project page' => '/en-GB/projects/booking-portal',
     'sitemap' => '/sitemap.xml',
     'robots' => '/robots.txt',
     'CV download' => '/it-IT/cv',
@@ -56,7 +56,7 @@ it('loads only local resources (no CDN, fonts or trackers)', function (string $p
     expect(resourceHosts($html))->each->toBe('localhost')
         ->and($html)->not->toContain('fonts.googleapis.com')
         ->and($html)->not->toContain('fonts.bunny.net');
-})->with(['/it-IT', '/en-GB/projects/data-catalog-and-lineage', '/it-IT/pagina-inesistente']);
+})->with(['/it-IT', '/en-GB/projects/booking-portal', '/it-IT/pagina-inesistente']);
 
 it('sends security headers with a strict content security policy', function () {
     $response = $this->get('/it-IT');

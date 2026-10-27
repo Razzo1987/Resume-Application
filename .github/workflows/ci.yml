@@ -99,9 +99,11 @@ jobs:
           name: playwright-results
           path: test-results/
           retention-days: 7
-      - name: Screenshot del sito e dell'admin
+      - name: Screenshot del sito e dell'admin (con statistiche dimostrative)
         if: success() || failure()
-        run: SCREENSHOTS=1 npx playwright test screenshots --project=chromium --reporter=list
+        run: |
+          php artisan db:seed --class=DemoStatsSeeder --force
+          SCREENSHOTS=1 npx playwright test screenshots --project=chromium --reporter=list
       - name: Report dei test (HTML)
         uses: actions/upload-artifact@v4
         if: always()

@@ -14,6 +14,7 @@ use App\Support\Stats\Ip;
 use App\Support\Stats\StatsQuery;
 use App\Support\Stats\WorldMap;
 use App\Support\System\Backup;
+use Database\Seeders\DemoStatsSeeder;
 use Filament\Facades\Filament;
 use Illuminate\Http\Client\Request;
 use Illuminate\Support\Facades\File;
@@ -299,4 +300,17 @@ it('updates the GeoLite databases from the cron job', function () {
 
     expect(app(GeoIpUpdater::class)->updateAll())->toBe('updated GeoLite2-City, GeoLite2-ASN')
         ->and(app(GeoIp::class)->lookup('2a01:4f8::5')['country'])->toBe('DE');
+});
+
+it('fills the demo with three months of sample visits', function () {
+    app(Settings::class)->set('stats.enabled', false);
+    $this->seed(DemoStatsSeeder::class);
+
+    $totals = StatsQuery::forPeriod('90')->totals();
+
+    expect(app(Settings::class)->bool('stats.enabled'))->toBeTrue()
+        ->and($totals['views'])->toBeGreaterThan(1000)
+        ->and($totals['downloads'])->toBeGreaterThan(50)
+        ->and($totals['countries'])->toBe(12)
+        ->and(StatsQuery::forPeriod('90')->top('utm_campaign'))->toHaveKey('new-job-2026');
 });

@@ -27,9 +27,13 @@ The CV page, top to bottom (click to open it full size):
 
 ## Admin panel
 
-| Dashboard | Editing an experience (one tab per language) |
+| Dashboard (grouped by system, languages, content, CV, statistics) | Editing an experience (one tab per language) |
 |---|---|
 | ![Dashboard](screenshots/admin-dashboard.webp) | ![Experience form](screenshots/admin-experience.webp) |
+
+| Visit statistics, without cookies | Where visits come from (map drawn by the server) |
+|---|---|
+| ![Statistics](screenshots/admin-statistics.webp) | ![Statistics map](screenshots/admin-statistics-map.webp) |
 
 | CV layout | Translations |
 |---|---|
@@ -44,6 +48,7 @@ The CV page, top to bottom (click to open it full size):
 ```bash
 php artisan migrate:fresh --seed && php artisan db:seed --class=DemoSeeder
 php artisan make:filament-user --name=Demo --email=demo@example.com --password=demo-password
+php artisan db:seed --class=DemoStatsSeeder    # sample visits for the statistics page
 RESUME_ADMIN_LOCALE=en php artisan serve       # in another terminal
 SCREENSHOTS=1 E2E_BASE_URL=http://localhost:8000 npx playwright test screenshots --project=chromium
 ```

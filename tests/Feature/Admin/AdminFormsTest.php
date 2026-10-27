@@ -253,12 +253,12 @@ it('refreshes the public pages after reordering the CV sections', function () {
 it('links the edit page to the public page when there is one', function () {
     seedDemo();
 
-    $withPage = Project::query()->where('slug->it-IT', 'data-catalog-e-lineage')->sole();
-    $withoutPage = Project::query()->where('slug->it-IT', 'regole-di-data-quality')->sole();
+    $withPage = Project::query()->where('slug->it-IT', 'portale-prenotazioni')->sole();
+    $withoutPage = Project::query()->where('slug->it-IT', 'app-per-i-biglietti')->sole();
 
     Livewire::test(EditProject::class, ['record' => $withPage->getRouteKey()])
         ->assertActionVisible('viewOnSite')
-        ->assertActionHasUrl('viewOnSite', 'http://localhost/it-IT/progetti/data-catalog-e-lineage');
+        ->assertActionHasUrl('viewOnSite', 'http://localhost/it-IT/progetti/portale-prenotazioni');
 
     Livewire::test(EditProject::class, ['record' => $withoutPage->getRouteKey()])
         ->assertActionHidden('viewOnSite');

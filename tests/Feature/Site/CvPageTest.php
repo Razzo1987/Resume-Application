@@ -62,7 +62,7 @@ it('builds the menu from the sections marked for it, with custom titles', functi
         ->and($html)->not->toContain('<li><a href="#highlights">');
 
     // dalle pagine di dettaglio il menu riporta al CV
-    $this->get('/it-IT/progetti/data-catalog-e-lineage')
+    $this->get('/it-IT/progetti/portale-prenotazioni')
         ->assertSee('<li><a href="http://localhost/it-IT#experience">Carriera</a></li>', escape: false);
 });
 
@@ -95,12 +95,12 @@ it('formats dates, durations and key figures in the page language', function () 
     $this->get('/it-IT')
         ->assertSee('gen 2021 - in corso')
         ->assertSee('5 anni e 10 mesi')
-        ->assertSee('460+');
+        ->assertSee('40+');
 
     $this->get('/en-GB')
         ->assertSee('Jan 2021 - present')
         ->assertSee('5 years and 10 months')
-        ->assertSee('data quality rules migrated');
+        ->assertSee('websites and apps released');
 });
 
 it('links to the CV download only when a PDF exists for the language', function () {

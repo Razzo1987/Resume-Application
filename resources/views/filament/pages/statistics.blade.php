@@ -61,9 +61,11 @@
 
     <x-filament::section>
         <x-slot name="heading">{{ __('admin.stats.map') }}</x-slot>
-        @if ($geoip->isAvailable())
+        @if ($geoip->isAvailable() || $totals['countries'] > 0)
             <div class="resume-stats-map">{{ $map }}</div>
-            <p class="resume-stats-note">{{ __('admin.stats.geoip.credit') }}</p>
+            @if ($geoip->isAvailable())
+                <p class="resume-stats-note">{{ __('admin.stats.geoip.credit') }}</p>
+            @endif
         @else
             <p>{{ __('admin.stats.geoip.missing') }}</p>
         @endif

@@ -110,11 +110,11 @@ test.describe('CV', () => {
     });
 
     test('switches language to the same page', async ({ page }) => {
-        await page.goto('/it-IT/progetti/data-catalog-e-lineage');
+        await page.goto('/it-IT/progetti/portale-prenotazioni');
 
         await page.locator('.language-switcher a[hreflang="en-GB"]').click();
-        await expect(page).toHaveURL(/\/en-GB\/projects\/data-catalog-and-lineage$/);
-        await expect(page.locator('h1')).toHaveText('Data catalog and lineage');
+        await expect(page).toHaveURL(/\/en-GB\/projects\/booking-portal$/);
+        await expect(page.locator('h1')).toHaveText('Booking portal');
     });
 
     test('downloads the CV with the standard file name', async ({ page }) => {
@@ -141,7 +141,7 @@ test.describe('CV', () => {
 });
 
 test.describe('accessibility (axe, WCAG 2.1 AA)', () => {
-    for (const path of ['/it-IT', '/en-GB/experience/data-governance-manager-acme-consulting', '/en-GB/projects/data-catalog-and-lineage', '/it-IT/blog', '/en-GB/blog/why-data-governance-pays-off', '/it-IT/pagina-inesistente']) {
+    for (const path of ['/it-IT', '/en-GB/experience/tech-lead-brightline-software', '/en-GB/projects/booking-portal', '/it-IT/blog', '/en-GB/blog/three-rules-for-an-accessible-website', '/it-IT/pagina-inesistente']) {
         test(path, async ({ page }) => {
             await page.goto(path);
             // I temi con animazioni: si analizza la pagina a riposo (testo a opacità piena)

@@ -32,7 +32,8 @@ use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Storage;
 
 /**
- * CV dimostrativo di "John Doe" in italiano e inglese, per provare il progetto subito dopo l'installazione.
+ * CV dimostrativo di "John Doe", sviluppatore web (profilo inventato e generico), in italiano e inglese,
+ * per provare il progetto subito dopo l'installazione: tutte le sezioni, un progetto con pagina dedicata, un articolo.
  */
 class DemoSeeder extends Seeder
 {
@@ -47,118 +48,119 @@ class DemoSeeder extends Seeder
             'email' => 'john.doe@example.com',
             'phone' => '+39 000 000 0000',
             'country_code' => 'IT',
-            'location' => ['it-IT' => 'Milano', 'en-GB' => 'Milan'],
+            'location' => ['it-IT' => 'Torino', 'en-GB' => 'Turin'],
             'headlines' => [
-                'it-IT' => "Data Governance\nData Quality\nData Strategy",
-                'en-GB' => "Data Governance\nData Quality\nData Strategy",
+                'it-IT' => "Sviluppatore full-stack\nTech lead\nAccessibilità web",
+                'en-GB' => "Full-stack developer\nTech lead\nWeb accessibility",
             ],
             'bio' => [
-                'it-IT' => '<p>Consulente con oltre dieci anni di esperienza in progetti di governo e qualità dei dati.</p>',
-                'en-GB' => '<p>Consultant with more than ten years of experience in data governance and data quality projects.</p>',
+                'it-IT' => '<p>Sviluppo applicazioni web da dodici anni, dal database all\'interfaccia. Mi piace costruire servizi veloci e accessibili a tutti e aiutare i colleghi più giovani a crescere.</p>',
+                'en-GB' => '<p>I have been building web applications for twelve years, from the database to the interface. I like making services that are fast and accessible to everyone, and helping junior colleagues grow.</p>',
             ],
         ]);
 
         SocialLink::query()->create(['platform' => SocialPlatform::LinkedIn, 'url' => 'https://www.linkedin.com/in/example', 'sort_order' => 10]);
         SocialLink::query()->create(['platform' => SocialPlatform::GitHub, 'url' => 'https://github.com/example', 'sort_order' => 20]);
 
-        $acme = Organization::query()->create(['name' => 'Acme Consulting', 'type' => OrganizationType::Company, 'website' => 'https://example.com']);
-        $globex = Organization::query()->create(['name' => 'Globex Energy', 'type' => OrganizationType::Client]);
-        $university = Organization::query()->create(['name' => 'Università di Esempio', 'type' => OrganizationType::University]);
-        $certifier = Organization::query()->create(['name' => 'Data Academy', 'type' => OrganizationType::Certifier]);
-        $association = Organization::query()->create(['name' => 'Associazione Esempio', 'type' => OrganizationType::Association]);
+        $company = Organization::query()->create(['name' => 'Brightline Software', 'type' => OrganizationType::Company, 'website' => 'https://example.com']);
+        $client = Organization::query()->create(['name' => 'Verde Mobilità', 'type' => OrganizationType::Client]);
+        $university = Organization::query()->create(['name' => 'Politecnico di Esempio', 'type' => OrganizationType::University]);
+        $certifier = Organization::query()->create(['name' => 'Web Skills Academy', 'type' => OrganizationType::Certifier]);
+        $association = Organization::query()->create(['name' => 'Associazione Codice Aperto', 'type' => OrganizationType::Association]);
 
         $tools = SkillCategory::query()->where('key', 'tools')->firstOrFail();
         $expertise = SkillCategory::query()->where('key', 'expertise')->firstOrFail();
         $soft = SkillCategory::query()->where('key', 'soft-skills')->firstOrFail();
 
-        $governance = Skill::query()->create(['skill_category_id' => $expertise->id, 'name' => ['it-IT' => 'Data Governance', 'en-GB' => 'Data Governance'], 'is_featured' => true]);
-        $quality = Skill::query()->create(['skill_category_id' => $expertise->id, 'name' => ['it-IT' => 'Qualità dei dati', 'en-GB' => 'Data Quality'], 'is_featured' => true]);
+        $web = Skill::query()->create(['skill_category_id' => $expertise->id, 'name' => ['it-IT' => 'Sviluppo web', 'en-GB' => 'Web development'], 'is_featured' => true]);
+        $accessibility = Skill::query()->create(['skill_category_id' => $expertise->id, 'name' => ['it-IT' => 'Accessibilità', 'en-GB' => 'Accessibility'], 'is_featured' => true]);
+        $php = Skill::query()->create(['skill_category_id' => $tools->id, 'name' => ['it-IT' => 'PHP e Laravel', 'en-GB' => 'PHP and Laravel']]);
+        $javascript = Skill::query()->create(['skill_category_id' => $tools->id, 'name' => ['it-IT' => 'JavaScript', 'en-GB' => 'JavaScript']]);
         $sql = Skill::query()->create(['skill_category_id' => $tools->id, 'name' => ['it-IT' => 'SQL', 'en-GB' => 'SQL']]);
-        $teamwork = Skill::query()->create(['skill_category_id' => $soft->id, 'name' => ['it-IT' => 'Lavoro di squadra', 'en-GB' => 'Teamwork']]);
+        $mentoring = Skill::query()->create(['skill_category_id' => $soft->id, 'name' => ['it-IT' => 'Mentoring', 'en-GB' => 'Mentoring']]);
 
         $current = Experience::query()->create([
             'kind' => ExperienceKind::Work,
-            'organization_id' => $acme->id,
-            'role' => ['it-IT' => 'Data Governance Manager', 'en-GB' => 'Data Governance Manager'],
-            'location' => ['it-IT' => 'Milano', 'en-GB' => 'Milan'],
+            'organization_id' => $company->id,
+            'role' => ['it-IT' => 'Tech Lead', 'en-GB' => 'Tech Lead'],
+            'location' => ['it-IT' => 'Torino', 'en-GB' => 'Turin'],
             'start_date' => '2021-01-01',
             'summary' => [
-                'it-IT' => '<p>Guido i progetti di Data Governance per clienti del settore energetico.</p>',
-                'en-GB' => '<p>I lead data governance projects for energy-sector clients.</p>',
+                'it-IT' => '<p>Guido un team di cinque persone che sviluppa piattaforme web per aziende di trasporti e turismo.</p>',
+                'en-GB' => '<p>I lead a team of five building web platforms for transport and tourism companies.</p>',
             ],
         ]);
-        $current->skills()->attach([$governance->id, $quality->id, $teamwork->id]);
+        $current->skills()->attach([$web->id, $accessibility->id, $mentoring->id]);
 
         $previous = Experience::query()->create([
             'kind' => ExperienceKind::Work,
-            'organization_id' => $acme->id,
-            'role' => ['it-IT' => 'Sviluppatore BI', 'en-GB' => 'BI Developer'],
+            'organization_id' => $company->id,
+            'role' => ['it-IT' => 'Sviluppatore full-stack', 'en-GB' => 'Full-stack developer'],
             'start_date' => '2016-03-01',
             'end_date' => '2020-12-31',
             'summary' => [
-                'it-IT' => '<p>Sviluppo di data warehouse e processi ETL.</p>',
-                'en-GB' => '<p>Data warehouse and ETL development.</p>',
+                'it-IT' => '<p>Applicazioni web e API con PHP, JavaScript e MySQL.</p>',
+                'en-GB' => '<p>Web applications and APIs with PHP, JavaScript and MySQL.</p>',
             ],
         ]);
-        $previous->skills()->attach([$sql->id]);
+        $previous->skills()->attach([$php->id, $javascript->id, $sql->id]);
 
         Experience::query()->create([
             'kind' => ExperienceKind::Volunteering,
             'organization_id' => $association->id,
-            'role' => ['it-IT' => 'Docente volontario', 'en-GB' => 'Volunteer teacher'],
-            'start_date' => '2014-01-01',
-            'end_date' => '2017-01-31',
+            'role' => ['it-IT' => 'Mentore volontario', 'en-GB' => 'Volunteer mentor'],
+            'start_date' => '2015-01-01',
+            'end_date' => '2018-06-30',
             'summary' => [
-                'it-IT' => '<p>Corsi di informatica di base per adulti.</p>',
-                'en-GB' => '<p>Basic computer courses for adults.</p>',
+                'it-IT' => '<p>Laboratori di programmazione per ragazzi delle scuole medie.</p>',
+                'en-GB' => '<p>Coding workshops for middle school students.</p>',
             ],
         ]);
 
         foreach ([
-            ['Data Catalog e lineage', 'Data catalog and lineage', '2023-01-01', null],
-            ['Regole di Data Quality', 'Data quality rules', '2022-01-01', '2022-12-31'],
-            ['Data warehouse regolamentare', 'Regulatory data warehouse', '2018-01-01', '2020-06-30'],
+            ['Portale prenotazioni', 'Booking portal', '2023-01-01', null],
+            ['App per i biglietti', 'Ticketing app', '2022-01-01', '2022-12-31'],
+            ['Nuovo sito accessibile', 'Accessible website redesign', '2018-01-01', '2020-06-30'],
         ] as [$it, $en, $start, $end]) {
             $project = Project::query()->create([
                 'experience_id' => $start >= '2021-01-01' ? $current->id : $previous->id,
-                'client_id' => $globex->id,
+                'client_id' => $client->id,
                 'title' => ['it-IT' => $it, 'en-GB' => $en],
-                'role' => ['it-IT' => 'Responsabile di progetto', 'en-GB' => 'Project lead'],
-                'sector' => ['it-IT' => 'Energia', 'en-GB' => 'Energy'],
+                'role' => ['it-IT' => 'Responsabile tecnico', 'en-GB' => 'Technical lead'],
+                'sector' => ['it-IT' => 'Trasporti', 'en-GB' => 'Transport'],
                 'start_date' => $start,
                 'end_date' => $end,
                 'summary' => ['it-IT' => "<p>{$it}: obiettivi, attività e risultati.</p>", 'en-GB' => "<p>{$en}: goals, activities and results.</p>"],
             ]);
-            $project->skills()->attach([$governance->id]);
+            $project->skills()->attach([$web->id, $php->id]);
         }
 
         // Un progetto con il testo di dettaglio: ha una pagina dedicata
         Project::query()->orderBy('id')->firstOrFail()->update([
             'details' => [
-                'it-IT' => '<h2>Contesto</h2><p>Catalogo dei dati aziendali con lineage automatico dai sistemi sorgente ai report.</p><h2>Risultati</h2><ul><li>1.200 dataset documentati</li><li>Tempi di analisi d\'impatto ridotti del 60%</li></ul>',
-                'en-GB' => '<h2>Context</h2><p>Enterprise data catalogue with automated lineage from source systems to reports.</p><h2>Results</h2><ul><li>1,200 datasets documented</li><li>Impact analysis time cut by 60%</li></ul>',
+                'it-IT' => '<h2>Contesto</h2><p>Prenotazioni online per una rete di 40 stazioni di noleggio bici, con pagamento e biglietto sul telefono.</p><h2>Risultati</h2><ul><li>300.000 prenotazioni nel primo anno</li><li>Tempo medio per prenotare sceso da 5 a 2 minuti</li><li>Conforme alle WCAG 2.1 livello AA</li></ul>',
+                'en-GB' => '<h2>Context</h2><p>Online booking for a network of 40 bike rental stations, with payment and ticket on the phone.</p><h2>Results</h2><ul><li>300,000 bookings in the first year</li><li>Average booking time down from 5 to 2 minutes</li><li>Compliant with WCAG 2.1 level AA</li></ul>',
             ],
         ]);
 
         Education::query()->create([
             'organization_id' => $university->id,
             'degree' => ['it-IT' => 'Laurea Magistrale', 'en-GB' => 'Master\'s Degree'],
-            'field_of_study' => ['it-IT' => 'Informatica', 'en-GB' => 'Computer Science'],
+            'field_of_study' => ['it-IT' => 'Ingegneria informatica', 'en-GB' => 'Computer Engineering'],
             'start_date' => '2011-10-01',
             'end_date' => '2014-07-15',
-            'grade' => '110',
+            'grade' => '108',
             'grade_scale' => '110',
-            'cum_laude' => true,
-            'thesis_title' => ['it-IT' => 'Qualità dei dati aperti', 'en-GB' => 'Open data quality'],
+            'thesis_title' => ['it-IT' => 'Interfacce web accessibili', 'en-GB' => 'Accessible web interfaces'],
             'details' => [
-                'it-IT' => '<p>Esami principali: Basi di dati, Data mining, Statistica.</p>',
-                'en-GB' => '<p>Main exams: Databases, Data mining, Statistics.</p>',
+                'it-IT' => '<p>Esami principali: Basi di dati, Reti, Interazione uomo-macchina.</p>',
+                'en-GB' => '<p>Main exams: Databases, Networks, Human-computer interaction.</p>',
             ],
         ]);
 
         Certification::query()->create([
             'organization_id' => $certifier->id,
-            'title' => ['it-IT' => 'Data Governance Professional', 'en-GB' => 'Data Governance Professional'],
+            'title' => ['it-IT' => 'Web Accessibility Specialist', 'en-GB' => 'Web Accessibility Specialist'],
             'type' => CertificationType::Certification,
             'issued_on' => '2023-05-10',
             'verification_url' => 'https://example.com/verify/123',
@@ -184,33 +186,33 @@ class DemoSeeder extends Seeder
             'sort_order' => 20,
         ]);
 
-        foreach ([['Fotografia di paesaggio', 'Landscape photography', 'camera'], ['Corsa in montagna', 'Trail running', 'running'], ['Scacchi', 'Chess', 'chess']] as $position => [$it, $en, $icon]) {
+        foreach ([['Fotografia', 'Photography', 'camera'], ['Bici e cicloturismo', 'Cycling and bike touring', 'cycling'], ['Cucina', 'Cooking', 'cooking']] as $position => [$it, $en, $icon]) {
             Interest::query()->create(['name' => ['it-IT' => $it, 'en-GB' => $en], 'icon' => $icon, 'sort_order' => ($position + 1) * 10]);
         }
 
         Highlight::query()->create([
             'source' => HighlightSource::Manual,
-            'value' => 460,
+            'value' => 40,
             'display' => HighlightDisplay::Plus,
-            'label' => ['it-IT' => 'regole di Data Quality migrate', 'en-GB' => 'data quality rules migrated'],
+            'label' => ['it-IT' => 'siti e applicazioni pubblicati', 'en-GB' => 'websites and apps released'],
             'icon' => 'chart',
             'sort_order' => 30,
         ]);
 
         Publication::query()->create([
             'type' => PublicationType::Thesis,
-            'title' => ['it-IT' => 'Qualità dei dati aperti', 'en-GB' => 'Open data quality'],
-            'venue' => ['it-IT' => 'Università di Esempio', 'en-GB' => 'Example University'],
+            'title' => ['it-IT' => 'Interfacce web accessibili', 'en-GB' => 'Accessible web interfaces'],
+            'venue' => ['it-IT' => 'Politecnico di Esempio', 'en-GB' => 'Example Polytechnic'],
             'published_on' => '2014-07-15',
             'language_code' => 'it',
         ]);
 
         Article::query()->create([
-            'title' => ['it-IT' => 'Perché la Data Governance conviene', 'en-GB' => 'Why data governance pays off'],
-            'excerpt' => ['it-IT' => 'Tre benefici concreti.', 'en-GB' => 'Three concrete benefits.'],
+            'title' => ['it-IT' => 'Tre regole per un sito accessibile', 'en-GB' => 'Three rules for an accessible website'],
+            'excerpt' => ['it-IT' => 'Piccole scelte che aiutano tutti.', 'en-GB' => 'Small choices that help everyone.'],
             'body' => [
-                'it-IT' => '<p>Un programma di Data Governance ben impostato si ripaga in fretta.</p><h2>1. Meno tempo perso a cercare i dati</h2><p>Un catalogo condiviso dice dove sono i dati, chi li gestisce e come si usano.</p><h2>2. Decisioni basate su numeri affidabili</h2><p>Regole di qualità misurate ogni giorno rendono i report credibili.</p><h2>3. Conformità senza affanno</h2><p>Lineage e responsabilità chiare semplificano audit e richieste del regolatore.</p>',
-                'en-GB' => '<p>A well-designed data governance programme pays for itself quickly.</p><h2>1. Less time spent looking for data</h2><p>A shared catalogue tells where data lives, who owns it and how to use it.</p><h2>2. Decisions based on reliable numbers</h2><p>Quality rules measured every day make reports credible.</p><h2>3. Compliance without the rush</h2><p>Clear lineage and ownership make audits and regulator requests simpler.</p>',
+                'it-IT' => '<p>Rendere un sito accessibile non richiede un progetto a parte: bastano alcune abitudini, fin dal primo giorno.</p><h2>1. Testi alternativi che dicono qualcosa</h2><p>Un\'immagine senza descrizione per chi usa un lettore di schermo non esiste.</p><h2>2. Contrasto e dimensioni leggibili</h2><p>Un testo grigio chiaro su bianco è elegante, ma metà dei lettori fatica a leggerlo.</p><h2>3. Tutto si usa anche con la tastiera</h2><p>Menu, moduli e finestre devono funzionare senza mouse, con un indicatore di focus ben visibile.</p>',
+                'en-GB' => '<p>Making a website accessible does not need a separate project: a few habits from day one are enough.</p><h2>1. Alternative texts that say something</h2><p>For a screen reader user, an image without a description does not exist.</p><h2>2. Readable contrast and sizes</h2><p>Light grey text on white looks elegant, but half of your readers struggle with it.</p><h2>3. Everything works with the keyboard</h2><p>Menus, forms and dialogs must work without a mouse, with a clearly visible focus indicator.</p>',
             ],
             'cover_image' => self::sampleCover(),
             'cover_alt' => ['it-IT' => 'Illustrazione astratta con barre e linee', 'en-GB' => 'Abstract illustration with bars and lines'],
@@ -324,7 +326,7 @@ class DemoSeeder extends Seeder
         imagepng($image, $source);
 
         try {
-            return app(ImageOptimizer::class)->store((string) $source, 'data-governance.png', 'uploads', 'articles', 2000);
+            return app(ImageOptimizer::class)->store((string) $source, 'accessibility.png', 'uploads', 'articles', 2000);
         } finally {
             @unlink((string) $source);
         }
