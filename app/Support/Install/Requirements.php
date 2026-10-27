@@ -12,7 +12,7 @@ class Requirements
     public const string MIN_PHP = '8.4.1';
 
     /** @var list<string> */
-    public const array EXTENSIONS = ['ctype', 'dom', 'fileinfo', 'filter', 'gd', 'intl', 'mbstring', 'openssl', 'pdo_mysql', 'session', 'tokenizer', 'zip'];
+    public const array EXTENSIONS = ['ctype', 'dom', 'fileinfo', 'filter', 'gd', 'intl', 'mbstring', 'openssl', 'pdo_mysql', 'session', 'tokenizer', 'zip', 'zlib'];
 
     /**
      * @return list<array{label: string, ok: bool, detail: string}>

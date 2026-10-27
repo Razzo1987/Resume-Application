@@ -12,6 +12,8 @@ use Livewire\Livewire;
 beforeEach(fn () => seedDemo());
 
 it('has no privacy page until it is turned on', function () {
+    app(Settings::class)->set('privacy.page', false);
+
     $this->get('/it-IT/privacy')->assertNotFound();
     $this->get('/it-IT')->assertOk()->assertDontSee('/it-IT/privacy');
 });

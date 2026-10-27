@@ -128,7 +128,7 @@ Codespace (delete it when you are done). The configuration is in
 ## 📋 Requirements
 
 - ![PHP](https://img.shields.io/badge/PHP-8.4+-777BB4?style=flat&logo=php&logoColor=white) **PHP 8.4 or 8.5** with `ctype`, `dom`,
-  `fileinfo`, `filter`, `gd`, `intl`, `mbstring`, `openssl`, `pdo_mysql`, `session`, `tokenizer`, `zip`
+  `fileinfo`, `filter`, `gd`, `intl`, `mbstring`, `openssl`, `pdo_mysql`, `session`, `tokenizer`, `zip`, `zlib`
 - ![MySQL](https://img.shields.io/badge/MySQL-8.0+-4479A1?style=flat&logo=mysql&logoColor=white) **MySQL 8.0+** or MariaDB 10.11+
 - **Apache** with `mod_rewrite` and `.htaccess` files enabled (standard on cPanel hosting)
 

@@ -17,7 +17,7 @@ Once the site is installed, [CONFIGURATION.md](CONFIGURATION.md) explains how to
 
 | | |
 |---|---|
-| PHP | 8.4 or 8.5 with `ctype`, `dom`, `fileinfo`, `filter`, `gd`, `intl`, `mbstring`, `openssl`, `pdo_mysql`, `session`, `tokenizer`, `zip` |
+| PHP | 8.4 or 8.5 with `ctype`, `dom`, `fileinfo`, `filter`, `gd`, `intl`, `mbstring`, `openssl`, `pdo_mysql`, `session`, `tokenizer`, `zip`, `zlib` |
 | Database | MySQL 8.0+ or MariaDB 10.11+ |
 | Web server | Apache with `mod_rewrite` and `.htaccess` files enabled (`AllowOverride All`) |
 | Recommended | `mod_headers`, `mod_deflate`, an SSL certificate (AutoSSL / Let's Encrypt) |

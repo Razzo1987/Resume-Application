@@ -141,7 +141,7 @@ test.describe('CV', () => {
 });
 
 test.describe('accessibility (axe, WCAG 2.1 AA)', () => {
-    for (const path of ['/it-IT', '/en-GB/experience/tech-lead-brightline-software', '/en-GB/projects/booking-portal', '/it-IT/blog', '/en-GB/blog/three-rules-for-an-accessible-website', '/it-IT/pagina-inesistente']) {
+    for (const path of ['/it-IT', '/en-GB/experience/tech-lead-brightline-software', '/en-GB/projects/booking-portal', '/it-IT/blog', '/en-GB/blog/three-rules-for-an-accessible-website', '/it-IT/pagina-inesistente', '/it-IT/privacy', '/en-GB/privacy']) {
         test(path, async ({ page }) => {
             await page.goto(path);
             // I temi con animazioni: si analizza la pagina a riposo (testo a opacità piena)

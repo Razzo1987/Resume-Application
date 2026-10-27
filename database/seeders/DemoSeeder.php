@@ -28,6 +28,7 @@ use App\Models\Skill;
 use App\Models\SkillCategory;
 use App\Models\SocialLink;
 use App\Support\Media\ImageOptimizer;
+use App\Support\Settings\Settings;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Storage;
 
@@ -234,6 +235,9 @@ class DemoSeeder extends Seeder
                 'note' => 'Demo',
             ]);
         }
+
+        // Privacy page with the template text, linked from the footer
+        app(Settings::class)->set('privacy.page', true);
     }
 
     /**
