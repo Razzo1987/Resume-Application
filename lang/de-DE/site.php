@@ -136,6 +136,28 @@ return [
         'latest' => 'Neueste Artikel',
     ],
 
+    'privacy' => [
+        'title' => 'Datenschutz',
+        'link' => 'Datenschutz',
+        'intro_title' => 'Verantwortlich für die Daten',
+        'intro' => 'Diese Website ist der Online-Lebenslauf von {name}, verantwortlich für die Verarbeitung der personenbezogenen Daten. Bei Fragen zum Datenschutz kannst du an {email} schreiben.',
+        'cookies_title' => 'Keine Cookies',
+        'cookies' => 'Die Website verwendet keine Cookies oder andere Techniken, die Informationen auf deinem Gerät speichern oder auslesen, und lädt nichts von anderen Websites (Schriften, Skripte, Videos, Karten): niemand sonst erhält Daten über deinen Besuch.',
+        'logs_title' => 'Server-Logs',
+        'logs' => 'Wie bei jeder Website protokolliert der Server die eingehenden Anfragen (IP-Adresse, Datum und Uhrzeit, Seite, Browser) aus Sicherheitsgründen und für den Betrieb. Diese Logs verwaltet der Hosting-Anbieter; sie werden nach der vom Anbieter vorgesehenen Frist gelöscht.',
+        'contact_title' => 'Wenn du mir schreibst',
+        'contact' => 'Deine Adresse und deine Nachricht verwende ich nur, um dir zu antworten, und gebe sie nicht weiter.',
+        'rights_title' => 'Deine Rechte',
+        'rights' => 'Du kannst Auskunft über deine Daten verlangen, sie berichtigen oder löschen lassen und der Verarbeitung widersprechen, indem du an die oben genannte Adresse schreibst. Außerdem kannst du dich bei der zuständigen Datenschutzbehörde beschweren.',
+        'stats_title' => 'Besuchsstatistik',
+        'stats' => 'Um zu wissen, wie viele Menschen die Website besuchen und welche Seiten sie lesen, speichere ich zu jedem Besuch einige Angaben: Datum und Uhrzeit, Seite, die verweisende Website und eventuelle Kampagnenparameter (UTM), Gerätetyp, Betriebssystem und Browser.',
+        'stats_zone' => 'Aus der IP-Adresse ermittle ich außerdem die Herkunft (Land, ungefähre Stadt und Netz) mit einer Datenbank auf dem Server: die Adresse wird an niemanden gesendet.',
+        'stats_ip' => 'Die IP-Adresse wird nicht vollständig gespeichert, sondern sofort gekürzt (zum Beispiel 93.44.12.x). Ich verwende keine Cookies und erkenne wiederkehrende Besucher nicht.',
+        'stats_basis' => 'Rechtsgrundlage ist mein berechtigtes Interesse zu verstehen, wie die Website genutzt wird. Die Daten der einzelnen Besuche werden nach :months Monaten gelöscht; es bleiben nur Summen, etwa die Besuche pro Tag.',
+        'stats_credit' => 'Die Herkunft wird mit GeoLite2-Daten von MaxMind ermittelt, verfügbar unter https://www.maxmind.com.',
+        'contact_fallback' => 'die auf der Website angegebenen Kontaktdaten',
+    ],
+
     'footer' => [
         'last_updated' => 'Lebenslauf aktualisiert am :date',
         'images_owners' => 'Bilder und Logos gehören ihren jeweiligen Inhabern.',

@@ -4,10 +4,14 @@ namespace App\Filament\Pages;
 
 use App\Filament\Support\Fields;
 use App\Filament\Support\Translatable;
+use App\Site\PrivacyPolicy;
+use App\Site\SiteUrls;
+use App\Support\Languages\Locales;
 use App\Support\Settings\Settings;
 use App\Themes\ThemeManager;
 use BackedEnum;
 use Filament\Actions\Action;
+use Filament\Forms\Components\RichEditor;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
@@ -19,6 +23,7 @@ use Filament\Schemas\Components\EmbeddedSchema;
 use Filament\Schemas\Components\Form;
 use Filament\Schemas\Components\Grid;
 use Filament\Schemas\Components\Section;
+use Filament\Schemas\Components\Utilities\Set;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Illuminate\Support\Arr;
@@ -100,6 +105,37 @@ class ManageSettings extends Page
                             Toggle::make('privacy.show_phone')->label(__('admin.fields.show_phone')),
                             Toggle::make('privacy.show_birthdate')->label(__('admin.fields.show_birthdate')),
                         ]),
+                    ])
+                    ->columnSpanFull(),
+
+                Section::make(__('admin.sections.privacy_policy'))
+                    ->description(__('admin.help.privacy_policy'))
+                    ->schema([
+                        Toggle::make('privacy.page')
+                            ->label(__('admin.fields.privacy_page'))
+                            ->helperText(fn (): string => app(PrivacyPolicy::class)->statsEnabled() ? __('admin.help.privacy_page_forced') : __('admin.help.privacy_page'))
+                            ->disabled(fn (): bool => app(PrivacyPolicy::class)->statsEnabled())
+                            ->hintAction(
+                                Action::make('viewPrivacy')
+                                    ->label(__('admin.actions.view_page'))
+                                    ->icon(Heroicon::OutlinedArrowTopRightOnSquare)
+                                    ->url(fn (): string => url(app(SiteUrls::class)->privacyPath(app(Locales::class)->default())), shouldOpenInNewTab: true)
+                                    ->visible(fn (): bool => app(PrivacyPolicy::class)->isEnabled()),
+                            ),
+                        Translatable::tabs(fn (string $locale): array => [
+                            RichEditor::make("privacy.text.{$locale}")
+                                ->label(__('admin.fields.privacy_text'))
+                                ->helperText(__('admin.help.privacy_text'))
+                                ->toolbarButtons([['bold', 'italic', 'link'], ['h2', 'h3'], ['bulletList', 'orderedList'], ['undo', 'redo']])
+                                ->hintAction(
+                                    Action::make("privacyTemplate_{$locale}")
+                                        ->label(__('admin.actions.use_template'))
+                                        ->icon(Heroicon::OutlinedDocumentText)
+                                        ->requiresConfirmation()
+                                        ->modalDescription(__('admin.help.use_template'))
+                                        ->action(fn (Set $set) => $set("privacy.text.{$locale}", app(PrivacyPolicy::class)->template($locale))),
+                                ),
+                        ], 'privacy-texts'),
                     ])
                     ->columnSpanFull(),
 

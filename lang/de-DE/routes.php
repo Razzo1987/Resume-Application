@@ -13,4 +13,5 @@ return [
     'experience' => 'erfahrung',
     'blog' => 'blog',
     'cv' => 'lebenslauf',
+    'privacy' => 'datenschutz',
 ];

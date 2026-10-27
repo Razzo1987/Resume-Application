@@ -6,7 +6,10 @@ namespace App\Http\Controllers\Site;
 
 use App\Http\Controllers\Controller;
 use App\Models\CvDocument;
+use App\Site\CvData;
 use App\Site\CvFiles;
+use App\Site\Pages;
+use App\Site\PrivacyPolicy;
 use App\Site\SiteContext;
 use App\Site\SiteUrls;
 use Illuminate\Contracts\View\View;
@@ -18,7 +21,7 @@ use Symfony\Component\HttpFoundation\BinaryFileResponse;
 use Symfony\Component\HttpFoundation\ResponseHeaderBag;
 
 /**
- * Indirizzi "/{lingua}/{segmento}": download del CV; per progetti ed esperienze
+ * Indirizzi "/{lingua}/{segmento}": download del CV, blog, informativa privacy; per progetti ed esperienze
  * (che non hanno una pagina elenco) rimanda alla sezione del CV.
  */
 class SegmentController extends Controller
@@ -40,8 +43,24 @@ class SegmentController extends Controller
             'cv' => $this->downloadCv($request, $site, $files),
             'projects', 'experience' => redirect()->to(url($urls->sectionPath($locale, $key)), 301),
             'blog' => app()->call([app(BlogController::class), 'index'], ['request' => $request, 'locale' => $locale]),
+            'privacy' => $this->privacy($locale),
             default => abort(404),
         };
+    }
+
+    /**
+     * Informativa privacy (attiva dalle impostazioni o con le statistiche).
+     */
+    private function privacy(string $locale): View
+    {
+        $policy = app(PrivacyPolicy::class);
+
+        abort_unless($policy->isEnabled(), 404);
+
+        return view('theme::privacy', [
+            'page' => app(Pages::class)->privacy($locale),
+            'policy' => $policy->render($locale, app(CvData::class)->profile()),
+        ]);
     }
 
     private function downloadCv(Request $request, SiteContext $site, CvFiles $files): BinaryFileResponse

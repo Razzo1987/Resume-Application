@@ -135,6 +135,28 @@ return [
         'latest' => 'Ultimi articoli',
     ],
 
+    'privacy' => [
+        'title' => 'Privacy',
+        'link' => 'Privacy',
+        'intro_title' => 'Chi gestisce i dati',
+        'intro' => 'Questo sito è il curriculum online di {name}, titolare del trattamento dei dati personali. Per qualsiasi domanda sulla privacy puoi scrivere a {email}.',
+        'cookies_title' => 'Niente cookie',
+        'cookies' => 'Il sito non usa cookie né altri strumenti che salvano o leggono informazioni sul tuo dispositivo, e non carica nulla da altri siti (font, script, video, mappe): nessun altro riceve dati sulla tua visita.',
+        'logs_title' => 'Registri del server',
+        'logs' => 'Come per ogni sito, il server che lo ospita registra le richieste che riceve (indirizzo IP, data e ora, pagina, browser) per motivi di sicurezza e di funzionamento. Questi registri sono gestiti dal fornitore dell\'hosting e vengono cancellati dopo il periodo previsto dal fornitore.',
+        'contact_title' => 'Se mi scrivi',
+        'contact' => 'Uso il tuo indirizzo e le informazioni che mi mandi solo per risponderti, e non li passo ad altri.',
+        'rights_title' => 'I tuoi diritti',
+        'rights' => 'Puoi chiedere di vedere i dati che ti riguardano, di correggerli o di cancellarli, e puoi opporti al loro trattamento scrivendo all\'indirizzo indicato qui sopra. Se pensi che i tuoi dati non siano trattati correttamente puoi rivolgerti al Garante per la protezione dei dati personali.',
+        'stats_title' => 'Statistiche delle visite',
+        'stats' => 'Per sapere quante persone visitano il sito e quali pagine leggono, registro alcune informazioni su ogni visita: data e ora, pagina, sito di provenienza ed eventuali parametri di campagna (UTM), tipo di dispositivo, sistema operativo e browser.',
+        'stats_zone' => 'Dall\'indirizzo IP ricavo anche la zona di provenienza (Paese, città approssimativa e rete), con un database installato sul server: l\'indirizzo non viene inviato a nessuno.',
+        'stats_ip' => 'L\'indirizzo IP non viene salvato per intero: viene accorciato subito (per esempio 93.44.12.x). Non uso cookie e non riconosco chi torna a visitare il sito.',
+        'stats_basis' => 'Lo faccio per il legittimo interesse a capire come viene usato il sito. I dati di ogni visita vengono cancellati dopo :months mesi; restano solo i totali, come le visite di ogni giorno.',
+        'stats_credit' => 'La zona di provenienza è ricavata con i dati GeoLite2 creati da MaxMind, disponibili su https://www.maxmind.com.',
+        'contact_fallback' => 'i contatti indicati nel sito',
+    ],
+
     'footer' => [
         'last_updated' => 'CV aggiornato a :date',
         'images_owners' => 'Immagini e loghi appartengono ai rispettivi proprietari.',

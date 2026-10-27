@@ -152,6 +152,26 @@ final class Pages
         return $page;
     }
 
+    public function privacy(string $locale): Page
+    {
+        $name = $this->cv->profile()->full_name;
+        $title = (string) __('site.privacy.title');
+
+        return new Page(
+            title: $title.' - '.$name,
+            canonical: url($this->urls->privacyPath($locale)),
+            alternates: $this->urls->alternates(fn (string $code): string => $this->urls->privacyPath($code)),
+            imageAlt: $name,
+            breadcrumbs: [
+                ['label' => $name ?: (string) __('site.actions.back_to_cv'), 'url' => url($this->urls->homePath($locale))],
+                ['label' => $title, 'url' => null],
+            ],
+            // Testo uguale su tutti i siti fatti con Resume App: non serve nei risultati di ricerca
+            robots: 'noindex, follow',
+            section: 'privacy',
+        );
+    }
+
     public function maintenance(): Page
     {
         return new Page(

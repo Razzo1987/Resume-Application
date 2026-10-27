@@ -136,6 +136,28 @@ return [
         'latest' => 'Últimos artículos',
     ],
 
+    'privacy' => [
+        'title' => 'Privacidad',
+        'link' => 'Privacidad',
+        'intro_title' => 'Quién gestiona los datos',
+        'intro' => 'Este sitio es el currículum en línea de {name}, responsable del tratamiento de los datos personales. Para cualquier pregunta sobre privacidad puedes escribir a {email}.',
+        'cookies_title' => 'Sin cookies',
+        'cookies' => 'El sitio no usa cookies ni otras herramientas que guarden o lean información en tu dispositivo, y no carga nada de otros sitios (fuentes, scripts, vídeos, mapas): nadie más recibe datos de tu visita.',
+        'logs_title' => 'Registros del servidor',
+        'logs' => 'Como cualquier sitio web, el servidor que lo aloja registra las peticiones que recibe (dirección IP, fecha y hora, página, navegador) por seguridad y para su funcionamiento. Estos registros los gestiona el proveedor de alojamiento y se borran después del plazo que este establece.',
+        'contact_title' => 'Si me escribes',
+        'contact' => 'Uso tu dirección y lo que me envías solo para responderte, y no se lo paso a nadie.',
+        'rights_title' => 'Tus derechos',
+        'rights' => 'Puedes pedir acceso a tus datos, su rectificación o supresión, y oponerte a su tratamiento escribiendo a la dirección indicada arriba. También puedes presentar una reclamación ante la autoridad de protección de datos (en España, la AEPD).',
+        'stats_title' => 'Estadísticas de visitas',
+        'stats' => 'Para saber cuántas personas visitan el sitio y qué páginas leen, registro algunos datos de cada visita: fecha y hora, página, sitio de procedencia y posibles parámetros de campaña (UTM), tipo de dispositivo, sistema operativo y navegador.',
+        'stats_zone' => 'A partir de la dirección IP también obtengo la procedencia (país, ciudad aproximada y red) con una base de datos instalada en el servidor: la dirección no se envía a nadie.',
+        'stats_ip' => 'La dirección IP no se guarda completa: se acorta de inmediato (por ejemplo 93.44.12.x). No uso cookies y no reconozco a quien vuelve a visitar el sitio.',
+        'stats_basis' => 'Lo hago por el interés legítimo de entender cómo se usa el sitio. Los datos de cada visita se borran después de :months meses; solo quedan los totales, como las visitas de cada día.',
+        'stats_credit' => 'La procedencia se obtiene con los datos GeoLite2 creados por MaxMind, disponibles en https://www.maxmind.com.',
+        'contact_fallback' => 'los datos de contacto indicados en el sitio',
+    ],
+
     'footer' => [
         'last_updated' => 'CV actualizado el :date',
         'images_owners' => 'Las imágenes y los logotipos pertenecen a sus respectivos propietarios.',

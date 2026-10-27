@@ -6,8 +6,16 @@
     @if ($layout->gdprText)
         <p class="footer-gdpr">{!! nl2br(e($layout->gdprText)) !!}</p>
     @endif
-    @if ($layout->feedUrl)
-        <p><a href="{{ $layout->feedUrl }}" type="application/rss+xml">{{ __('site.blog.feed') }}</a></p>
+    @if ($layout->feedUrl || $layout->privacyUrl)
+        <p class="footer-links">
+            @if ($layout->feedUrl)
+                <a href="{{ $layout->feedUrl }}" type="application/rss+xml">{{ __('site.blog.feed') }}</a>
+            @endif
+            @if ($layout->feedUrl && $layout->privacyUrl) · @endif
+            @if ($layout->privacyUrl)
+                <a href="{{ $layout->privacyUrl }}">{{ __('site.privacy.link') }}</a>
+            @endif
+        </p>
     @endif
     <p class="footer-credits"><a href="{{ config('resume.project_url') }}" rel="noopener">{{ __('site.footer.made_with') }}</a></p>
 </footer>

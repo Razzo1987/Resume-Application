@@ -12,7 +12,7 @@ use Locale;
 class LanguagePacks
 {
     /** Chiavi dei segmenti URL tradotti. */
-    public const array SEGMENTS = ['projects', 'experience', 'blog', 'cv'];
+    public const array SEGMENTS = ['projects', 'experience', 'blog', 'cv', 'privacy'];
 
     /**
      * Codici dei language pack disponibili (cartelle con routes.php).

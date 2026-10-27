@@ -42,5 +42,6 @@ final readonly class Layout
         public ?string $blogUrl = null,
         public ?string $feedUrl = null,
         public ?array $icons = null,
+        public ?string $privacyUrl = null,
     ) {}
 }

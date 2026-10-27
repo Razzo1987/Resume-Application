@@ -135,6 +135,28 @@ return [
         'latest' => 'Latest articles',
     ],
 
+    'privacy' => [
+        'title' => 'Privacy',
+        'link' => 'Privacy',
+        'intro_title' => 'Who looks after the data',
+        'intro' => 'This site is the online CV of {name}, who is the controller of the personal data. For any question about privacy you can write to {email}.',
+        'cookies_title' => 'No cookies',
+        'cookies' => 'The site uses no cookies or other tools that store or read information on your device, and it loads nothing from other sites (fonts, scripts, videos, maps): nobody else receives data about your visit.',
+        'logs_title' => 'Server logs',
+        'logs' => 'Like any website, the server that hosts it records the requests it receives (IP address, date and time, page, browser) for security and to keep it running. These logs are managed by the hosting provider and deleted after the period the provider sets.',
+        'contact_title' => 'If you write to me',
+        'contact' => 'I use your address and what you send me only to answer you, and I do not pass them on to anyone.',
+        'rights_title' => 'Your rights',
+        'rights' => 'You can ask to see the data about you, to correct it or to delete it, and you can object to its use by writing to the address above. If you think your data is not handled properly you can contact your data protection authority.',
+        'stats_title' => 'Visit statistics',
+        'stats' => 'To know how many people visit the site and which pages they read, I record some information about each visit: date and time, page, the site you came from and any campaign parameters (UTM), type of device, operating system and browser.',
+        'stats_zone' => 'From the IP address I also work out where the visit comes from (country, approximate city and network), with a database installed on the server: the address is not sent to anyone.',
+        'stats_ip' => 'The IP address is not stored in full: it is shortened straight away (for example 93.44.12.x). I use no cookies and I do not recognise people who come back.',
+        'stats_basis' => 'I do this for the legitimate interest of understanding how the site is used. The data of each visit is deleted after :months months; only the totals remain, such as the visits of each day.',
+        'stats_credit' => 'The location is worked out with GeoLite2 data created by MaxMind, available from https://www.maxmind.com.',
+        'contact_fallback' => 'the contact details on this site',
+    ],
+
     'footer' => [
         'last_updated' => 'CV last updated :date',
         'images_owners' => 'Images and logos belong to their respective owners.',

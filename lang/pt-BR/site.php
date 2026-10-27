@@ -136,6 +136,28 @@ return [
         'latest' => 'Últimos artigos',
     ],
 
+    'privacy' => [
+        'title' => 'Privacidade',
+        'link' => 'Privacidade',
+        'intro_title' => 'Quem cuida dos dados',
+        'intro' => 'Este site é o currículo online de {name}, controlador dos dados pessoais. Para qualquer dúvida sobre privacidade, você pode escrever para {email}.',
+        'cookies_title' => 'Sem cookies',
+        'cookies' => 'O site não usa cookies nem outras ferramentas que armazenem ou leiam informações no seu dispositivo, e não carrega nada de outros sites (fontes, scripts, vídeos, mapas): ninguém mais recebe dados sobre a sua visita.',
+        'logs_title' => 'Registros do servidor',
+        'logs' => 'Como qualquer site, o servidor que o hospeda registra as solicitações recebidas (endereço IP, data e hora, página, navegador) por segurança e para o funcionamento. Esses registros são gerenciados pelo provedor de hospedagem e apagados após o prazo definido por ele.',
+        'contact_title' => 'Se você me escrever',
+        'contact' => 'Uso o seu endereço e o que você me envia apenas para responder, e não repasso a ninguém.',
+        'rights_title' => 'Seus direitos',
+        'rights' => 'Você pode pedir acesso aos seus dados, a correção ou a exclusão, e se opor ao tratamento escrevendo para o endereço indicado acima. Também pode recorrer à autoridade de proteção de dados (no Brasil, a ANPD).',
+        'stats_title' => 'Estatísticas de visitas',
+        'stats' => 'Para saber quantas pessoas visitam o site e quais páginas leem, registro algumas informações de cada visita: data e hora, página, site de origem e eventuais parâmetros de campanha (UTM), tipo de dispositivo, sistema operacional e navegador.',
+        'stats_zone' => 'A partir do endereço IP também obtenho a origem (país, cidade aproximada e rede) com um banco de dados instalado no servidor: o endereço não é enviado a ninguém.',
+        'stats_ip' => 'O endereço IP não é salvo por inteiro: ele é encurtado na hora (por exemplo 93.44.12.x). Não uso cookies e não reconheço quem volta a visitar o site.',
+        'stats_basis' => 'Faço isso com base no legítimo interesse de entender como o site é usado. Os dados de cada visita são apagados após :months meses; ficam apenas os totais, como as visitas de cada dia.',
+        'stats_credit' => 'A origem é obtida com os dados GeoLite2 criados pela MaxMind, disponíveis em https://www.maxmind.com.',
+        'contact_fallback' => 'os contatos indicados no site',
+    ],
+
     'footer' => [
         'last_updated' => 'Currículo atualizado em :date',
         'images_owners' => 'Imagens e logotipos pertencem aos seus respectivos proprietários.',

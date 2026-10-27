@@ -36,7 +36,7 @@ final class SiteUrls
     }
 
     /**
-     * Chiave del segmento (projects, experience, blog, cv) a cui corrisponde una parola dell'URL.
+     * Chiave del segmento (projects, experience, blog, cv, privacy) a cui corrisponde una parola dell'URL.
      * Si accettano anche i segmenti delle altre lingue attive: il controller poi reindirizza all'URL corretto.
      */
     public function segmentKey(string $locale, string $segment): ?string
@@ -77,6 +77,11 @@ final class SiteUrls
     public function blogPath(string $locale): string
     {
         return '/'.$locale.'/'.$this->segment($locale, 'blog');
+    }
+
+    public function privacyPath(string $locale): string
+    {
+        return '/'.$locale.'/'.$this->segment($locale, 'privacy');
     }
 
     public function feedPath(string $locale): string

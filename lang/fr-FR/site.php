@@ -136,6 +136,28 @@ return [
         'latest' => 'Derniers articles',
     ],
 
+    'privacy' => [
+        'title' => 'Confidentialité',
+        'link' => 'Confidentialité',
+        'intro_title' => 'Qui gère les données',
+        'intro' => 'Ce site est le CV en ligne de {name}, responsable du traitement des données personnelles. Pour toute question sur la confidentialité, vous pouvez écrire à {email}.',
+        'cookies_title' => 'Aucun cookie',
+        'cookies' => 'Le site n\'utilise ni cookies ni autres outils qui enregistrent ou lisent des informations sur votre appareil, et ne charge rien depuis d\'autres sites (polices, scripts, vidéos, cartes) : personne d\'autre ne reçoit de données sur votre visite.',
+        'logs_title' => 'Journaux du serveur',
+        'logs' => 'Comme pour tout site, le serveur qui l\'héberge enregistre les requêtes reçues (adresse IP, date et heure, page, navigateur) pour la sécurité et le bon fonctionnement. Ces journaux sont gérés par l\'hébergeur et supprimés après la durée prévue par celui-ci.',
+        'contact_title' => 'Si vous m\'écrivez',
+        'contact' => 'J\'utilise votre adresse et votre message uniquement pour vous répondre, et je ne les transmets à personne.',
+        'rights_title' => 'Vos droits',
+        'rights' => 'Vous pouvez demander à accéder aux données qui vous concernent, à les corriger ou à les effacer, et vous opposer à leur traitement en écrivant à l\'adresse ci-dessus. Vous pouvez aussi saisir l\'autorité de protection des données (en France, la CNIL).',
+        'stats_title' => 'Statistiques de visite',
+        'stats' => 'Pour savoir combien de personnes visitent le site et quelles pages elles lisent, j\'enregistre quelques informations sur chaque visite : date et heure, page, site d\'origine et éventuels paramètres de campagne (UTM), type d\'appareil, système d\'exploitation et navigateur.',
+        'stats_zone' => 'À partir de l\'adresse IP, je déduis aussi la provenance (pays, ville approximative et réseau) avec une base de données installée sur le serveur : l\'adresse n\'est envoyée à personne.',
+        'stats_ip' => 'L\'adresse IP n\'est pas enregistrée en entier : elle est raccourcie immédiatement (par exemple 93.44.12.x). Je n\'utilise pas de cookies et je ne reconnais pas les visiteurs qui reviennent.',
+        'stats_basis' => 'Je le fais sur la base de l\'intérêt légitime à comprendre comment le site est utilisé. Les données de chaque visite sont supprimées après :months mois ; il ne reste que les totaux, comme les visites par jour.',
+        'stats_credit' => 'La provenance est déterminée avec les données GeoLite2 créées par MaxMind, disponibles sur https://www.maxmind.com.',
+        'contact_fallback' => 'les coordonnées indiquées sur le site',
+    ],
+
     'footer' => [
         'last_updated' => 'CV mis à jour le :date',
         'images_owners' => 'Les images et logos appartiennent à leurs propriétaires respectifs.',

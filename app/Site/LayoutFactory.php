@@ -36,6 +36,7 @@ final class LayoutFactory
         private readonly Dates $dates,
         private readonly Blog $blog,
         private readonly SiteIcon $icon,
+        private readonly PrivacyPolicy $privacy,
     ) {}
 
     public function make(Page $page): Layout
@@ -103,6 +104,7 @@ final class LayoutFactory
             blogUrl: $hasBlog ? url($this->urls->blogPath($locale)) : null,
             feedUrl: $hasBlog ? url($this->urls->feedPath($locale)) : null,
             icons: $this->icon->urls(),
+            privacyUrl: $this->privacy->isEnabled() ? url($this->urls->privacyPath($locale)) : null,
         );
     }
 }

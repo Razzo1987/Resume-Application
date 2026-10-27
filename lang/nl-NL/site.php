@@ -136,6 +136,28 @@ return [
         'latest' => 'Nieuwste artikelen',
     ],
 
+    'privacy' => [
+        'title' => 'Privacy',
+        'link' => 'Privacy',
+        'intro_title' => 'Wie beheert de gegevens',
+        'intro' => 'Deze site is het online cv van {name}, verwerkingsverantwoordelijke voor de persoonsgegevens. Voor vragen over privacy kun je schrijven naar {email}.',
+        'cookies_title' => 'Geen cookies',
+        'cookies' => 'De site gebruikt geen cookies of andere technieken die informatie op je apparaat opslaan of uitlezen, en laadt niets van andere sites (lettertypen, scripts, video\'s, kaarten): niemand anders ontvangt gegevens over je bezoek.',
+        'logs_title' => 'Serverlogboeken',
+        'logs' => 'Zoals bij elke website registreert de server de verzoeken die binnenkomen (IP-adres, datum en tijd, pagina, browser) voor de beveiliging en de werking. Deze logboeken worden beheerd door de hostingprovider en verwijderd na de termijn die de provider hanteert.',
+        'contact_title' => 'Als je me schrijft',
+        'contact' => 'Ik gebruik je adres en je bericht alleen om je te antwoorden en geef ze aan niemand door.',
+        'rights_title' => 'Je rechten',
+        'rights' => 'Je kunt vragen om inzage in je gegevens, ze laten corrigeren of verwijderen, en bezwaar maken tegen de verwerking door te schrijven naar het adres hierboven. Je kunt ook een klacht indienen bij de toezichthouder (in Nederland de Autoriteit Persoonsgegevens).',
+        'stats_title' => 'Bezoekstatistieken',
+        'stats' => 'Om te weten hoeveel mensen de site bezoeken en welke pagina\'s ze lezen, leg ik bij elk bezoek enkele gegevens vast: datum en tijd, pagina, de verwijzende site en eventuele campagneparameters (UTM), type apparaat, besturingssysteem en browser.',
+        'stats_zone' => 'Uit het IP-adres leid ik ook de herkomst af (land, ongeveer de stad en het netwerk) met een database op de server: het adres wordt naar niemand gestuurd.',
+        'stats_ip' => 'Het IP-adres wordt niet volledig opgeslagen: het wordt meteen ingekort (bijvoorbeeld 93.44.12.x). Ik gebruik geen cookies en herken terugkerende bezoekers niet.',
+        'stats_basis' => 'Ik doe dit op basis van het gerechtvaardigd belang om te begrijpen hoe de site wordt gebruikt. De gegevens van elk bezoek worden na :months maanden verwijderd; alleen de totalen blijven, zoals het aantal bezoeken per dag.',
+        'stats_credit' => 'De herkomst wordt bepaald met GeoLite2-gegevens van MaxMind, beschikbaar via https://www.maxmind.com.',
+        'contact_fallback' => 'de contactgegevens op de site',
+    ],
+
     'footer' => [
         'last_updated' => 'Cv bijgewerkt op :date',
         'images_owners' => 'Afbeeldingen en logo\'s zijn eigendom van hun respectieve eigenaren.',

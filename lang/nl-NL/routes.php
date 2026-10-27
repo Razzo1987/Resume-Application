@@ -13,4 +13,5 @@ return [
     'experience' => 'ervaring',
     'blog' => 'blog',
     'cv' => 'cv',
+    'privacy' => 'privacy',
 ];

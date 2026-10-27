@@ -42,10 +42,15 @@ class Settings
         'jsonld.include_phone' => false,
         'jsonld.include_birthdate' => false,
         'updates.auto' => 'download',                 // aggiornamenti automatici col cron: off, download, patch
+        'privacy.page' => false,                      // pagina Privacy e link nel footer (sempre attiva con le statistiche)
+        'privacy.text' => [],                         // testo dell'informativa per lingua (vuoto = testo modello)
+        'stats.enabled' => false,                     // statistiche delle visite (senza cookie)
+        'stats.retention_months' => 12,               // dopo quanti mesi si cancellano i dati delle singole visite
+        'stats.admin_ip_days' => 14,                  // per quanti giorni l'IP usato nell'admin non conta nelle visite
     ];
 
     /** @var list<string> */
-    public const array TRANSLATABLE = ['seo.title', 'seo.description', 'footer.gdpr_text'];
+    public const array TRANSLATABLE = ['seo.title', 'seo.description', 'footer.gdpr_text', 'privacy.text'];
 
     /** @var array<string, mixed>|null */
     private ?array $values = null;
