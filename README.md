@@ -69,15 +69,16 @@ can be imported (see [docs/INSTALL.md](docs/INSTALL.md#from-version-1)).
   your own visits do not count. No cookie banner needed; a **Privacy page** (template in 9 languages, editable)
   explains it to visitors.
 - HTML page cache cleared on every change, ETags, a reduced Bootstrap build and an SVG icon sprite with only the
-  icons in use. Lighthouse 100 on the demo data, WCAG 2.1 AA checked with axe.
+  icons in use. Lighthouse 100 on the demo data, WCAG 2.1 AA checked with axe on the site and the admin pages.
 
 ### 🛠️ Admin panel
-- One form per item with a **tab for each language**; a *Translations* page lists what is still missing.
+- One form per item with a **tab for each language**, marked with the number of texts still empty; a *Translations*
+  page lists what is missing everywhere.
 - Images resized and converted to WebP on upload; organisation logos, certification badges, project images.
 - Key figures computed for you (years of experience, projects, certifications...) or written by hand.
 - A **dashboard** grouped by system, languages, content, CV and statistics, each card linking to where you act.
 - Two-factor authentication, configurable admin address, interface in Italian or English (each administrator
-  chooses).
+  chooses), dates and statistics in the time zone of the site.
 - **Content export and import** (zip) to back up the site or move it to another server.
 
 ### 📦 Installation and updates
@@ -85,8 +86,8 @@ can be imported (see [docs/INSTALL.md](docs/INSTALL.md#from-version-1)).
 - **Updates from the admin**: new versions are announced from the GitHub releases; the package is downloaded
   straight to the server (or uploaded from your computer, with no upload-size limit), checked, installed in a few
   seconds and completed automatically. No FTP needed.
-- **Scheduled jobs** with one cron line in the hosting panel: update check, **automatic updates** (off, download and notify, or
-  install fix releases by themselves), GeoLite updates, statistics summaries and clean-up.
+- **Scheduled jobs** with one cron line in the hosting panel: update check, **automatic updates** (off, download and
+  notify, or install fix releases by themselves), GeoLite updates, statistics summaries and clean-up.
 
 ## 📸 Screenshots
 
