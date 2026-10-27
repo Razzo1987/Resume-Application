@@ -2,6 +2,7 @@
 
 namespace App\Providers\Filament;
 
+use App\Filament\Pages\Auth\EditProfile;
 use App\Filament\Support\InitialsAvatarProvider;
 use App\Filament\Support\SiteActions;
 use App\Filament\Widgets\ContentOverviewWidget;
@@ -46,7 +47,7 @@ class AdminPanelProvider extends PanelProvider
             ->path((string) config('resume.admin_path'))
             ->brandName(fn (): string => (string) config('app.name'))
             ->login()
-            ->profile()
+            ->profile(EditProfile::class)
             ->passwordReset()
             // Autenticazione a due fattori con app (Google Authenticator, 1Password, ...), con codici di recupero
             ->multiFactorAuthentication([

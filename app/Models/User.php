@@ -18,10 +18,11 @@ use Illuminate\Notifications\Notifiable;
  * dall'installer o con "php artisan make:filament-user".
  *
  * @property string $email
+ * @property string|null $locale
  * @property string|null $app_authentication_secret
  * @property array<string>|null $app_authentication_recovery_codes
  */
-#[Fillable(['name', 'email', 'password'])]
+#[Fillable(['name', 'email', 'password', 'locale'])]
 #[Hidden(['password', 'remember_token', 'app_authentication_secret', 'app_authentication_recovery_codes'])]
 class User extends Authenticatable implements FilamentUser, HasAppAuthentication, HasAppAuthenticationRecovery
 {
