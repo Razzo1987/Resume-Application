@@ -2,7 +2,7 @@
 
 All notable changes to this project are documented here. The format follows [Keep a Changelog](https://keepachangelog.com/) and the project uses [Semantic Versioning](https://semver.org/).
 
-## [Unreleased]
+## [2.1.0] — 2026-10-27
 
 ### Added
 - Scheduled jobs: one cron job in cPanel (`php …/core/artisan schedule:run` every 5 minutes, the exact line is on the *System* page) runs the update check, automatic updates and clean-up; without it the light jobs start from the admin at most once an hour. The *System* page shows whether the cron job runs, with which PHP version, and the result of every job. Commands `resume:cron` and `resume:update --check|--finish`.

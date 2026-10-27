@@ -1,7 +1,7 @@
 {
     "name": "base",
     "title": "Base",
-    "version": "2.0.3",
+    "version": "2.1.0",
     "description": "Tema open source di riferimento: Bootstrap 5, icone Font Awesome Free (sprite SVG), JavaScript senza dipendenze.",
     "extends": null,
     "entrypoints": [

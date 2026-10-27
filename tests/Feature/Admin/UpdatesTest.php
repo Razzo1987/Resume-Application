@@ -30,6 +30,14 @@ use Livewire\Livewire;
 
 require_once dirname(__DIR__, 3).'/resources/update/updater.php';
 
+// Versioni relative a quella del progetto (VERSION), così i test valgono a ogni rilascio:
+// UPDATES_FIX è una versione di correzione più recente (stessa x.y), UPDATES_FEATURE la x.y successiva
+[$major, $minor, $patch] = array_map(intval(...), explode('.', trim((string) file_get_contents(dirname(__DIR__, 3).'/VERSION'))));
+define('UPDATES_CURRENT', "{$major}.{$minor}.{$patch}");
+define('UPDATES_FIX', "{$major}.{$minor}.".($patch + 6));
+define('UPDATES_FIX_NEXT', "{$major}.{$minor}.".($patch + 7));
+define('UPDATES_FEATURE', "{$major}.".($minor + 1).'.0');
+
 beforeEach(function () {
     Http::preventStrayRequests();
     app()->setLocale('it');
@@ -162,7 +170,7 @@ it('refuses package paths that point outside the site', function (string $name) 
 })->with(['../evil.php', 'core/../../evil.php', '/etc/passwd', 'C:/evil.php', 'core\\evil.php', "core/a\0b"]);
 
 it('extracts a package in short steps, leaving data and configuration untouched', function () {
-    $package = updatePackage('2.0.9', [
+    $package = updatePackage(UPDATES_FIX, [
         'core/.env' => 'APP_KEY=from-package',
         '.htaccess' => 'from package',
         'uploads/photo.webp' => 'from package',
@@ -182,8 +190,8 @@ it('extracts a package in short steps, leaving data and configuration untouched'
     expect($steps)->toBe(5)
         ->and($result['redirect'])->toBe('/admin/system?update=finish')
         ->and($this->state)->not->toBeFile()
-        ->and(file_get_contents("{$this->core}/app/Old.php"))->toContain('2.0.9')
-        ->and(file_get_contents("{$this->core}/app/NewFeature.php"))->toContain('2.0.9')
+        ->and(file_get_contents("{$this->core}/app/Old.php"))->toContain(UPDATES_FIX)
+        ->and(file_get_contents("{$this->core}/app/NewFeature.php"))->toContain(UPDATES_FIX)
         ->and(file_get_contents("{$this->web}/themes/base/assets/app-NEW.css"))->toBe('body{}')
         ->and("{$this->core}/storage/logs")->toBeDirectory()
         ->and(file_get_contents("{$this->core}/.env"))->toBe('APP_KEY=secret')
@@ -198,7 +206,7 @@ it('extracts a package in short steps, leaving data and configuration untouched'
 });
 
 it('stops on an unsafe entry without losing its place, so it can be retried', function () {
-    $package = updatePackage('2.0.9', ['core/zz/../../../evil.php' => 'x']);
+    $package = updatePackage(UPDATES_FIX, ['core/zz/../../../evil.php' => 'x']);
     file_put_contents($this->state, json_encode(['token' => 'abc', 'zip' => $package, 'next' => 0, 'total' => 12, 'return' => '/']));
 
     expect(fn () => resume_updater_step($this->state, $this->web, $this->core))->toThrow(RuntimeException::class)
@@ -211,10 +219,10 @@ it('stops on an unsafe entry without losing its place, so it can be retried', fu
 // --- Controlli sul pacchetto ----------------------------------------------------------------------------
 
 it('accepts a newer package that this server can run', function () {
-    $report = app(PackageInspector::class)->inspect($package = updatePackage('2.0.9'));
+    $report = app(PackageInspector::class)->inspect($package = updatePackage(UPDATES_FIX));
 
     expect($report->ok())->toBeTrue()
-        ->and($report->version)->toBe('2.0.9')
+        ->and($report->version)->toBe(UPDATES_FIX)
         ->and($report->currentVersion)->toBe(app(Updater::class)->codeVersion())
         ->and($report->entries)->toBe(11);
 
@@ -230,11 +238,11 @@ it('refuses packages that cannot be installed', function (string $package, strin
     @unlink($package);
 })->with([
     'not a zip' => [fn () => tap(sys_get_temp_dir().'/resume-not-zip.zip', fn (string $path) => file_put_contents($path, 'text')), 'non è un archivio zip'],
-    'not a package' => [fn () => updatePackage('2.0.9', ['core/vendor/autoload.php' => null]), 'core/vendor/autoload.php'],
+    'not a package' => [fn () => updatePackage(UPDATES_FIX, ['core/vendor/autoload.php' => null]), 'core/vendor/autoload.php'],
     'older version' => [fn () => updatePackage('1.9.0'), 'più vecchia'],
-    'php too old' => [fn () => updatePackage('2.0.9', [], ['php' => '99.0.0']), 'PHP 99.0.0'],
-    'missing extension' => [fn () => updatePackage('2.0.9', [], ['extensions' => ['resume_missing_extension']]), 'resume_missing_extension'],
-    'unsafe path' => [fn () => updatePackage('2.0.9', ['../evil.php' => 'x']), '../evil.php'],
+    'php too old' => [fn () => updatePackage(UPDATES_FIX, [], ['php' => '99.0.0']), 'PHP 99.0.0'],
+    'missing extension' => [fn () => updatePackage(UPDATES_FIX, [], ['extensions' => ['resume_missing_extension']]), 'resume_missing_extension'],
+    'unsafe path' => [fn () => updatePackage(UPDATES_FIX, ['../evil.php' => 'x']), '../evil.php'],
     'incompatible theme' => [function () {
         File::ensureDirectoryExists("{$this->core}/themes/demo-pro/views");
         file_put_contents("{$this->core}/themes/demo-pro/theme.json", json_encode(['name' => 'demo-pro', 'title' => 'Demo PRO', 'version' => '1.0.0', 'requires' => ['resume-app' => '^2.0']]));
@@ -244,7 +252,7 @@ it('refuses packages that cannot be installed', function (string $package, strin
     'development copy' => [function () {
         unlink("{$this->core}/manifest.json");
 
-        return updatePackage('2.0.9');
+        return updatePackage(UPDATES_FIX);
     }, 'installazione da pacchetto'],
 ]);
 
@@ -252,14 +260,14 @@ it('refuses packages that cannot be installed', function (string $package, strin
 
 it('finds a newer release on GitHub, sending the token when there is one', function () {
     app(UpdateStorage::class)->setToken('github_pat_test');
-    fakeLatestRelease(githubRelease('2.0.9'));
+    fakeLatestRelease(githubRelease(UPDATES_FIX));
 
     $status = app(ReleaseChecker::class)->check();
     $release = app(ReleaseChecker::class)->available();
 
     expect($status['error'])->toBeNull()
-        ->and($release?->version)->toBe('2.0.9')
-        ->and($release?->package['name'])->toBe('resume-app-2.0.9.zip')
+        ->and($release?->version)->toBe(UPDATES_FIX)
+        ->and($release?->package['name'])->toBe('resume-app-'.UPDATES_FIX.'.zip')
         ->and(app(ReleaseChecker::class)->isStale())->toBeFalse();
 
     Http::assertSent(fn (Request $request): bool => $request->hasHeader('Authorization', 'Bearer github_pat_test')
@@ -292,29 +300,29 @@ it('does not offer older versions, drafts or pre-releases', function (array $dat
 })->with([
     'same version' => [fn () => githubRelease(app(Updater::class)->codeVersion())],
     'older' => [fn () => githubRelease('1.9.0')],
-    'draft' => [fn () => githubRelease('2.0.9', ['draft' => true])],
-    'pre-release' => [fn () => githubRelease('2.0.9', ['prerelease' => true])],
-    'not a version' => [fn () => githubRelease('2.0.9', ['tag_name' => 'nightly'])],
+    'draft' => [fn () => githubRelease(UPDATES_FIX, ['draft' => true])],
+    'pre-release' => [fn () => githubRelease(UPDATES_FIX, ['prerelease' => true])],
+    'not a version' => [fn () => githubRelease(UPDATES_FIX, ['tag_name' => 'nightly'])],
 ]);
 
 it('explains a failed check and keeps the last known release', function () {
-    Http::fake(['api.github.com/*' => Http::sequence()->push(githubRelease('2.0.9'))->push(['message' => 'Not Found'], 404)]);
+    Http::fake(['api.github.com/*' => Http::sequence()->push(githubRelease(UPDATES_FIX))->push(['message' => 'Not Found'], 404)]);
     app(ReleaseChecker::class)->check();
     $status = app(ReleaseChecker::class)->check();
 
     expect($status['error'])->toContain('privato')
-        ->and(app(ReleaseChecker::class)->available()?->version)->toBe('2.0.9');
+        ->and(app(ReleaseChecker::class)->available()?->version)->toBe(UPDATES_FIX);
 });
 
 // --- Download e caricamento a blocchi ----------------------------------------------------------------------
 
 it('downloads the package in chunks and checks its SHA-256', function () {
     $content = str_repeat('resume-app', 3);
-    $release = Release::fromGitHub(githubRelease('2.0.9', size: strlen($content)));
+    $release = Release::fromGitHub(githubRelease(UPDATES_FIX, size: strlen($content)));
 
     Http::fake(function (Request $request) use ($content) {
         if (str_ends_with($request->url(), '.sha256')) {
-            return Http::response(hash('sha256', $content).'  resume-app-2.0.9.zip');
+            return Http::response(hash('sha256', $content).'  resume-app-'.UPDATES_FIX.'.zip');
         }
 
         preg_match('/bytes=(\d+)-(\d+)/', $request->header('Range')[0] ?? '', $range);
@@ -331,15 +339,15 @@ it('downloads the package in chunks and checks its SHA-256', function () {
     } while (! $result['done']);
 
     expect($calls)->toBe(4)
-        ->and($result['file'])->toBe('resume-app-2.0.9.zip')
-        ->and(file_get_contents((string) app(UpdateStorage::class)->package('resume-app-2.0.9.zip')))->toBe($content);
+        ->and($result['file'])->toBe('resume-app-'.UPDATES_FIX.'.zip')
+        ->and(file_get_contents((string) app(UpdateStorage::class)->package('resume-app-'.UPDATES_FIX.'.zip')))->toBe($content);
 });
 
 it('deletes a download that does not match the published SHA-256', function () {
-    $release = Release::fromGitHub(githubRelease('2.0.9', size: 10));
+    $release = Release::fromGitHub(githubRelease(UPDATES_FIX, size: 10));
 
     Http::fake(fn (Request $request) => str_ends_with($request->url(), '.sha256')
-        ? Http::response(str_repeat('0', 64).'  resume-app-2.0.9.zip')
+        ? Http::response(str_repeat('0', 64).'  resume-app-'.UPDATES_FIX.'.zip')
         : Http::response('0123456789', 206));
 
     expect(fn () => (new ReleaseDownloader(app(UpdateStorage::class), app(ReleaseChecker::class)))->next($release))
@@ -350,7 +358,7 @@ it('deletes a download that does not match the published SHA-256', function () {
 it('assembles a package uploaded in chunks, only for administrators', function () {
     $url = fn (array $query): string => route('filament.admin.update-upload').'?'.http_build_query($query);
     $send = fn (array $query, string $body) => $this->call('POST', $url($query), [], [], [], ['CONTENT_TYPE' => 'application/octet-stream', 'HTTP_ACCEPT' => 'application/json'], $body);
-    $query = ['id' => str_repeat('a', 32), 'count' => 3, 'name' => 'resume-app-2.0.9.zip'];
+    $query = ['id' => str_repeat('a', 32), 'count' => 3, 'name' => 'resume-app-'.UPDATES_FIX.'.zip'];
 
     Filament::setCurrentPanel('admin');
     $send([...$query, 'index' => 0], 'one|')->assertUnauthorized();
@@ -360,10 +368,10 @@ it('assembles a package uploaded in chunks, only for administrators', function (
     $send([...$query, 'index' => 0], 'one|')->assertOk()->assertJson(['next' => 1]);
     $send([...$query, 'index' => 2], 'three')->assertStatus(409)->assertJson(['next' => 1]);
     $send([...$query, 'index' => 1], 'two|')->assertOk()->assertJson(['next' => 2]);
-    $send([...$query, 'index' => 2], 'three')->assertOk()->assertJson(['done' => true, 'file' => 'resume-app-2.0.9.zip']);
+    $send([...$query, 'index' => 2], 'three')->assertOk()->assertJson(['done' => true, 'file' => 'resume-app-'.UPDATES_FIX.'.zip']);
     $send([...$query, 'index' => 0, 'name' => '../evil.php'], 'x')->assertStatus(422);
 
-    expect(file_get_contents((string) app(UpdateStorage::class)->package('resume-app-2.0.9.zip')))->toBe('one|two|three');
+    expect(file_get_contents((string) app(UpdateStorage::class)->package('resume-app-'.UPDATES_FIX.'.zip')))->toBe('one|two|three');
 });
 
 // --- Dall'admin ---------------------------------------------------------------------------------------
@@ -372,10 +380,10 @@ it('shows a new version on the dashboard and on the system page', function () {
     seedDemo();
     $this->actingAs(User::factory()->create());
     app(Settings::class)->set(Updater::VERSION_KEY, app(Updater::class)->codeVersion());
-    fakeLatestRelease(githubRelease('2.0.9'));
+    fakeLatestRelease(githubRelease(UPDATES_FIX));
     app(ReleaseChecker::class)->check();
 
-    $this->get('/admin')->assertOk()->assertSee('Disponibile la versione 2.0.9');
+    $this->get('/admin')->assertOk()->assertSee('Disponibile la versione '.UPDATES_FIX);
 
     $this->get('/admin/system')
         ->assertOk()
@@ -388,11 +396,11 @@ it('checks GitHub on request from the system page', function () {
     seedDemo();
     $this->actingAs(User::factory()->create());
     Filament::setCurrentPanel('admin');
-    fakeLatestRelease(githubRelease('2.0.9'));
+    fakeLatestRelease(githubRelease(UPDATES_FIX));
 
     Livewire::test(ManageSystem::class)
         ->callAction('checkUpdates')
-        ->assertNotified('Disponibile la versione 2.0.9');
+        ->assertNotified('Disponibile la versione '.UPDATES_FIX);
 });
 
 it('updates from the system page: checks, safety copy, extraction outside Laravel, completion', function () {
@@ -402,18 +410,18 @@ it('updates from the system page: checks, safety copy, extraction outside Larave
 
     $storage = app(UpdateStorage::class);
     File::ensureDirectoryExists($storage->packagesDirectory());
-    rename(updatePackage('2.0.9'), $storage->packagesDirectory().'/resume-app-2.0.9.zip');
+    rename(updatePackage(UPDATES_FIX), $storage->packagesDirectory().'/resume-app-'.UPDATES_FIX.'.zip');
     $backups = glob(storage_path('app/private/backups/*.zip')) ?: [];
 
     Livewire::test(ManageSystem::class)
-        ->callAction('install', arguments: ['package' => 'resume-app-2.0.9.zip'])
+        ->callAction('install', arguments: ['package' => 'resume-app-'.UPDATES_FIX.'.zip'])
         ->assertRedirectContains('?resume-update=');
 
     $state = json_decode((string) file_get_contents($storage->stateFile()), true);
 
     expect(app(Maintenance::class)->isOn())->toBeTrue()
         ->and($storage->updaterFile())->toBeFile()
-        ->and($state['to'])->toBe('2.0.9')
+        ->and($state['to'])->toBe(UPDATES_FIX)
         ->and($state['strings']['visitor_title'])->toBe(__('site.errors.maintenance_title', [], app(Locales::class)->default()))
         ->and($state['strings']['title'])->toBe('Aggiornamento in corso')
         ->and(count(glob(storage_path('app/private/backups/*.zip')) ?: []))->toBe(count($backups) + 1);
@@ -423,7 +431,7 @@ it('updates from the system page: checks, safety copy, extraction outside Larave
         $result = resume_updater_step($storage->stateFile(), $this->web, $this->core);
     } while (! $result['done']);
 
-    expect(file_get_contents("{$this->core}/app/NewFeature.php"))->toContain('2.0.9');
+    expect(file_get_contents("{$this->core}/app/NewFeature.php"))->toContain(UPDATES_FIX);
 
     // Ritorno alla pagina Sistema: completamento automatico
     app(Settings::class)->set(Updater::VERSION_KEY, '2.0.1');
@@ -501,37 +509,37 @@ function sentMails(): array
 
 it('only checks for new versions when automatic updates are off or the cron job is missing', function () {
     seedDemo();
-    fakeGitHubWithPackage('2.0.9');
+    fakeGitHubWithPackage(UPDATES_FIX);
     $auto = autoUpdate(AutoUpdate::OFF);
 
-    expect($auto->run(fromCron: true))->toBe('available 2.0.9')
+    expect($auto->run(fromCron: true))->toBe('available '.UPDATES_FIX)
         ->and(app(UpdateStorage::class)->packages())->toBe([]);
 
     app(Settings::class)->set(AutoUpdate::SETTING, AutoUpdate::PATCH);
 
-    expect($auto->run(fromCron: false))->toBe('available 2.0.9')
+    expect($auto->run(fromCron: false))->toBe('available '.UPDATES_FIX)
         ->and(app(UpdateStorage::class)->packages())->toBe([]);
 });
 
 it('downloads a new version and tells the administrators', function () {
     seedDemo();
     User::factory()->create(['email' => 'admin@example.com']);
-    fakeGitHubWithPackage('2.1.0');
+    fakeGitHubWithPackage(UPDATES_FEATURE);
 
-    expect(autoUpdate(AutoUpdate::DOWNLOAD)->run(fromCron: true))->toBe('downloaded 2.1.0')
-        ->and(app(UpdateStorage::class)->package('resume-app-2.1.0.zip'))->toBeFile()
+    expect(autoUpdate(AutoUpdate::DOWNLOAD)->run(fromCron: true))->toBe('downloaded '.UPDATES_FEATURE)
+        ->and(app(UpdateStorage::class)->package('resume-app-'.UPDATES_FEATURE.'.zip'))->toBeFile()
         ->and(app(AutoUpdate::class)->lastEvent()['type'])->toBe('downloaded')
         ->and(sentMails())->toHaveCount(1);
 
     $this->actingAs(User::query()->first());
-    $this->get('/admin')->assertSee('La versione 2.1.0 è pronta da installare');
+    $this->get('/admin')->assertSee('La versione '.UPDATES_FEATURE.' è pronta da installare');
 });
 
 it('never installs a feature release by itself, only downloads it', function () {
     seedDemo();
-    fakeGitHubWithPackage('2.1.0');
+    fakeGitHubWithPackage(UPDATES_FEATURE);
 
-    expect(autoUpdate(AutoUpdate::PATCH)->run(fromCron: true))->toBe('downloaded 2.1.0')
+    expect(autoUpdate(AutoUpdate::PATCH)->run(fromCron: true))->toBe('downloaded '.UPDATES_FEATURE)
         ->and(app(UpdateStorage::class)->isExtracting())->toBeFalse()
         ->and(app(Maintenance::class)->isOn())->toBeFalse();
 });
@@ -539,24 +547,24 @@ it('never installs a feature release by itself, only downloads it', function () 
 it('recognises fix releases', function (string $version, bool $patch) {
     expect(app(AutoUpdate::class)->isPatch($version))->toBe($patch);
 })->with([
-    ['2.0.9', true],
-    ['2.0.10', true],
-    ['2.1.0', false],
+    [UPDATES_FIX, true],
+    [UPDATES_FIX_NEXT, true],
+    [UPDATES_FEATURE, false],
     ['3.0.0', false],
-    ['2.0.3', false],
-    ['2.0.1', false],
+    [UPDATES_CURRENT, false],
+    ['1.9.0', false],
 ]);
 
 it('installs a fix release from the cron job and completes it in a new process', function () {
     seedDemo();
     User::factory()->create(['email' => 'admin@example.com']);
-    fakeGitHubWithPackage('2.0.9');
+    fakeGitHubWithPackage(UPDATES_FIX);
     $auto = autoUpdate(AutoUpdate::PATCH);
     $backups = glob(storage_path('app/private/backups/*.zip')) ?: [];
 
     // Primo giro: download, controlli, copia dei contenuti, manutenzione, estrazione; poi il giro si ferma
-    expect(fn () => $auto->run(fromCron: true))->toThrow(CronStop::class, 'extracted 2.0.9')
-        ->and(file_get_contents("{$this->core}/app/NewFeature.php"))->toContain('2.0.9')
+    expect(fn () => $auto->run(fromCron: true))->toThrow(CronStop::class, 'extracted '.UPDATES_FIX)
+        ->and(file_get_contents("{$this->core}/app/NewFeature.php"))->toContain(UPDATES_FIX)
         ->and(file_get_contents("{$this->web}/uploads/photo.webp"))->toBe('original')
         ->and(app(UpdateStorage::class)->isExtracting())->toBeFalse()
         ->and(app(Maintenance::class)->isOn())->toBeTrue()
@@ -565,11 +573,11 @@ it('installs a fix release from the cron job and completes it in a new process',
     // Giro successivo (o "resume:update --finish"): migrazioni, cache, fine della manutenzione
     app(Settings::class)->set(Updater::VERSION_KEY, '2.0.1');
 
-    expect($auto->run(fromCron: true))->toBe('installed 2.0.9')
+    expect($auto->run(fromCron: true))->toBe('installed '.UPDATES_FIX)
         ->and(app(Maintenance::class)->isOn())->toBeFalse()
         ->and(app(UpdateStorage::class)->runFile())->not->toBeFile()
         ->and($auto->lastEvent()['type'])->toBe('installed')
-        ->and(collect(sentMails())->map(fn ($message) => $message->getOriginalMessage()->getSubject())->last())->toContain('2.0.9');
+        ->and(collect(sentMails())->map(fn ($message) => $message->getOriginalMessage()->getSubject())->last())->toContain(UPDATES_FIX);
 
     foreach (array_diff(glob(storage_path('app/private/backups/*.zip')) ?: [], $backups) as $file) {
         @unlink($file);
@@ -578,19 +586,19 @@ it('installs a fix release from the cron job and completes it in a new process',
 
 it('does not install a fix release the web server cannot run', function () {
     seedDemo();
-    $content = (string) file_get_contents(updatePackage('2.0.9', requires: ['php' => '8.4.0', 'extensions' => ['zip', 'imaginary']]));
+    $content = (string) file_get_contents(updatePackage(UPDATES_FIX, requires: ['php' => '8.4.0', 'extensions' => ['zip', 'imaginary']]));
 
     Http::fake(function (Request $request) use ($content) {
         return match (true) {
-            str_ends_with($request->url(), 'releases/latest') => Http::response(githubRelease('2.0.9', size: strlen($content))),
-            str_ends_with($request->url(), '.sha256') => Http::response(hash('sha256', $content).'  resume-app-2.0.9.zip'),
+            str_ends_with($request->url(), 'releases/latest') => Http::response(githubRelease(UPDATES_FIX, size: strlen($content))),
+            str_ends_with($request->url(), '.sha256') => Http::response(hash('sha256', $content).'  resume-app-'.UPDATES_FIX.'.zip'),
             default => Http::response($content, 200),
         };
     });
 
     $auto = autoUpdate(AutoUpdate::PATCH);
 
-    expect($auto->run(fromCron: true))->toContain('not installed 2.0.9')
+    expect($auto->run(fromCron: true))->toContain('not installed '.UPDATES_FIX)
         ->and($auto->lastEvent()['type'])->toBe('failed')
         ->and(app(UpdateStorage::class)->isExtracting())->toBeFalse()
         ->and(app(Maintenance::class)->isOn())->toBeFalse();
