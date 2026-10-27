@@ -20,7 +20,7 @@ function makeThemesFixture(): string
     ];
 
     foreach ($files as $path => $content) {
-        @mkdir(dirname("{$root}/{$path}"), 0777, true);
+        is_dir(dirname("{$root}/{$path}")) || mkdir(dirname("{$root}/{$path}"), 0777, true);
         file_put_contents("{$root}/{$path}", $content);
     }
 

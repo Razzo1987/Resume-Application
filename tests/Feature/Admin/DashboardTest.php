@@ -8,6 +8,7 @@ use App\Filament\Widgets\SystemOverviewWidget;
 use App\Models\StatVisit;
 use App\Models\User;
 use App\Support\Settings\Settings;
+use App\Support\Stats\StatsQuery;
 use Filament\Facades\Filament;
 use Livewire\Livewire;
 
@@ -35,7 +36,7 @@ it('summarises the visits of the last days when statistics are on', function () 
 
     foreach (range(1, 3) as $i) {
         StatVisit::query()->create([
-            'visited_at' => now(), 'day' => today(), 'page' => 'cv', 'path' => '/it-IT', 'locale' => 'it-IT',
+            'visited_at' => now(), 'day' => StatsQuery::today(), 'page' => 'cv', 'path' => '/it-IT', 'locale' => 'it-IT',
             'referrer_host' => 'linkedin.com', 'country' => 'IT', 'ip' => '93.44.12.x',
         ]);
     }

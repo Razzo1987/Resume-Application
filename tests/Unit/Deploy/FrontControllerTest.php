@@ -9,8 +9,8 @@
 
 function fakeCore(string $dir): void
 {
-    @mkdir("{$dir}/bootstrap", 0777, true);
-    @mkdir("{$dir}/vendor", 0777, true);
+    is_dir("{$dir}/bootstrap") || mkdir("{$dir}/bootstrap", 0777, true);
+    is_dir("{$dir}/vendor") || mkdir("{$dir}/vendor", 0777, true);
 
     file_put_contents("{$dir}/vendor/autoload.php", <<<'PHP'
         <?php

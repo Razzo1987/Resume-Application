@@ -32,7 +32,7 @@ jobs:
           ' CHANGELOG.md > dist/RELEASE_NOTES.md
           test -s dist/RELEASE_NOTES.md
           printf '\n---\nSHA-256 of the package: `%s`\n' "$(cut -d' ' -f1 dist/*.zip.sha256)" >> dist/RELEASE_NOTES.md
-      - uses: softprops/action-gh-release@v2
+      - uses: softprops/action-gh-release@v3
         with:
           name: Resume App ${{ github.ref_name }}
           body_path: dist/RELEASE_NOTES.md

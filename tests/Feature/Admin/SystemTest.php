@@ -90,7 +90,7 @@ it('removes only the files left over by older versions, with their empty folders
     ];
 
     foreach (array_keys($files) as $file) {
-        @mkdir(dirname("{$web}/{$file}"), 0777, true);
+        is_dir(dirname("{$web}/{$file}")) || mkdir(dirname("{$web}/{$file}"), 0777, true);
         file_put_contents("{$web}/{$file}", $file);
     }
 

@@ -138,7 +138,7 @@ it('sums the visits by day, page and dimension, and keeps the totals after delet
     pageView('/en-GB/projects/'.$project->t('slug', 'en-GB'), ['REMOTE_ADDR' => '2a01:4f8:c0c::1']);
     pageView('/it-IT/cv');
 
-    app(Aggregator::class)->aggregate(today());
+    app(Aggregator::class)->aggregate(StatsQuery::today()); // the day of the visits is a day of the site time zone
     $query = StatsQuery::forPeriod('30');
 
     expect($query->totals())->toBe(['views' => 3, 'downloads' => 1, 'countries' => 3, 'pages' => 2])

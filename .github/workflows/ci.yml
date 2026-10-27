@@ -93,7 +93,7 @@ jobs:
       - run: npx playwright install --with-deps chromium firefox webkit
       - run: npx playwright test
       - name: Traces of the failed tests
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         if: failure()
         with:
           name: playwright-results
@@ -105,14 +105,14 @@ jobs:
           php artisan db:seed --class=DemoStatsSeeder --force
           SCREENSHOTS=1 npx playwright test screenshots --project=chromium --reporter=list
       - name: Test report (HTML)
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         if: always()
         with:
           name: playwright-report
           path: playwright-report/
           retention-days: 30
       - name: Screenshots
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         if: always()
         with:
           name: screenshots
