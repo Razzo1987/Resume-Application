@@ -35,6 +35,14 @@ return [
         'check_every_hours' => 12,
     ],
 
+    // Provenienza delle visite (statistiche): database GeoLite2 di MaxMind scaricati con un account gratuito.
+    // Account ID e License Key di solito si inseriscono dall'admin (Statistiche); qui hanno la precedenza.
+    'geoip' => [
+        'account_id' => env('RESUME_GEOIP_ACCOUNT_ID'),
+        'license_key' => env('RESUME_GEOIP_LICENSE_KEY'),
+        'download_url' => env('RESUME_GEOIP_DOWNLOAD_URL', 'https://download.maxmind.com/geoip/databases/{edition}/download?suffix=tar.gz'),
+    ],
+
     'themes' => [
         // Tema attivo. Ogni tema eredita dal tema "base" le view e le stringhe che non ridefinisce.
         'active' => env('RESUME_THEME', 'base'),

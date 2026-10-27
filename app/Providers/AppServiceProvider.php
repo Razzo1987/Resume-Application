@@ -36,6 +36,7 @@ use App\Support\Install\InstallState;
 use App\Support\Languages\LanguagePacks;
 use App\Support\Languages\Locales;
 use App\Support\Settings\Settings;
+use App\Support\Stats\GeoIp;
 use App\Support\Translatable\SlugRefresher;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Model;
@@ -64,6 +65,7 @@ class AppServiceProvider extends ServiceProvider
         $this->app->singleton(Settings::class);
         $this->app->singleton(PageCache::class);
         $this->app->singleton(SiteUrls::class);
+        $this->app->singleton(GeoIp::class);
         $this->app->singleton(Cron::class, function (): Cron {
             $cron = new Cron;
             CronJobs::register($cron);

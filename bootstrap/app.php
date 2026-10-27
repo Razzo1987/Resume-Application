@@ -6,6 +6,7 @@ use App\Http\Middleware\RedirectToInstaller;
 use App\Http\Middleware\SiteMaintenance;
 use App\Http\Middleware\SiteSecurityHeaders;
 use App\Http\Middleware\StripCookies;
+use App\Http\Middleware\TrackVisit;
 use App\Site\NotFound;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
@@ -37,6 +38,7 @@ $app = Application::configure(basePath: dirname(__DIR__))
 
         // L'ordine conta: la risposta (anche quella dalla cache) passa sempre da intestazioni di sicurezza e StripCookies
         $middleware->group('site', [
+            TrackVisit::class,
             NormalizeSitePath::class,
             SiteSecurityHeaders::class,
             StripCookies::class,

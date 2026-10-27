@@ -23,7 +23,7 @@ use ZipArchive;
 class Backup
 {
     /** Tabelle tecniche escluse */
-    public const array SKIP = ['users', 'sessions', 'cache', 'cache_locks', 'jobs', 'job_batches', 'failed_jobs', 'password_reset_tokens'];
+    public const array SKIP = ['users', 'sessions', 'cache', 'cache_locks', 'jobs', 'job_batches', 'failed_jobs', 'password_reset_tokens', 'stat_visits', 'stat_daily', 'stat_admin_ips'];
 
     public function create(): string
     {
