@@ -4,8 +4,12 @@ namespace App\Providers\Filament;
 
 use App\Filament\Support\InitialsAvatarProvider;
 use App\Filament\Support\SiteActions;
-use App\Filament\Widgets\SiteStatusWidget;
+use App\Filament\Widgets\ContentOverviewWidget;
+use App\Filament\Widgets\CvOverviewWidget;
+use App\Filament\Widgets\LanguagesOverviewWidget;
+use App\Filament\Widgets\StatisticsOverviewWidget;
 use App\Filament\Widgets\SystemAlertsWidget;
+use App\Filament\Widgets\SystemOverviewWidget;
 use App\Http\Controllers\Admin\UpdateUploadController;
 use App\Http\Middleware\AdminActivity;
 use App\Http\Middleware\NoIndex;
@@ -59,10 +63,15 @@ class AdminPanelProvider extends PanelProvider
             ->pages([
                 Dashboard::class,
             ])
+            // Dashboard: avvisi, poi un gruppo per tipo (Sistema, Lingue, Contenuti, CV, Statistiche)
             ->widgets([
-                SystemAlertsWidget::class,
-                SiteStatusWidget::class,
                 AccountWidget::class,
+                SystemAlertsWidget::class,
+                SystemOverviewWidget::class,
+                LanguagesOverviewWidget::class,
+                ContentOverviewWidget::class,
+                CvOverviewWidget::class,
+                StatisticsOverviewWidget::class,
             ])
             ->navigationGroups([
                 NavigationGroup::make(fn (): string => __('admin.nav.cv')),

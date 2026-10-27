@@ -7,6 +7,7 @@ namespace App\Support\System;
 use App\Models\CvDocument;
 use App\Site\Cache\PageCache;
 use App\Support\Settings\Settings;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Schema;
@@ -74,6 +75,16 @@ class Backup
     public function directory(): string
     {
         return storage_path('app/private/backups');
+    }
+
+    /**
+     * Data dell'esportazione dei contenuti più recente (fatta a mano o prima di un aggiornamento o di un'importazione).
+     */
+    public function lastCreatedAt(): ?Carbon
+    {
+        $times = array_map(fn (string $file): int => (int) filemtime($file), glob($this->directory().'/*.zip') ?: []);
+
+        return $times !== [] ? Carbon::createFromTimestamp(max($times)) : null;
     }
 
     /**

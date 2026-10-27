@@ -2,7 +2,7 @@
 
 use App\Enums\PageSectionKey;
 use App\Filament\Pages\Translations;
-use App\Filament\Widgets\SiteStatusWidget;
+use App\Filament\Widgets\LanguagesOverviewWidget;
 use App\Models\Interest;
 use App\Models\PageSection;
 use App\Models\User;
@@ -56,5 +56,5 @@ it('links each dashboard translation box to its list', function () {
     Interest::query()->create(['name' => ['it-IT' => 'Montagna']]);
 
     // I widget della dashboard si caricano a parte (lazy): si verifica il componente
-    Livewire::test(SiteStatusWidget::class)->assertSeeHtml(Translations::getUrl(['locale' => 'en-GB']));
+    Livewire::test(LanguagesOverviewWidget::class)->assertSeeHtml(Translations::getUrl(['locale' => 'en-GB']));
 });
