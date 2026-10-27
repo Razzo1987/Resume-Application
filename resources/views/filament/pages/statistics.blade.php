@@ -115,7 +115,7 @@
                 </x-filament::button>
                 <div class="resume-update-progress" x-show="total > 0" x-cloak>
                     <span x-text="edition"></span>
-                    <progress x-bind:max="total" x-bind:value="received"></progress>
+                    <progress x-bind:max="total" x-bind:value="received" aria-label="{{ __('admin.stats.geoip.update_now') }}"></progress>
                     <span x-text="Math.round(received / total * 100) + '%'"></span>
                 </div>
                 <p class="resume-update-ok" x-show="done" x-cloak>{{ __('admin.stats.geoip.updated') }}</p>

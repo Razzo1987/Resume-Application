@@ -405,6 +405,7 @@ return [
         'available' => 'Disponibile la versione :version',
         'notes_title' => 'Novità di questa versione',
         'download_install' => 'Scarica e installa (:size)',
+        'download_progress' => 'Download del pacchetto',
         'upload_title' => 'Carica un pacchetto',
         'upload_help' => 'Lo zip completo di una versione (resume-app-x.y.z.zip). Viene inviato a blocchi da 1 MB, quindi il limite di caricamento del server non conta.',
         'upload' => 'Carica',

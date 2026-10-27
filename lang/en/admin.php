@@ -405,6 +405,7 @@ return [
         'available' => 'Version :version is available',
         'notes_title' => 'What\'s new in this version',
         'download_install' => 'Download and install (:size)',
+        'download_progress' => 'Package download',
         'upload_title' => 'Upload a package',
         'upload_help' => 'The full zip of a version (resume-app-x.y.z.zip). It is sent in 1 MB chunks, so the server upload limit does not matter.',
         'upload' => 'Upload',

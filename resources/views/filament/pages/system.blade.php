@@ -98,7 +98,7 @@
                             {{ __('admin.updates.download_install', ['size' => \Illuminate\Support\Number::fileSize($updateAvailable->package['size'], 1)]) }}
                         </x-filament::button>
                         <div class="resume-update-progress" x-show="total > 0" x-cloak>
-                            <progress x-bind:max="total" x-bind:value="received"></progress>
+                            <progress x-bind:max="total" x-bind:value="received" aria-label="{{ __('admin.updates.download_progress') }}"></progress>
                             <span x-text="Math.round(received / total * 100) + '%'"></span>
                         </div>
                         <p class="resume-update-problem" x-show="error" x-text="error" x-cloak></p>
@@ -112,13 +112,13 @@
                 <h3 class="resume-update-title">{{ __('admin.updates.upload_title') }}</h3>
                 <p>{{ __('admin.updates.upload_help') }}</p>
                 <div class="resume-update-upload">
-                    <input type="file" accept=".zip,application/zip" x-ref="file" x-bind:disabled="busy">
+                    <input type="file" accept=".zip,application/zip" x-ref="file" x-bind:disabled="busy" aria-label="{{ __('admin.updates.upload_title') }}">
                     <x-filament::button color="gray" icon="heroicon-o-arrow-up-tray" x-on:click="upload()" x-bind:disabled="busy">
                         {{ __('admin.updates.upload') }}
                     </x-filament::button>
                 </div>
                 <div class="resume-update-progress" x-show="size > 0" x-cloak>
-                    <progress x-bind:max="size" x-bind:value="sent"></progress>
+                    <progress x-bind:max="size" x-bind:value="sent" aria-label="{{ __('admin.updates.upload_title') }}"></progress>
                     <span x-text="Math.round(sent / size * 100) + '%'"></span>
                 </div>
                 <p class="resume-update-problem" x-show="error" x-text="error" x-cloak></p>
