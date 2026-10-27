@@ -11,7 +11,7 @@ return new class extends Migration
         Schema::create('cv_documents', function (Blueprint $table) {
             $table->id();
             $table->foreignId('language_id')->constrained()->cascadeOnDelete();
-            $table->string('path')->comment('Disco local (privato): cv/cv_it-IT_20261025-143012.pdf');
+            $table->string('path')->comment('"local" disk (private): cv/cv_it-IT_20261025-143012.pdf');
             $table->string('original_name');
             $table->unsignedInteger('size');
             $table->char('sha256', 64);
@@ -30,7 +30,7 @@ return new class extends Migration
             $table->string('cover_image')->nullable();
             $table->json('cover_alt')->nullable()->comment('(T)');
             $table->string('status', 10)->default('draft')->comment('draft | published');
-            $table->dateTime('published_at')->nullable()->comment('Data futura = pubblicazione programmata');
+            $table->dateTime('published_at')->nullable()->comment('Future date = scheduled publication');
             $table->timestamps();
             $table->index(['status', 'published_at']);
         });

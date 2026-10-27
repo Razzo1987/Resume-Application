@@ -1,5 +1,5 @@
-# Resume App — cartella del codice applicativo.
-# Nessun file di questa cartella deve essere servito dal web server.
+# Resume App — application code folder.
+# No file in this folder may be served by the web server.
 <IfModule mod_authz_core.c>
     Require all denied
 </IfModule>

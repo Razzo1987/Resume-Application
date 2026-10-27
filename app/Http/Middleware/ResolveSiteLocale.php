@@ -11,8 +11,8 @@ use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
 
 /**
- * Lingua dal primo segmento dell'URL. Accetta solo le lingue attive; le varianti di maiuscole
- * ("/it-it/...") vengono reindirizzate in modo permanente al codice corretto ("/it-IT/...").
+ * Language from the first URL segment. Only active languages are accepted; letter case variants
+ * ("/it-it/...") are permanently redirected to the correct code ("/it-IT/...").
  */
 class ResolveSiteLocale
 {

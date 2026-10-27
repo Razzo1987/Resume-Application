@@ -11,8 +11,9 @@ use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
 
 /**
- * Pagine dell'admin con un amministratore collegato: annota il PHP del sito (per gli aggiornamenti automatici)
- * e l'IP dell'amministratore (le sue visite al sito non contano nelle statistiche) e, se il cron dell'hosting non c'è, fa partire i lavori programmati leggeri dopo aver risposto.
+ * Admin pages with a logged-in administrator: records the PHP version of the site (for automatic updates) and the
+ * administrator's IP (their visits to the site do not count in the statistics) and, if there is no hosting cron,
+ * starts the light scheduled jobs after the response is sent.
  */
 class AdminActivity
 {

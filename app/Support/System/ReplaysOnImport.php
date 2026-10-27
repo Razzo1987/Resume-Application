@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace App\Support\System;
 
 /**
- * Migrazione che cambia anche i dati (non solo la struttura): va ripetuta quando si importano contenuti esportati
- * da una versione precedente, che non l'aveva ancora eseguita (vedi Backup::restore()).
+ * Migration that also changes the data (not just the structure): it must be run again when importing content
+ * exported from a previous version that had not run it yet (see Backup::restore()).
  */
 interface ReplaysOnImport
 {

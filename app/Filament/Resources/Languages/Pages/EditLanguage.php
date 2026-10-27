@@ -17,7 +17,7 @@ class EditLanguage extends EditRecord
     protected function getHeaderActions(): array
     {
         return [
-            // La lingua di default non si può eliminare: prima se ne sceglie un'altra
+            // The default language cannot be deleted: another one must be chosen first
             DeleteAction::make()->hidden(fn (Language $record): bool => $record->is_default),
         ];
     }

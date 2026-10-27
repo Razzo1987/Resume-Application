@@ -16,7 +16,7 @@ use App\Support\Settings\Settings;
 use Illuminate\Pagination\LengthAwarePaginator;
 
 /**
- * Prepara i metadati (titolo, descrizione, canonical, hreflang, Open Graph, JSON-LD) delle pagine pubbliche.
+ * Prepares the metadata (title, description, canonical, hreflang, Open Graph, JSON-LD) of the public pages.
  */
 final class Pages
 {
@@ -110,7 +110,7 @@ final class Pages
             title: $title.($pageNumber > 1 ? ' - '.__('site.blog.page', ['page' => $pageNumber]) : '').' - '.$name,
             description: (string) __('site.blog.description', ['name' => $name]),
             canonical: url($path).($pageNumber > 1 ? '?page='.$pageNumber : ''),
-            // Le pagine successive alla prima non hanno versioni in altre lingue
+            // Pages after the first one have no versions in other languages
             alternates: $pageNumber > 1 ? [] : $this->urls->alternates(fn (string $code): ?string => $this->blog->hasArticles($code) ? $this->urls->blogPath($code) : null),
             image: $this->defaultImage(),
             imageAlt: $name,
@@ -166,7 +166,7 @@ final class Pages
                 ['label' => $name ?: (string) __('site.actions.back_to_cv'), 'url' => url($this->urls->homePath($locale))],
                 ['label' => $title, 'url' => null],
             ],
-            // Testo uguale su tutti i siti fatti con Resume App: non serve nei risultati di ricerca
+            // Same text on every site built with Resume App: not needed in search results
             robots: 'noindex, follow',
             section: 'privacy',
         );
@@ -209,7 +209,7 @@ final class Pages
     }
 
     /**
-     * Immagine per la condivisione: quella delle impostazioni SEO, altrimenti la foto del profilo.
+     * Image for sharing: the one from the SEO settings, otherwise the profile photo.
      */
     private function defaultImage(): ?string
     {

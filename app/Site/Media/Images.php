@@ -9,7 +9,7 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\HtmlString;
 
 /**
- * Immagini caricate dall'admin (disco "uploads", servito dal web server).
+ * Images uploaded from the admin ("uploads" disk, served by the web server).
  */
 final class Images
 {
@@ -25,7 +25,7 @@ final class Images
     }
 
     /**
-     * Larghezza e altezza (per gli attributi width/height, evitano spostamenti del layout).
+     * Width and height (for the width/height attributes, they prevent layout shifts).
      *
      * @return array{0: int, 1: int}|null
      */
@@ -52,9 +52,9 @@ final class Images
     }
 
     /**
-     * Attributi pronti per un tag <img> (src, width, height), con i valori protetti.
+     * Attributes ready for an <img> tag (src, width, height), with the values escaped.
      *
-     * @param  array<string, string|int>  $attributes  risultato di attributes()
+     * @param  array<string, string|int>  $attributes  result of attributes()
      */
     public function html(array $attributes): HtmlString
     {
@@ -68,7 +68,7 @@ final class Images
     }
 
     /**
-     * Attributi src, width e height per un tag <img>.
+     * The src, width and height attributes for an <img> tag.
      *
      * @return array<string, string|int>
      */

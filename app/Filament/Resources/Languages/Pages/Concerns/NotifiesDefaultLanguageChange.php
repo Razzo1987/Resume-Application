@@ -8,7 +8,7 @@ use App\Models\Language;
 use Filament\Notifications\Notification;
 
 /**
- * Dopo il cambio della lingua di default ricorda che il redirect di "/" resta nella cache dei browser per un giorno.
+ * After the default language changes, reminds that the redirect of "/" stays in browser caches for one day.
  */
 trait NotifiesDefaultLanguageChange
 {

@@ -1,8 +1,8 @@
 <?php
 
 /*
- * Installer web: disponibile solo finché manca il file .env (vedi RedirectToInstaller).
- * Nessuna sessione né cookie: non esiste ancora una chiave dell'applicazione.
+ * Web installer: available only while the .env file is missing (see RedirectToInstaller).
+ * No session or cookies: there is no application key yet.
  */
 
 use App\Http\Controllers\Install\InstallController;

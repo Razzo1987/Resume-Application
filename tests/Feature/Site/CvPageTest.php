@@ -14,7 +14,7 @@ use Illuminate\Support\Facades\DB;
 beforeEach(fn () => seedDemo());
 
 /**
- * Ordine delle sezioni nella pagina (id delle <section>).
+ * Order of the sections in the page (ids of the <section> elements).
  *
  * @return list<string>
  */
@@ -61,7 +61,7 @@ it('builds the menu from the sections marked for it, with custom titles', functi
         ->not->toContain('<li><a href="#languages">')
         ->and($html)->not->toContain('<li><a href="#highlights">');
 
-    // dalle pagine di dettaglio il menu riporta al CV
+    // from the detail pages the menu links back to the CV
     $this->get('/it-IT/progetti/portale-prenotazioni')
         ->assertSee('<li><a href="http://localhost/it-IT#experience">Carriera</a></li>', escape: false);
 });

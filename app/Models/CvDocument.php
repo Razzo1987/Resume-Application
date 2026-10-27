@@ -11,8 +11,8 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Support\Facades\Storage;
 
 /**
- * Versione del CV in PDF per una lingua. Il file sta sul disco privato "local",
- * con nome cv_{lingua}_{timestamp}.pdf; si scarica con un nome standard senza date.
+ * PDF version of the CV for a language. The file is stored on the private "local" disk,
+ * named cv_{language}_{timestamp}.pdf; it is downloaded with a standard name without dates.
  *
  * @property int $id
  * @property int $language_id
@@ -51,7 +51,7 @@ class CvDocument extends Model
             }
         });
 
-        // Una sola versione corrente per lingua
+        // Only one current version per language
         static::saved(function (CvDocument $document): void {
             if ($document->is_current) {
                 self::query()
@@ -65,7 +65,7 @@ class CvDocument extends Model
         static::deleted(function (CvDocument $document): void {
             Storage::disk(self::DISK)->delete($document->path);
 
-            // Se era la versione corrente, diventa corrente la più recente rimasta
+            // If it was the current version, the most recent remaining one becomes current
             if ($document->is_current) {
                 self::query()->where('language_id', $document->language_id)->latest('id')->first()?->update(['is_current' => true]);
             }
@@ -73,7 +73,7 @@ class CvDocument extends Model
     }
 
     /**
-     * Nome del file salvato: cv_{lingua}_{AAAAMMGG-hhmmss}.pdf
+     * Name of the stored file: cv_{language}_{YYYYMMDD-hhmmss}.pdf
      */
     public static function storageName(string $languageCode, ?\DateTimeInterface $at = null): string
     {
@@ -96,7 +96,7 @@ class CvDocument extends Model
     }
 
     /**
-     * Nome con cui il file viene scaricato, es. "CV Luca Racchetti - IT.pdf".
+     * Name the file is downloaded with, e.g. "CV Luca Racchetti - IT.pdf".
      */
     public function downloadName(): string
     {

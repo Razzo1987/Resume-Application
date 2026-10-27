@@ -23,8 +23,8 @@ use App\Support\Translatable\Translatable;
 use Illuminate\Database\Eloquent\Model;
 
 /**
- * Contenuti con traduzioni mancanti per ciascuna lingua attiva: un campo scritto in almeno una lingua e vuoto in
- * un'altra. Comprende i titoli personalizzati delle sezioni e i testi delle impostazioni (SEO, footer).
+ * Content with missing translations for each active language: a field written in at least one language and empty in
+ * another. Includes the custom section titles and the settings texts (SEO, footer).
  */
 class TranslationReport
 {
@@ -41,7 +41,7 @@ class TranslationReport
     ) {}
 
     /**
-     * @return array<string, int> lingua => numero di contenuti da completare
+     * @return array<string, int> language => number of items to complete
      */
     public function missingByLocale(): array
     {
@@ -55,8 +55,8 @@ class TranslationReport
     }
 
     /**
-     * Cosa manca in una lingua: per ogni contenuto incompleto i campi da tradurre.
-     * Il record è null per i testi delle impostazioni.
+     * What is missing in a language: for each incomplete item, the fields to translate.
+     * The record is null for the settings texts.
      *
      * @return list<array{record: (Model&Translatable)|null, fields: list<string>}>
      */

@@ -25,7 +25,7 @@ enum PublicationType: string implements HasLabel
     }
 
     /**
-     * Tipo Schema.org per il JSON-LD.
+     * Schema.org type for the JSON-LD.
      */
     public function schemaType(): string
     {

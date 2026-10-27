@@ -9,8 +9,8 @@ use Filament\Facades\Filament;
 use Illuminate\Database\Eloquent\Model;
 
 /**
- * Avatar dell'utente admin generato in locale (SVG con le iniziali).
- * Sostituisce il provider predefinito di Filament, che scarica l'immagine da ui-avatars.com.
+ * Avatar of the admin user generated locally (SVG with the initials).
+ * Replaces Filament's default provider, which downloads the image from ui-avatars.com.
  */
 class InitialsAvatarProvider implements AvatarProvider
 {

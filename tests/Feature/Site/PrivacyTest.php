@@ -51,7 +51,7 @@ it('uses the text written in the admin, sanitized', function () {
         ->assertDontSee('<script>alert(1)</script>', escape: false)
         ->assertDontSee('Niente cookie');
 
-    // Le lingue senza testo usano il modello
+    // Languages without a text use the template
     $this->get('/en-GB/privacy')->assertSee('No cookies');
 });
 
@@ -63,7 +63,7 @@ it('is always on with visit statistics, and describes them from the settings', f
         ->assertSee('Statistiche delle visite')
         ->assertSee('93.44.12.x')
         ->assertSee('dopo 6 mesi')
-        // Senza database GeoLite niente provenienza dall'IP
+        // Without a GeoLite database there is no origin from the IP
         ->assertDontSee('GeoLite2');
 });
 

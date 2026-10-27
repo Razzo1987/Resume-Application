@@ -1,19 +1,19 @@
 #!/usr/bin/env node
 /**
- * Genera lo sprite SVG delle icone di un tema con le sole icone mappate nel suo icons.php
- * (più quelle dei temi da cui eredita). Ogni simbolo ha come id il nome semantico ("briefcase").
+ * Generates the SVG icon sprite of a theme with only the icons mapped in its icons.php
+ * (plus those of the themes it inherits from). Each symbol has the semantic name as id ("briefcase").
  *
- *   node scripts/build-icons.mjs [tema] [sorgente icone]
+ *   node scripts/build-icons.mjs [theme] [icon source]
  *
- * Tema: "base" se non indicato.
- * Sorgente: cartella di Font Awesome con un file per icona ({stile}/{icona}.svg, es. "svgs") oppure
- * con uno sprite per stile ({stile}.svg, es. "sprites" di Font Awesome Pro). Di default quella di
- * @fortawesome/fontawesome-free. Le icone che il tema eredita senza ridefinirle, se mancano nella
- * sorgente del tema, vengono prese da Font Awesome Free.
+ * Theme: "base" if not given.
+ * Source: a Font Awesome folder with one file per icon ({style}/{icon}.svg, e.g. "svgs") or
+ * with one sprite per style ({style}.svg, e.g. the Font Awesome Pro "sprites"). Defaults to the one of
+ * @fortawesome/fontawesome-free. Icons the theme inherits without redefining them are taken from
+ * Font Awesome Free when they are missing from the theme's source.
  *
- * Classi accettate in icons.php: "fa-solid fa-briefcase" (FA 6/7) oppure "fas fa-briefcase" (FA 5;
- * anche far, fal, fad, fab). Le icone duotone mantengono il secondo livello con opacità 0,4.
- * Uscita: themes/{tema}/resources/icons/sprite.svg (compilato poi da Vite con hash nel nome).
+ * Classes accepted in icons.php: "fa-solid fa-briefcase" (FA 6/7) or "fas fa-briefcase" (FA 5;
+ * also far, fal, fad, fab). Duotone icons keep the second layer with opacity 0.4.
+ * Output: themes/{theme}/resources/icons/sprite.svg (then compiled by Vite with a hash in the name).
  */
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
@@ -30,12 +30,12 @@ const PREFIXES = { fas: 'solid', far: 'regular', fal: 'light', fat: 'thin', fad:
 function themeDir(name) {
     const dir = join(root, 'themes', name);
     if (!existsSync(join(dir, 'theme.json'))) {
-        throw new Error(`Tema non trovato: ${dir}`);
+        throw new Error(`Theme not found: ${dir}`);
     }
     return dir;
 }
 
-/** Mappa nome → { classes, own }, dal tema base al tema richiesto. */
+/** Map name → { classes, own }, from the base theme to the requested one. */
 function iconMap(name, seen = new Set()) {
     if (seen.has(name)) return {};
     seen.add(name);
@@ -80,7 +80,7 @@ function parse(classes) {
 
 const spriteCache = new Map();
 
-/** Simboli di uno sprite per stile ({stile}.svg), indicizzati per id. */
+/** Symbols of a per-style sprite ({style}.svg), indexed by id. */
 function spriteSymbols(dir, style) {
     const key = `${dir}/${style}`;
     if (!spriteCache.has(key)) {
@@ -98,7 +98,7 @@ function spriteSymbols(dir, style) {
     return spriteCache.get(key);
 }
 
-/** Icona da una cartella: un file per icona oppure uno sprite per stile. */
+/** Icon from a folder: one file per icon or one sprite per style. */
 function load(dir, style, icon) {
     const file = join(dir, style, `${icon}.svg`);
     if (existsSync(file)) {
@@ -128,18 +128,18 @@ for (const [name, { classes, own }] of Object.entries(iconMap(themeName))) {
     const { style, icon } = parse(classes);
 
     if (!icon) {
-        throw new Error(`Icona "${name}": classi non valide "${classes}"`);
+        throw new Error(`Icon "${name}": invalid classes "${classes}"`);
     }
 
     let found = load(sourceDir, style, icon);
 
-    // Icona ereditata da un tema "padre" e assente nella sorgente del tema: si usa Font Awesome Free
+    // Icon inherited from a "parent" theme and missing from the theme's source: Font Awesome Free is used
     if (!found && !own && sourceDir !== freeDir) {
         found = load(freeDir, style, icon);
     }
 
     if (!found?.viewBox || !found?.body) {
-        throw new Error(`Icona "${name}" (${classes}): non trovata in ${sourceDir}`);
+        throw new Error(`Icon "${name}" (${classes}): not found in ${sourceDir}`);
     }
 
     if (found.license) licenses.add(found.license.replace(/\s+/g, ' '));
@@ -151,4 +151,4 @@ mkdirSync(dirname(output), { recursive: true });
 const header = [...licenses].map((license) => `<!-- ${license.replace(/--/g, '-')} -->`).join('');
 writeFileSync(output, `<svg xmlns="http://www.w3.org/2000/svg">${header}${symbols.join('')}</svg>\n`);
 
-console.log(`Sprite ${themeName}: ${symbols.length} icone → ${output.replace(root + '/', '')}`);
+console.log(`Sprite ${themeName}: ${symbols.length} icons → ${output.replace(root + '/', '')}`);

@@ -12,8 +12,8 @@ use Symfony\Component\HttpFoundation\Response;
 use Throwable;
 
 /**
- * Pagina non trovata nel sito pubblico: prima si cerca un redirect (tabella redirects),
- * poi si mostra la pagina 404 del tema nella lingua dell'URL (o in quella di default).
+ * Page not found on the public site: first a redirect is looked up (redirects table),
+ * then the theme's 404 page is shown in the language of the URL (or in the default one).
  */
 final class NotFound
 {
@@ -29,7 +29,7 @@ final class NotFound
             return null;
         }
 
-        // Indirizzi con slash finale o doppi slash che non corrispondono a nessuna rotta
+        // Addresses with a trailing slash or double slashes that match no route
         if (($normalized = NormalizeSitePath::redirect($request)) !== null) {
             return $normalized;
         }
@@ -66,7 +66,7 @@ final class NotFound
     }
 
     /**
-     * Admin, Livewire e file statici mantengono la gestione standard di Laravel.
+     * Admin, Livewire and static files keep the standard Laravel handling.
      */
     private function isOutsideSite(Request $request): bool
     {

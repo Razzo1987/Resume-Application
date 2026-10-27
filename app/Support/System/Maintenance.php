@@ -7,8 +7,8 @@ namespace App\Support\System;
 use Illuminate\Support\Facades\File;
 
 /**
- * Manutenzione del sito pubblico (durante gli aggiornamenti): i visitatori vedono una pagina "torniamo presto",
- * l'area admin continua a funzionare. Diversa da "php artisan down", che blocca anche l'admin.
+ * Maintenance mode for the public site (during updates): visitors see a "we'll be back soon" page, the admin area
+ * keeps working. Different from "php artisan down", which also blocks the admin.
  */
 class Maintenance
 {

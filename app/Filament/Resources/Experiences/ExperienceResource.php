@@ -18,7 +18,7 @@ use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 
 /**
- * Esperienze di lavoro. Il volontariato usa lo stesso modello con una risorsa dedicata.
+ * Work experiences. Volunteering uses the same model with a dedicated resource.
  */
 class ExperienceResource extends Resource
 {

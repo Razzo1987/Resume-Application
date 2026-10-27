@@ -7,7 +7,7 @@ namespace App\Enums;
 use Filament\Support\Contracts\HasLabel;
 
 /**
- * Sezioni della pagina CV. L'ordine dei case è l'ordine di default.
+ * Sections of the CV page. The order of the cases is the default order.
  */
 enum PageSectionKey: string implements HasLabel
 {
@@ -29,7 +29,7 @@ enum PageSectionKey: string implements HasLabel
     }
 
     /**
-     * Chiave della stringa del sito usata come titolo di default.
+     * Key of the site string used as the default title.
      */
     public function siteStringKey(): string
     {

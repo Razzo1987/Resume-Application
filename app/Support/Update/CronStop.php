@@ -7,8 +7,8 @@ namespace App\Support\Update;
 use RuntimeException;
 
 /**
- * Fine anticipata del giro del cron: i file dell'app sono appena stati sostituiti (o l'estrazione si è fermata
- * a metà), quindi questo processo non deve eseguire altri lavori né caricare altre classi.
+ * Early end of the cron run: the app files have just been replaced (or the extraction stopped halfway), so this
+ * process must not run any other jobs or load any other classes.
  */
 final class CronStop extends RuntimeException
 {

@@ -21,22 +21,22 @@ $app = Application::configure(basePath: dirname(__DIR__))
         web: __DIR__.'/../routes/web.php',
         commands: __DIR__.'/../routes/console.php',
         then: function (): void {
-            // Installer: senza sessione (prima dell'installazione non esiste la chiave dell'app)
+            // Installer: no session (before installation the app key does not exist)
             Route::middleware('installer')->group(base_path('routes/install.php'));
 
-            // Sito pubblico: nessuna sessione, nessun CSRF, nessun cookie.
+            // Public site: no session, no CSRF, no cookies.
             Route::middleware('site')->group(base_path('routes/site.php'));
         },
     )
     ->withMiddleware(function (Middleware $middleware): void {
-        // Prima dell'installazione tutto porta a /install
+        // Before installation everything leads to /install
         $middleware->prepend(RedirectToInstaller::class);
 
         $middleware->group('installer', [
             StripCookies::class,
         ]);
 
-        // L'ordine conta: la risposta (anche quella dalla cache) passa sempre da intestazioni di sicurezza e StripCookies
+        // Order matters: the response (even a cached one) always goes through the security headers and StripCookies
         $middleware->group('site', [
             TrackVisit::class,
             NormalizeSitePath::class,
@@ -52,12 +52,12 @@ $app = Application::configure(basePath: dirname(__DIR__))
             fn (Request $request) => $request->is('api/*') || $request->expectsJson(),
         );
 
-        // 404 del sito pubblico: redirect dalla tabella, altrimenti la pagina del tema
+        // 404 on the public site: redirect from the table, otherwise the theme page
         $exceptions->render(fn (NotFoundHttpException $exception, Request $request) => app(NotFound::class)->render($request));
     })->create();
 
-// Pacchetto di rilascio: il codice sta in public_html/core e la webroot è la cartella superiore.
-// Vale sia per le richieste web sia per i comandi artisan.
+// Release package: the code is in public_html/core and the webroot is the parent folder.
+// This applies both to web requests and to artisan commands.
 if (basename(dirname(__DIR__)) === 'core' && is_file(dirname(__DIR__, 2).'/index.php')) {
     $app->usePublicPath(dirname(__DIR__, 2));
 }

@@ -35,9 +35,10 @@ use Locale;
 use Throwable;
 
 /**
- * Statistiche delle visite (senza cookie): andamento nel tempo, pagine più viste, provenienza, campagne, Paesi e
- * città con la mappa, dispositivi, sistemi, browser, lingue e reti, elenco delle ultime visite. Filtri per periodo
- * e per singola pagina (es. un articolo del blog). Impostazioni, account MaxMind e IP esclusi dai pulsanti in alto.
+ * Visit statistics (without cookies): trend over time, most viewed pages, referrers, campaigns, countries and
+ * cities with the map, devices, operating systems, browsers, languages and networks, list of the latest visits.
+ * Filters by period and by single page (e.g. a blog article). Settings, MaxMind account and excluded IPs from the
+ * buttons at the top.
  */
 class Statistics extends Page implements HasTable
 {
@@ -51,11 +52,11 @@ class Statistics extends Page implements HasTable
 
     protected string $view = 'filament.pages.statistics';
 
-    /** Giorni del periodo ("7", "30", "90", "365") o "all" */
+    /** Days in the period ("7", "30", "90", "365") or "all" */
     #[Url]
     public string $period = '30';
 
-    /** Pagina (es. "article:3"), vuoto = tutto il sito */
+    /** Page (e.g. "article:3"), empty = whole site */
     #[Url(as: 'page_filter')]
     public string $pageFilter = '';
 
@@ -71,7 +72,7 @@ class Statistics extends Page implements HasTable
 
     public function mount(): void
     {
-        // Totali di oggi aggiornati all'apertura (bastano poche query)
+        // Today's totals updated when the page opens (a few queries are enough)
         if (app(Settings::class)->bool('stats.enabled')) {
             rescue(fn () => app(Aggregator::class)->aggregate(StatsQuery::today()), report: false);
         }
@@ -206,7 +207,7 @@ class Statistics extends Page implements HasTable
     }
 
     /**
-     * Scarica il blocco successivo di un database GeoLite (chiamato a ripetizione dalla pagina).
+     * Downloads the next chunk of a GeoLite database (called repeatedly by the page).
      *
      * @return array{received?: int, total?: int, done?: bool, error?: string}
      */
@@ -220,7 +221,7 @@ class Statistics extends Page implements HasTable
     }
 
     /**
-     * Database da scaricare (mancanti o con una versione più recente), dopo un controllo su MaxMind.
+     * Databases to download (missing or with a newer version), after a check on MaxMind.
      *
      * @return array{editions?: list<string>, error?: string}
      */

@@ -9,7 +9,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('users', function (Blueprint $table) {
-            // Autenticazione a due fattori con app (TOTP); i valori sono cifrati dal modello
+            // Two-factor authentication with an app (TOTP); the values are encrypted by the model
             $table->text('app_authentication_secret')->nullable()->after('password');
             $table->text('app_authentication_recovery_codes')->nullable()->after('app_authentication_secret');
         });

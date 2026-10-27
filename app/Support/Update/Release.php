@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Support\Update;
 
 /**
- * Una release pubblicata su GitHub (tag vX.Y.Z) con il pacchetto completo e il suo SHA-256.
+ * A release published on GitHub (tag vX.Y.Z) with the full package and its SHA-256.
  */
 final readonly class Release
 {
@@ -27,7 +27,7 @@ final readonly class Release
     ) {}
 
     /**
-     * Dalla risposta dell'API di GitHub; null per bozze, pre-release e tag che non sono una versione.
+     * From the GitHub API response; null for drafts, pre-releases and tags that are not a version.
      *
      * @param  array<string, mixed>  $data
      */

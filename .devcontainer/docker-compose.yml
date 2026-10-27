@@ -9,7 +9,7 @@ services:
     depends_on:
       - db
 
-  # Database del CV di prova (dati di "John Doe"), solo dentro il Codespace
+  # Database of the sample CV ("John Doe" data), only inside the Codespace
   db:
     image: mysql:8.0
     restart: unless-stopped

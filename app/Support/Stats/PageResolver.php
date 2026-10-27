@@ -12,9 +12,9 @@ use App\Support\Languages\Locales;
 use Illuminate\Database\Eloquent\Model;
 
 /**
- * Pagina delle statistiche a partire dall'indirizzo: "cv", "blog", "privacy", "cv-download", "project:12",
- * "experience:3", "article:5". Le pagine possono arrivare dalla cache HTML, senza passare dai controller: per
- * questo si riconoscono dall'indirizzo (canonico, perché si contano solo le risposte 200).
+ * Statistics page derived from the URL: "cv", "blog", "privacy", "cv-download", "project:12", "experience:3",
+ * "article:5". Pages can be served from the HTML cache without going through the controllers: that is why they are
+ * recognized by their URL (canonical, because only 200 responses are counted).
  */
 class PageResolver
 {
@@ -66,7 +66,7 @@ class PageResolver
     }
 
     /**
-     * Nome leggibile di una pagina, nella lingua principale del sito.
+     * Readable name of a page, in the site's main language.
      */
     public function label(string $page): string
     {
@@ -90,7 +90,7 @@ class PageResolver
     }
 
     /**
-     * Pagine con almeno una visita, per il filtro: chiave => nome.
+     * Pages with at least one visit, for the filter: key => name.
      *
      * @param  list<string>  $pages
      * @return array<string, string>

@@ -11,16 +11,16 @@ use Illuminate\Support\Facades\File;
 use RuntimeException;
 
 /**
- * Scarica il pacchetto di una release da GitHub direttamente sul server, a blocchi di 8 MB (ogni blocco è una
- * richiesta breve, sotto i limiti di tempo degli hosting; un download interrotto riprende da dove era arrivato).
- * Alla fine controlla lo SHA-256 pubblicato con la release.
+ * Downloads a release package from GitHub directly to the server, in 8 MB chunks (each chunk is a short request,
+ * within hosting time limits; an interrupted download resumes from where it stopped).
+ * At the end it checks the SHA-256 published with the release.
  */
 class ReleaseDownloader
 {
     public const int CHUNK = 8 * 1024 * 1024;
 
     /**
-     * @param  int  $chunk  byte per richiesta (più piccolo nei test)
+     * @param  int  $chunk  bytes per request (smaller in tests)
      */
     public function __construct(
         private readonly UpdateStorage $storage,
@@ -29,7 +29,7 @@ class ReleaseDownloader
     ) {}
 
     /**
-     * Scarica il blocco successivo.
+     * Downloads the next chunk.
      *
      * @return array{received: int, total: int, done: bool, file: ?string}
      */
@@ -60,7 +60,7 @@ class ReleaseDownloader
             if ($response->status() === 206) {
                 file_put_contents($part, $response->body(), FILE_APPEND);
             } elseif ($response->status() === 200) {
-                // Il server ha ignorato il blocco richiesto e ha mandato tutto il file
+                // The server ignored the requested range and sent the whole file
                 file_put_contents($part, $response->body());
             } else {
                 throw new RuntimeException($this->checker->describe($response));
@@ -81,7 +81,7 @@ class ReleaseDownloader
     }
 
     /**
-     * Lo zip deve corrispondere allo SHA-256 pubblicato con la release (se c'è).
+     * The zip must match the SHA-256 published with the release (if there is one).
      */
     private function verify(Release $release, string $file): void
     {
@@ -103,8 +103,8 @@ class ReleaseDownloader
     }
 
     /**
-     * Un file allegato alla release. Con il token (repository privato) si passa dall'API, che rimanda a un indirizzo
-     * temporaneo di GitHub (il token non viene inviato a quell'indirizzo); senza token dal link pubblico.
+     * A file attached to the release. With the token (private repository) it is fetched via the API, which redirects
+     * to a temporary GitHub URL (the token is not sent to that URL); without a token, via the public link.
      *
      * @param  array{id: int, name: string, size: int, api_url: string, download_url: string}  $asset
      * @param  array<string, string>  $headers

@@ -8,9 +8,9 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Response;
 
 /**
- * robots.txt generato: indica la sitemap con l'indirizzo reale del sito.
- * Il percorso dell'admin non viene elencato (sarebbe un'indicazione in più per chi lo cerca):
- * le sue pagine hanno già X-Robots-Tag: noindex.
+ * Generated robots.txt: points to the sitemap with the real URL of the site.
+ * The admin path is not listed (it would be an extra hint for anyone looking for it):
+ * its pages already have X-Robots-Tag: noindex.
  */
 class RobotsController extends Controller
 {

@@ -7,7 +7,7 @@ namespace App\Enums;
 use Filament\Support\Contracts\HasLabel;
 
 /**
- * Piattaforme social supportate. Il valore è anche il nome dell'icona semantica del tema.
+ * Supported social platforms. The value is also the name of the theme's semantic icon.
  */
 enum SocialPlatform: string implements HasLabel
 {

@@ -16,15 +16,16 @@ use Illuminate\Support\Str;
 use Symfony\Component\HttpFoundation\Response;
 
 /**
- * Registra le visite al sito pubblico, senza cookie e senza leggere niente dal dispositivo: solo ciò che il browser
- * manda con ogni richiesta (indirizzo, IP, user agent, pagina di provenienza). Gira dopo la risposta.
+ * Records visits to the public site, without cookies and without reading anything from the device: only what the
+ * browser sends with every request (URL, IP, user agent, referring page). Runs after the response.
  *
- * Si contano le pagine (risposte 200 in HTML, o 304 se il browser le aveva già) e i download del CV, non bot, anteprime (prefetch) né le visite
- * dall'IP di un amministratore. L'IP serve solo in memoria per provenienza ed esclusione, poi si salva accorciato.
+ * Pages (200 HTML responses, or 304 if the browser already had them) and CV downloads are counted; bots, previews
+ * (prefetch) and visits from an administrator's IP are not. The IP is only kept in memory for the origin and the
+ * exclusion, then stored truncated.
  */
 class Tracker
 {
-    /** Parametri di clic delle piattaforme: si salva solo da dove arriva il clic, mai il codice. */
+    /** Platform click parameters: only where the click comes from is stored, never the code. */
     public const array CLICK_IDS = [
         'fbclid' => 'facebook',
         'igshid' => 'instagram',
@@ -58,21 +59,21 @@ class Tracker
             return false;
         }
 
-        // Anteprime caricate in anticipo dal browser (non sono visite)
+        // Previews loaded in advance by the browser (they are not visits)
         $purpose = strtolower((string) ($request->header('Sec-Purpose') ?? $request->header('Purpose') ?? ''));
 
         if (str_contains($purpose, 'prefetch') || str_contains($purpose, 'prerender')) {
             return false;
         }
 
-        // 304: la pagina era già nella cache del browser, ma è comunque una visita
+        // 304: the page was already in the browser cache, but it is still a visit
         $type = (string) $response->headers->get('Content-Type');
 
         return $response->getStatusCode() === 304 || str_starts_with($type, 'text/html') || str_starts_with($type, 'application/pdf');
     }
 
     /**
-     * @return StatVisit|null la visita registrata, o null se non conta
+     * @return StatVisit|null the recorded visit, or null if it does not count
      */
     public function record(Request $request): ?StatVisit
     {
@@ -119,7 +120,7 @@ class Tracker
     }
 
     /**
-     * Dispositivo, sistema e browser; null se è un bot.
+     * Device, operating system and browser; null for a bot.
      *
      * @param  array<string, list<string|null>>  $headers
      * @return array{device: ?string, os: ?string, browser: ?string, browser_version: ?string}|null
@@ -135,12 +136,12 @@ class Tracker
         }
 
         $detector = new DeviceDetector($userAgent, ClientHints::factory($server));
-        // Espressioni regolari già lette restano nella cache di Laravel (su file): niente YAML a ogni visita
+        // Regular expressions already read stay in Laravel's cache (on file): no YAML parsing on every visit
         $detector->setCache(new PSR16Bridge(Cache::store()));
         $detector->discardBotInformation();
         $detector->parse();
 
-        // Bot, ma anche programmi e librerie (curl, wget, script) e lettori di feed: non sono persone che leggono
+        // Bots, but also programs and libraries (curl, wget, scripts) and feed readers: they are not people reading
         if ($detector->isBot() || in_array($detector->getClient('type'), ['library', 'feed reader'], true)) {
             return null;
         }
@@ -159,7 +160,7 @@ class Tracker
     }
 
     /**
-     * Sito di provenienza, solo se esterno (la navigazione interna non è una provenienza).
+     * Referring site, only if external (internal navigation is not a referrer).
      */
     private function referrer(Request $request): ?string
     {

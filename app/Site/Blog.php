@@ -12,7 +12,7 @@ use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Carbon;
 
 /**
- * Articoli del blog visibili in una lingua: pubblicati (data passata) e scritti in quella lingua.
+ * Blog articles visible in a language: published (past date) and written in that language.
  */
 final class Blog
 {
@@ -51,7 +51,7 @@ final class Blog
     }
 
     /**
-     * Prossima pubblicazione programmata: le pagine in cache non devono sopravviverle.
+     * Next scheduled publication: cached pages must not outlive it.
      */
     public function nextScheduledAt(): ?Carbon
     {

@@ -1,11 +1,11 @@
 <?php
 
 /*
- * Resume App — segmenti URL per en-US (English (US)).
- * Regole: minuscolo, solo a-z, 0-9 e trattino, niente accenti.
- * Sono i valori di default: l'admin può sovrascriverli per lingua
- * (Lingue → Segmenti URL) e i vecchi indirizzi vengono reindirizzati.
- * Stato traduzione: verificato.
+ * Resume App — URL segments for en-US (English (US)).
+ * Rules: lowercase, only a-z, 0-9 and hyphen, no accents.
+ * These are the default values: the admin can override them per language
+ * (Site languages → URL segments) and old addresses are redirected.
+ * Translation status: verified.
  */
 
 return [

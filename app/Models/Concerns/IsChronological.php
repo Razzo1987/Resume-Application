@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 
 /**
- * Elementi con periodo (start_date / end_date): ordine dal più recente, quelli in corso per primi.
+ * Items with a period (start_date / end_date): ordered from the most recent, ongoing ones first.
  *
  * @phpstan-require-extends Model
  */

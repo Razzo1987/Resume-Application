@@ -1,4 +1,4 @@
-{{-- Elenco degli articoli: $articles (paginatore) --}}
+{{-- Article list: $articles (paginator) --}}
 @extends('theme::layouts.site')
 
 @section('content')

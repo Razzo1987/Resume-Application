@@ -10,9 +10,9 @@ use Illuminate\Support\Facades\File;
 use Throwable;
 
 /**
- * Provenienza delle visite dai database GeoLite2 di MaxMind (City e ASN), installati in core/storage: l'IP non
- * viene mandato a nessun servizio esterno. I database si scaricano con un account MaxMind gratuito (Account ID e
- * License Key, salvati cifrati) e si aggiornano col cron o dall'admin (GeoIpUpdater).
+ * Visit origin from MaxMind's GeoLite2 databases (City and ASN), installed in core/storage: the IP is not sent to
+ * any external service. The databases are downloaded with a free MaxMind account (Account ID and License Key,
+ * stored encrypted) and updated by the cron or from the admin (GeoIpUpdater).
  */
 class GeoIp
 {
@@ -26,7 +26,7 @@ class GeoIp
     private array $readers = [];
 
     /**
-     * @param  string|null  $storage  cartella storage dell'app (di default quella di Laravel; serve ai test)
+     * @param  string|null  $storage  the app's storage folder (Laravel's by default; used by the tests)
      */
     public function __construct(private readonly ?string $storage = null) {}
 
@@ -41,7 +41,7 @@ class GeoIp
     }
 
     /**
-     * Il database delle città c'è: la provenienza delle visite si può ricavare.
+     * The city database is present: the visit origin can be determined.
      */
     public function isAvailable(): bool
     {
@@ -49,7 +49,7 @@ class GeoIp
     }
 
     /**
-     * Provenienza di un indirizzo IP (campi null se non si sa).
+     * Origin of an IP address (null fields when unknown).
      *
      * @return array{country: ?string, region: ?string, city: ?string, latitude: ?float, longitude: ?float, asn: ?int, as_org: ?string}
      */
@@ -66,7 +66,7 @@ class GeoIp
                 $result['latitude'] = $record->location->latitude;
                 $result['longitude'] = $record->location->longitude;
             } catch (Throwable) {
-                // indirizzo non presente (reti private, indirizzi nuovi)
+                // address not found (private networks, new addresses)
             }
         }
 
@@ -76,7 +76,7 @@ class GeoIp
                 $result['asn'] = $record->autonomousSystemNumber;
                 $result['as_org'] = $record->autonomousSystemOrganization;
             } catch (Throwable) {
-                // come sopra
+                // same as above
             }
         }
 
@@ -84,7 +84,7 @@ class GeoIp
     }
 
     /**
-     * Data di creazione di un database installato (dai suoi metadati).
+     * Build date of an installed database (from its metadata).
      */
     public function builtAt(string $edition): ?int
     {
@@ -94,7 +94,7 @@ class GeoIp
     }
 
     /**
-     * Dopo un aggiornamento i file sono cambiati: si riaprono alla prossima ricerca.
+     * After an update the files have changed: they are reopened on the next lookup.
      */
     public function forgetReaders(): void
     {
@@ -110,8 +110,8 @@ class GeoIp
     // --- Account MaxMind ---------------------------------------------------------------------------
 
     /**
-     * Account ID e License Key: quelli del .env (RESUME_GEOIP_ACCOUNT_ID, RESUME_GEOIP_LICENSE_KEY) hanno la
-     * precedenza su quelli inseriti nell'admin.
+     * Account ID and License Key: those in .env (RESUME_GEOIP_ACCOUNT_ID, RESUME_GEOIP_LICENSE_KEY) take
+     * precedence over those entered in the admin.
      *
      * @return array{account: string, key: string}|null
      */
@@ -129,7 +129,7 @@ class GeoIp
                 ? json_decode(Crypt::decryptString((string) file_get_contents($this->credentialsFile())), true)
                 : null;
         } catch (Throwable) {
-            $saved = null; // APP_KEY cambiata: le credenziali vanno reinserite
+            $saved = null; // APP_KEY changed: the credentials must be entered again
         }
 
         return is_array($saved) && is_string($saved['account'] ?? null) && is_string($saved['key'] ?? null)
@@ -138,7 +138,7 @@ class GeoIp
     }
 
     /**
-     * Da dove vengono le credenziali: "env", "admin" o null.
+     * Where the credentials come from: "env", "admin" or null.
      */
     public function credentialsSource(): ?string
     {

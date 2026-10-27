@@ -12,12 +12,12 @@ use Illuminate\Console\Command;
 use Throwable;
 
 /**
- * Aggiornamento da riga di comando.
+ * Command-line update.
  *
- *   php core/artisan resume:update --check     controlla le nuove versioni su GitHub
- *   php core/artisan resume:update --finish    completa un aggiornamento estratto (migrazioni, cache, manutenzione)
+ *   php core/artisan resume:update --check     checks for new versions on GitHub
+ *   php core/artisan resume:update --finish    completes an extracted update (migrations, cache, maintenance)
  *
- * Il download e l'installazione automatici li fa il cron secondo l'impostazione di Sistema (resume:cron).
+ * Automatic download and installation are done by the cron, according to the System setting (resume:cron).
  */
 class UpdateApp extends Command
 {
@@ -42,7 +42,7 @@ class UpdateApp extends Command
                 return self::SUCCESS;
             }
 
-            // Completamento di un aggiornamento automatico: l'esito va anche tra i lavori programmati
+            // Finishing an automatic update: the result is also recorded with the scheduled jobs
             try {
                 $result = $auto->finish();
                 $cron->recordResult('updates', true, $result);

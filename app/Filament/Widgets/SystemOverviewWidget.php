@@ -15,7 +15,7 @@ use Filament\Widgets\StatsOverviewWidget;
 use Filament\Widgets\StatsOverviewWidget\Stat;
 
 /**
- * Dashboard, gruppo Sistema: versione e aggiornamenti, cron, aggiornamenti automatici, ultima copia dei contenuti.
+ * Dashboard, System group: version and updates, cron, automatic updates, latest content backup.
  */
 class SystemOverviewWidget extends StatsOverviewWidget
 {

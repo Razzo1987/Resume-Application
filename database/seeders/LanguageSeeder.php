@@ -8,7 +8,7 @@ use App\Support\Languages\Locales;
 use Illuminate\Database\Seeder;
 
 /**
- * Lingua di default (APP_LOCALE) e lingua di riserva (APP_FALLBACK_LOCALE), se non esistono già.
+ * Default language (APP_LOCALE) and fallback language (APP_FALLBACK_LOCALE), if they do not exist yet.
  */
 class LanguageSeeder extends Seeder
 {

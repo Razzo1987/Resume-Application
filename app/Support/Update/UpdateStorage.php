@@ -10,14 +10,14 @@ use Illuminate\Support\Number;
 use Throwable;
 
 /**
- * File degli aggiornamenti in core/storage (mai nella webroot, mai nelle esportazioni dei contenuti):
- * pacchetti scaricati o caricati, caricamenti a blocchi in corso, esito dell'ultimo controllo su GitHub,
- * token di GitHub (cifrato con la APP_KEY), aggiornamento in corso.
+ * Update files in core/storage (never in the web root, never in the content exports):
+ * downloaded or uploaded packages, chunked uploads in progress, result of the last GitHub check,
+ * GitHub token (encrypted with the APP_KEY), update in progress.
  */
 class UpdateStorage
 {
     /**
-     * @param  string|null  $storage  cartella storage dell'app (di default quella di Laravel; serve ai test)
+     * @param  string|null  $storage  the app's storage folder (Laravel's by default; used by the tests)
      */
     public function __construct(private ?string $storage = null) {}
 
@@ -37,7 +37,7 @@ class UpdateStorage
     }
 
     /**
-     * Stato dell'estrazione: finché esiste, index.php non avvia l'app.
+     * Extraction state: as long as it exists, index.php does not boot the app.
      */
     public function stateFile(): string
     {
@@ -45,7 +45,7 @@ class UpdateStorage
     }
 
     /**
-     * Copia dello script di estrazione della versione che avvia l'aggiornamento.
+     * Copy of the extraction script from the version that starts the update.
      */
     public function updaterFile(): string
     {
@@ -53,7 +53,7 @@ class UpdateStorage
     }
 
     /**
-     * Dati dell'aggiornamento avviato dall'admin, per completarlo dopo l'estrazione.
+     * Data of the update started from the admin, used to complete it after the extraction.
      */
     public function runFile(): string
     {
@@ -76,7 +76,7 @@ class UpdateStorage
     }
 
     /**
-     * Pacchetti sul server, dal più recente: nome file => descrizione.
+     * Packages on the server, newest first: file name => description.
      *
      * @return array<string, string>
      */
@@ -95,7 +95,7 @@ class UpdateStorage
     }
 
     /**
-     * Percorso di un pacchetto sul server, solo per nomi semplici (niente cartelle).
+     * Path of a package on the server, only for plain names (no folders).
      */
     public function package(string $name): ?string
     {
@@ -122,7 +122,7 @@ class UpdateStorage
     }
 
     /**
-     * Scrittura atomica (file temporaneo e rinomina).
+     * Atomic write (temporary file, then rename).
      *
      * @param  array<string, mixed>  $data
      */
@@ -134,7 +134,7 @@ class UpdateStorage
     }
 
     /**
-     * Token di GitHub: quello del .env (RESUME_UPDATE_TOKEN) ha la precedenza su quello inserito dall'admin.
+     * GitHub token: the one in .env (RESUME_UPDATE_TOKEN) takes precedence over the one entered in the admin.
      */
     public function token(): ?string
     {
@@ -147,14 +147,14 @@ class UpdateStorage
         try {
             $token = is_file($this->tokenFile()) ? Crypt::decryptString((string) file_get_contents($this->tokenFile())) : null;
         } catch (Throwable) {
-            $token = null; // APP_KEY cambiata: il token va reinserito
+            $token = null; // APP_KEY changed: the token must be entered again
         }
 
         return $token !== null && $token !== '' ? $token : null;
     }
 
     /**
-     * Da dove viene il token: "env", "admin" o null.
+     * Where the token comes from: "env", "admin" or null.
      */
     public function tokenSource(): ?string
     {

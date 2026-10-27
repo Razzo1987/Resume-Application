@@ -11,7 +11,7 @@ use Illuminate\Support\Facades\DB;
 use LogicException;
 
 /**
- * Lingua del sito. Il codice (es. it-IT) è anche il prefisso degli URL.
+ * Site language. The code (e.g. it-IT) is also the URL prefix.
  *
  * @property int $id
  * @property string $code
@@ -54,7 +54,7 @@ class Language extends Model
     protected static function booted(): void
     {
         static::saving(function (Language $language): void {
-            // La lingua di default è sempre attiva
+            // The default language is always active
             if ($language->is_default) {
                 $language->is_active = true;
             }
@@ -65,7 +65,7 @@ class Language extends Model
         });
 
         static::saved(function (Language $language): void {
-            // Una sola lingua di default
+            // Only one default language
             if ($language->is_default) {
                 DB::table('languages')
                     ->where('id', '!=', $language->id)
@@ -77,7 +77,7 @@ class Language extends Model
         });
 
         static::deleting(function (Language $language): void {
-            // Si controlla il valore salvato, non quello eventualmente modificato in memoria
+            // Check the stored value, not the one possibly changed in memory
             if ((bool) $language->getRawOriginal('is_default')) {
                 throw new LogicException('La lingua di default non si può eliminare.');
             }
@@ -87,7 +87,7 @@ class Language extends Model
     }
 
     /**
-     * Segmento URL tradotto (es. "progetti"): override dell'admin, poi language pack, poi inglese.
+     * Translated URL segment (e.g. "progetti"): admin override, then language pack, then English.
      */
     public function segment(string $key): string
     {
@@ -100,7 +100,7 @@ class Language extends Model
     }
 
     /**
-     * Tutti i segmenti effettivi della lingua.
+     * All the effective segments of the language.
      *
      * @return array<string, string>
      */

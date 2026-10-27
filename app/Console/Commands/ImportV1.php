@@ -8,12 +8,12 @@ use Illuminate\Support\Facades\DB;
 use Throwable;
 
 /**
- * Importa i contenuti di Resume Application 1.x.
+ * Imports the content of Resume Application 1.x.
  *
- *   php artisan resume:import-v1 --files=/percorso/public_html_v1 --volunteering=9,13 --cv=it-IT="/…/CV.pdf"
+ *   php artisan resume:import-v1 --files=/path/public_html_v1 --volunteering=9,13 --cv=it-IT="/…/CV.pdf"
  *
- * Il database della v1 si legge dalla connessione "legacy" (LEGACY_DB_* nel .env, di default il database
- * resume_v1 sullo stesso server); con --sql si carica prima un dump in quel database.
+ * The v1 database is read through the "legacy" connection (LEGACY_DB_* in .env, by default the resume_v1 database
+ * on the same server); with --sql a dump is first loaded into that database.
  */
 class ImportV1 extends Command
 {

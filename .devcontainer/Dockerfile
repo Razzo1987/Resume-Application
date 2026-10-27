@@ -1,8 +1,8 @@
-# Ambiente per GitHub Codespaces (e Dev Containers di VS Code): PHP 8.4 con le estensioni richieste, Composer, Node
+# Environment for GitHub Codespaces (and VS Code Dev Containers): PHP 8.4 with the required extensions, Composer, Node
 FROM mcr.microsoft.com/devcontainers/php:1-8.4-bookworm
 
-# L'immagine include il repository apt di Yarn, la cui chiave GPG è scaduta: apt-get update fallirebbe.
-# Yarn non serve (si usa npm), quindi il repository si toglie.
+# The image includes the Yarn apt repository, whose GPG key has expired: apt-get update would fail.
+# Yarn is not needed (npm is used), so the repository is removed.
 RUN rm -f /etc/apt/sources.list.d/yarn.list \
     && apt-get update \
     && apt-get install -y --no-install-recommends libicu-dev libzip-dev libpng-dev libjpeg-dev libwebp-dev libfreetype6-dev \

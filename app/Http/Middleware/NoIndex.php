@@ -9,7 +9,7 @@ use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
 
 /**
- * Le pagine dell'admin non devono finire nei motori di ricerca.
+ * Admin pages must not end up in search engines.
  */
 class NoIndex
 {

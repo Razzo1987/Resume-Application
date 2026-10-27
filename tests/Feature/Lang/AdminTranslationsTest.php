@@ -6,7 +6,7 @@ use Filament\Support\Contracts\HasLabel;
 use Illuminate\Support\Arr;
 
 /*
- * Testi dell'admin (lang/it/admin.php e lang/en/admin.php) e testi del sito usati dal codice.
+ * Admin texts (lang/it/admin.php and lang/en/admin.php) and site texts used by the code.
  */
 
 const ADMIN_LOCALES = ['it', 'en'];
@@ -29,10 +29,10 @@ it('defines every admin string used in the code', function () {
             continue;
         }
 
-        // Solo chiavi scritte per intero: quelle composte a runtime sono verificate dai test sugli enum
+        // Only keys written out in full: the ones built at runtime are checked by the enum tests
         preg_match_all("/__\\('(admin\\.[a-z0-9_.]+)'/", (string) file_get_contents($file->getPathname()), $matches);
 
-        // Le chiavi che finiscono con "." sono prefissi completati a runtime
+        // Keys ending with "." are prefixes completed at runtime
         foreach (array_unique(array_filter($matches[1], fn (string $key): bool => ! str_ends_with($key, '.'))) as $key) {
             foreach (ADMIN_LOCALES as $locale) {
                 if (! trans()->hasForLocale($key, $locale)) {

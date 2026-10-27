@@ -8,7 +8,7 @@ use App\Models\Highlight;
 use Illuminate\Database\Seeder;
 
 /**
- * Due numeri chiave automatici di partenza: anni di esperienza e numero di progetti ("17+").
+ * Two automatic key figures to start with: years of experience and number of projects ("17+").
  */
 class HighlightSeeder extends Seeder
 {

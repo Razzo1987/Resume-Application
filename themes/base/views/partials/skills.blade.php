@@ -1,4 +1,4 @@
-{{-- Competenze raggruppate per categoria: $skills (collection di Skill con la categoria caricata) --}}
+{{-- Skills grouped by category: $skills (collection of Skill with the category loaded) --}}
 @if ($skills->isNotEmpty())
     <div class="skills">
         @foreach ($skills->groupBy('skill_category_id')->sortBy(fn ($group) => $group->first()->category->sort_order ?? 0) as $group)

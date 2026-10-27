@@ -57,7 +57,7 @@ it('shows the missing translations with links to edit them', function () {
 it('links each dashboard translation box to its list', function () {
     Interest::query()->create(['name' => ['it-IT' => 'Montagna']]);
 
-    // I widget della dashboard si caricano a parte (lazy): si verifica il componente
+    // Dashboard widgets load separately (lazy): the component is tested directly
     Livewire::test(LanguagesOverviewWidget::class)->assertSeeHtml(Translations::getUrl(['locale' => 'en-GB']));
 });
 

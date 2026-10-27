@@ -10,8 +10,8 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Response;
 
 /**
- * /favicon.ico (chiesto da alcuni browser e crawler anche senza <link rel="icon">): rimanda all'icona del sito,
- * oppure risponde 404 senza pagina (niente lavoro inutile).
+ * /favicon.ico (requested by some browsers and crawlers even without <link rel="icon">): redirects to the site icon,
+ * or responds 404 without a page (no wasted work).
  */
 class FaviconController extends Controller
 {

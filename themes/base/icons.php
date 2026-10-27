@@ -1,12 +1,12 @@
 <?php
 
 /*
- * Mappa icone semantiche → Font Awesome Free 7.
- * I nomi a sinistra sono quelli scelti in admin; ogni tema può ridefinirli nel proprio icons.php.
+ * Maps semantic icons → Font Awesome Free 7.
+ * The names on the left are the ones chosen in the admin; each theme can redefine them in its own icons.php.
  */
 
 return [
-    // Interfaccia
+    // Interface
     'arrow-up' => 'fa-solid fa-arrow-up',
     'chevron-right' => 'fa-solid fa-chevron-right',
     'external-link' => 'fa-solid fa-arrow-up-right-from-square',
@@ -23,7 +23,7 @@ return [
     'tag' => 'fa-solid fa-tag',
     'menu' => 'fa-solid fa-bars',
 
-    // Contatti e profilo
+    // Contacts and profile
     'user' => 'fa-solid fa-user',
     'email' => 'fa-solid fa-envelope',
     'phone' => 'fa-solid fa-phone',
@@ -33,7 +33,7 @@ return [
     'role' => 'fa-solid fa-user-tie',
     'sector' => 'fa-solid fa-industry',
 
-    // Sezioni del CV
+    // CV sections
     'briefcase' => 'fa-solid fa-briefcase',
     'building' => 'fa-solid fa-building',
     'project' => 'fa-solid fa-diagram-project',
@@ -57,7 +57,7 @@ return [
     'database' => 'fa-solid fa-database',
     'shield' => 'fa-solid fa-shield-halved',
 
-    // Interessi (esempi)
+    // Interests (examples)
     'camera' => 'fa-solid fa-camera',
     'music' => 'fa-solid fa-music',
     'travel' => 'fa-solid fa-plane',
@@ -67,7 +67,7 @@ return [
     'cycling' => 'fa-solid fa-person-biking',
     'ai' => 'fa-solid fa-robot',
 
-    // Sport e aria aperta
+    // Sports and outdoors
     'hiking' => 'fa-solid fa-person-hiking',
     'mountain' => 'fa-solid fa-mountain',
     'swimming' => 'fa-solid fa-person-swimming',
@@ -78,7 +78,7 @@ return [
     'wellness' => 'fa-solid fa-spa',
     'sailing' => 'fa-solid fa-sailboat',
 
-    // Tempo libero e cultura
+    // Leisure and culture
     'gaming' => 'fa-solid fa-gamepad',
     'dice' => 'fa-solid fa-dice',
     'puzzle' => 'fa-solid fa-puzzle-piece',
@@ -98,7 +98,7 @@ return [
     'car' => 'fa-solid fa-car',
     'motorbike' => 'fa-solid fa-motorcycle',
 
-    // Lavoro, competenze e settori (anche per i numeri chiave)
+    // Work, skills and industries (also for the key figures)
     'brain' => 'fa-solid fa-brain',
     'microchip' => 'fa-solid fa-microchip',
     'cloud' => 'fa-solid fa-cloud',

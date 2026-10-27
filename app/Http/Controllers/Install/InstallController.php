@@ -20,8 +20,8 @@ use Illuminate\Validation\Rules\Password;
 use Symfony\Component\HttpFoundation\Response;
 
 /**
- * Installer web: una sola pagina con i requisiti e il modulo di configurazione.
- * Funziona senza sessione (non esiste ancora una chiave dell'app): gli errori si mostrano nella stessa risposta.
+ * Web installer: a single page with the requirements and the configuration form.
+ * It works without a session (there is no app key yet): errors are shown in the same response.
  */
 class InstallController extends Controller
 {
@@ -121,7 +121,7 @@ class InstallController extends Controller
     }
 
     /**
-     * Lingua dell'installer (italiano o inglese) dal browser; diventa anche la lingua dell'admin.
+     * Installer language (Italian or English) from the browser; it also becomes the admin language.
      */
     private function useLocale(Request $request): void
     {

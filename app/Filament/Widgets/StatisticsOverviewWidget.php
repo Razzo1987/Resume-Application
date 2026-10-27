@@ -15,8 +15,8 @@ use Illuminate\Support\Number;
 use Locale;
 
 /**
- * Dashboard, gruppo Statistiche: visite e download degli ultimi 7 giorni (con l'andamento e il confronto con i 7
- * precedenti), pagina più vista e provenienza principale degli ultimi 30 giorni.
+ * Dashboard, Statistics group: visits and downloads of the last 7 days (with the trend and the comparison with the
+ * previous 7), most viewed page and top referrer of the last 30 days.
  */
 class StatisticsOverviewWidget extends StatsOverviewWidget
 {

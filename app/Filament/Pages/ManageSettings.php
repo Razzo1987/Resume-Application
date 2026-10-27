@@ -32,7 +32,7 @@ use Filament\Support\Icons\Heroicon;
 use Illuminate\Support\Arr;
 
 /**
- * Impostazioni del sito: tema, CV, SEO, footer, stampa, privacy dei contatti e dati strutturati.
+ * Site settings: theme, CV, SEO, footer, printing, contact privacy and structured data.
  *
  * @property-read Schema $form
  */
@@ -64,7 +64,7 @@ class ManageSettings extends Page
 
     public function mount(Settings $settings): void
     {
-        // Le chiavi puntate (es. "cv.filename_pattern") diventano campi annidati del form
+        // Dotted keys (e.g. "cv.filename_pattern") become nested form fields
         $values = $settings->all();
         $values['site.timezone'] ??= $settings->timezone(); // the guessed one until it is saved
         $this->form->fill(Arr::undot($values));
@@ -78,7 +78,7 @@ class ManageSettings extends Page
             ->components([
                 Section::make(__('admin.sections.appearance'))
                     ->schema([
-                        // Il tema si sceglie solo nella pagina Temi (versioni, anteprima delle informazioni, Attiva)
+                        // The theme is chosen only on the Themes page (versions, information preview, Activate)
                         TextEntry::make('active_theme')
                             ->label(__('admin.fields.theme'))
                             ->state(fn (): string => $themes->active()->title)
@@ -224,7 +224,7 @@ class ManageSettings extends Page
         $state = $this->form->getState();
         $values = [];
 
-        // Solo le chiavi note presenti nel form ("seo.title" → array {lingua: testo})
+        // Only the known keys present in the form ("seo.title" → array {language: text})
         foreach (array_keys(Settings::DEFAULTS) as $key) {
             if (! Arr::has($state, $key)) {
                 continue;

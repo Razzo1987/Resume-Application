@@ -46,7 +46,7 @@ it('uses the SEO title and description from the settings, with a default', funct
         ->assertSee('<title>John Doe | Consulente dati</title>', escape: false)
         ->assertSee('<meta name="description" content="CV di John Doe.">', escape: false);
 
-    // in inglese non c'è un titolo: si usa quello della lingua di default
+    // there is no English title: the one of the default language is used
     $this->get('/en-GB')->assertSee('<title>John Doe | Consulente dati</title>', escape: false);
 });
 

@@ -51,7 +51,7 @@ class LanguageForm
                             ->disabled(fn (?Language $record): bool => (bool) $record?->is_default),
                         Toggle::make('is_default')
                             ->label(__('admin.fields.is_default'))
-                            // Spiegazione + avviso: il redirect di "/" resta nella cache dei browser per un giorno (RootController)
+                            // Explanation + warning: browsers cache the redirect of "/" for one day (RootController)
                             ->belowContent([
                                 Text::make(__('admin.help.is_default')),
                                 Text::make(__('admin.help.default_language_cache'))->color('warning'),

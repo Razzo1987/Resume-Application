@@ -9,9 +9,9 @@ use Filament\Facades\Filament;
 use Illuminate\Support\Facades\Storage;
 
 /*
-| Ogni pagina dell'admin si apre senza errori, con i dati di esempio caricati:
-| elenco, creazione e modifica di ogni risorsa, più le pagine singole (profilo, impostazioni).
-| L'elenco delle risorse è letto dal filesystem perché i dataset vengono valutati prima dell'avvio dell'app.
+| Every admin page opens without errors, with the demo data loaded:
+| list, create and edit pages of every resource, plus the single pages (profile, settings).
+| The resource list is read from the filesystem because datasets are evaluated before the app boots.
 */
 
 $resources = array_map(

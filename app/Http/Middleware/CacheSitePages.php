@@ -12,8 +12,8 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
 /**
- * Cache HTML delle pagine pubbliche: la seconda visita non tocca il database.
- * Le pagine hanno un ETag, quindi il browser ricarica solo se il contenuto è cambiato.
+ * HTML cache of the public pages: the second visit does not touch the database.
+ * Pages have an ETag, so the browser reloads only if the content has changed.
  */
 class CacheSitePages
 {
@@ -52,7 +52,7 @@ class CacheSitePages
         $response->headers->set('Cache-Control', 'public, max-age=0, must-revalidate');
         $response->headers->set('X-Page-Cache', $status);
 
-        // Il browser ha già questa versione
+        // The browser already has this version
         $response->isNotModified($request);
 
         return $response;

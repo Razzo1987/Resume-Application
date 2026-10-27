@@ -26,8 +26,8 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Support\Collection as BaseCollection;
 
 /**
- * Contenuti del CV per la richiesta corrente, caricati una sola volta e solo quando servono
- * (con le relazioni già incluse, per evitare query ripetute).
+ * CV content for the current request, loaded only once and only when needed
+ * (with the relations already included, to avoid repeated queries).
  */
 final class CvData
 {
@@ -53,7 +53,7 @@ final class CvData
     }
 
     /**
-     * Sezioni attive e non vuote, nell'ordine scelto in admin.
+     * Enabled, non-empty sections, in the order chosen in the admin.
      *
      * @return BaseCollection<int, PageSection>
      */
@@ -72,10 +72,11 @@ final class CvData
     }
 
     /**
-     * Voci del menu: sezioni attive, non vuote e segnate "nel menu".
+     * Menu items: enabled, non-empty sections marked "nel menu".
      *
-     * Il blog ha una sola voce, che porta alla sua pagina: la decide la sezione "Ultimi articoli" (nel menu sì o no,
-     * posizione, titolo), anche quando la sezione non è mostrata nel CV, purché ci siano articoli in questa lingua.
+     * The blog has a single item, which links to its page: the "Ultimi articoli" section controls it (in the menu
+     * or not, position, title), even when the section is not shown in the CV, as long as there are articles in
+     * this language.
      *
      * @return BaseCollection<int, PageSection>
      */
@@ -94,7 +95,7 @@ final class CvData
     }
 
     /**
-     * Titolo di una sezione: quello personalizzato in admin oppure quello del language pack.
+     * Title of a section: the one customized in the admin or the one from the language pack.
      */
     public function sectionTitle(PageSectionKey $key): string
     {
@@ -104,7 +105,7 @@ final class CvData
     }
 
     /**
-     * Tutte le sezioni, anche quelle spente, per chiave.
+     * All sections, including disabled ones, by key.
      *
      * @return Collection<string, PageSection>
      */
@@ -134,7 +135,7 @@ final class CvData
     }
 
     /**
-     * Numeri chiave con un valore calcolabile.
+     * Key figures with a value that can be computed.
      *
      * @return BaseCollection<int, Highlight>
      */
@@ -190,7 +191,7 @@ final class CvData
     }
 
     /**
-     * Lingue conosciute: prima le madrelingua.
+     * Known languages: native languages first.
      *
      * @return Collection<int, LanguageSkill>
      */
@@ -221,7 +222,7 @@ final class CvData
     }
 
     /**
-     * Ultimi articoli del blog scritti nella lingua della pagina.
+     * Latest blog articles written in the page language.
      *
      * @return Collection<int, Article>
      */
@@ -231,7 +232,7 @@ final class CvData
     }
 
     /**
-     * Esperienze di lavoro in corso (per "worksFor" nei dati strutturati).
+     * Current work experiences (for "worksFor" in the structured data).
      *
      * @return Collection<int, Experience>
      */
@@ -253,7 +254,7 @@ final class CvData
     }
 
     /**
-     * Competenze con la categoria, nell'ordine scelto in admin.
+     * Skills with their category, in the order chosen in the admin.
      *
      * @template TParent of Model
      *

@@ -14,22 +14,22 @@ use App\Support\Update\UpdateStorage;
 use Illuminate\Support\Facades\File;
 
 /**
- * Elenco dei lavori programmati dell'app.
+ * List of the app's scheduled jobs.
  */
 final class CronJobs
 {
     public static function register(Cron $cron): void
     {
-        // Nuove versioni su GitHub (al massimo ogni 12 ore) e, col cron, download o installazione automatica
+        // New versions on GitHub (at most every 12 hours) and, from the cron, automatic download or installation
         $cron->register('updates', 30, light: true, run: fn (bool $fromCron): ?string => app(AutoUpdate::class)->run($fromCron));
 
-        // Statistiche: totali giornalieri, cancellazione delle visite vecchie e degli IP admin scaduti
+        // Statistics: daily totals, deletion of old visits and of expired admin IPs
         $cron->register('stats', 60, light: true, run: fn (): string => app(Settings::class)->bool('stats.enabled') || StatVisit::query()->exists()
             ? app(Aggregator::class)->run()
             : 'off');
 
-        // Database GeoLite: dal cron controllo e download; dall'admin (senza cron) solo il controllo, il download si fa
-        // dalla pagina Statistiche
+        // GeoLite database: from the cron, check and download; from the admin (without cron) only the check, the
+        // download is done from the Statistics page
         $cron->register('geoip', 24 * 60, light: true, run: function (bool $fromCron): string {
             $updater = app(GeoIpUpdater::class);
 
@@ -46,7 +46,7 @@ final class CronJobs
             return $updater->needsUpdate() ? 'update available' : 'up to date';
         });
 
-        // File temporanei dimenticati: caricamenti a blocchi interrotti, download parziali vecchi
+        // Leftover temporary files: interrupted chunked uploads, old partial downloads
         $cron->register('cleanup', 24 * 60, light: true, run: fn (): string => self::cleanup());
     }
 

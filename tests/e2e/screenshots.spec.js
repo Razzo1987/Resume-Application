@@ -1,9 +1,9 @@
-// Screenshot del sito e dell'admin con i dati dimostrativi, per il README e la pagina docs/SCREENSHOTS.md.
-// Gira solo su richiesta, con un amministratore già creato:
+// Screenshots of the site and the admin with the demo data, for the README and the docs/SCREENSHOTS.md page.
+// Runs only on demand, with an administrator already created:
 //   php artisan make:filament-user --name=Demo --email=demo@example.com --password=demo-password
-//   php artisan db:seed --class=DemoStatsSeeder   (statistiche dimostrative)
+//   php artisan db:seed --class=DemoStatsSeeder   (demo statistics)
 //   SCREENSHOTS=1 npx playwright test screenshots --project=chromium
-// Le immagini finiscono in screenshots/ (ignorata da git); in CI sono un artefatto del workflow.
+// The images go to screenshots/ (ignored by git); in CI they are a workflow artifact.
 import { devices, expect, test } from '@playwright/test';
 
 const dir = 'screenshots';
@@ -14,11 +14,11 @@ const admin = {
 };
 
 test.describe('screenshots', () => {
-    test.skip(!process.env.SCREENSHOTS, 'solo con SCREENSHOTS=1');
+    test.skip(!process.env.SCREENSHOTS, 'only with SCREENSHOTS=1');
     test.describe.configure({ mode: 'serial' });
 
     test.beforeEach(async ({ page }, testInfo) => {
-        test.skip(testInfo.project.name !== 'chromium', 'solo Chromium');
+        test.skip(testInfo.project.name !== 'chromium', 'Chromium only');
         await page.emulateMedia({ reducedMotion: 'reduce' });
     });
 
@@ -42,7 +42,7 @@ test.describe('screenshots', () => {
         await page.goto('/en-GB', { waitUntil: 'networkidle' });
         await page.screenshot({ path: `${dir}/cv-full-page.png`, fullPage: true });
 
-        // Telefono: prima schermata e menu aperto
+        // Phone: first screen and open menu
         const phone = await browser.newContext({ ...devices['Pixel 7'], reducedMotion: 'reduce' });
         const mobile = await phone.newPage();
         await mobile.goto('/en-GB', { waitUntil: 'networkidle' });
@@ -72,19 +72,19 @@ test.describe('screenshots', () => {
 
         for (const [name, path] of shots) {
             await page.goto(`/${admin.path}${path}`, { waitUntil: 'networkidle' });
-            await page.waitForTimeout(500); // widget caricati dopo la pagina
+            await page.waitForTimeout(500); // widgets loaded after the page
             await page.screenshot({ path: `${dir}/${name}.png` });
         }
 
-        // Statistiche (con DemoStatsSeeder): la parte alta e la mappa
+        // Statistics (with DemoStatsSeeder): the top part and the map
         await page.goto(`/${admin.path}/statistics`, { waitUntil: 'networkidle' });
         await page.waitForTimeout(1000);
         await page.screenshot({ path: `${dir}/admin-statistics.png` });
-        // la barra in alto resta fissa e coprirebbe il riquadro
+        // the top bar stays fixed and would cover the box
         await page.addStyleTag({ content: '.fi-topbar { display: none !important; }' });
         await page.locator('.resume-stats-map').locator('xpath=ancestor::section[1]').screenshot({ path: `${dir}/admin-statistics-map.png` });
 
-        // Sistema: solo il riquadro degli aggiornamenti (il resto mostra i percorsi del server)
+        // System: only the updates box (the rest shows the server paths)
         await page.goto(`/${admin.path}/system`, { waitUntil: 'networkidle' });
         await page.locator('.fi-section').filter({ has: page.getByRole('button', { name: /Check now|Controlla ora/ }) })
             .screenshot({ path: `${dir}/admin-updates.png` });

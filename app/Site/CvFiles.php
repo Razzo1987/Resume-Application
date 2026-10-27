@@ -10,8 +10,8 @@ use App\Support\Languages\Locales;
 use App\Support\Settings\Settings;
 
 /**
- * CV in PDF da offrire in una lingua: la versione corrente di quella lingua oppure,
- * se l'admin lo ha attivato, quella della lingua di default.
+ * PDF CV to offer in a language: the current version for that language or,
+ * if the admin has enabled it, the one for the default language.
  */
 final class CvFiles
 {

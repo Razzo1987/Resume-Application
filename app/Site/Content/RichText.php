@@ -10,8 +10,8 @@ use Symfony\Component\HtmlSanitizer\HtmlSanitizer;
 use Symfony\Component\HtmlSanitizer\HtmlSanitizerConfig;
 
 /**
- * Testi scritti con l'editor dell'admin, mostrati nel sito.
- * L'HTML viene sempre sanificato: niente script, eventi, stili in linea (bloccati anche dalla CSP) o URL pericolosi.
+ * Texts written with the admin editor and shown on the site.
+ * The HTML is always sanitized: no scripts, event handlers, inline styles (also blocked by the CSP) or dangerous URLs.
  */
 final class RichText
 {
@@ -35,7 +35,7 @@ final class RichText
     }
 
     /**
-     * HTML sicuro, oppure null se il testo è vuoto.
+     * Safe HTML, or null if the text is empty.
      */
     public function render(?string $html): ?HtmlString
     {
@@ -47,7 +47,7 @@ final class RichText
     }
 
     /**
-     * Testo semplice (per meta description, JSON-LD, anteprime), facoltativamente accorciato.
+     * Plain text (for meta description, JSON-LD, previews), optionally shortened.
      */
     public function plain(?string $html, int $limit = 0): string
     {
@@ -55,7 +55,7 @@ final class RichText
             return '';
         }
 
-        // Gli a capo tra blocchi diventano spazi prima di togliere i tag
+        // Line breaks between blocks become spaces before the tags are stripped
         $text = preg_replace('#<(br|/p|/li|/h[1-6]|/div|/blockquote|/tr)\b[^>]*>#i', ' $0', $html) ?? $html;
         $text = html_entity_decode(strip_tags($text), ENT_QUOTES | ENT_HTML5, 'UTF-8');
         $text = trim((string) preg_replace('/\s+/u', ' ', $text));

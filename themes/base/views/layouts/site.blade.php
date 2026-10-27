@@ -1,6 +1,6 @@
 {{--
-    Layout delle pagine pubbliche.
-    Variabili: $page (metadati della pagina), $layout (dati comuni), $theme (tema attivo).
+    Layout of the public pages.
+    Variables: $page (page metadata), $layout (shared data), $theme (active theme).
 --}}
 <!DOCTYPE html>
 <html lang="{{ $layout->locale }}">
@@ -31,7 +31,7 @@
         <span class="visually-hidden">{{ __('site.a11y.back_to_top') }}</span>
     </a>
 
-    {{-- Descrizione dei link esterni, che lo script apre in una nuova scheda --}}
+    {{-- Description for external links, which the script opens in a new tab --}}
     <span id="new-tab-hint" hidden>{{ __('site.a11y.opens_new_tab') }}</span>
 </body>
 </html>

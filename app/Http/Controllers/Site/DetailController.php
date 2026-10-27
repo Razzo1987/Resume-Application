@@ -19,8 +19,8 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 
 /**
- * Pagine dedicate: "/{lingua}/{progetti}/{slug}" e "/{lingua}/{esperienze}/{slug}".
- * Se l'indirizzo non è quello canonico (maiuscole, segmento o slug di un'altra lingua) si reindirizza.
+ * Dedicated pages: "/{language}/{progetti}/{slug}" and "/{language}/{esperienze}/{slug}".
+ * If the URL is not the canonical one (letter case, segment or slug of another language), it redirects.
  */
 class DetailController extends Controller
 {
@@ -58,7 +58,7 @@ class DetailController extends Controller
     }
 
     /**
-     * Cerca lo slug prima nella lingua della pagina, poi nelle altre lingue attive.
+     * Looks up the slug first in the page language, then in the other active languages.
      *
      * @template TModel of Model
      *

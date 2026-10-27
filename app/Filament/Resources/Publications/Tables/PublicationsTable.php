@@ -36,7 +36,7 @@ class PublicationsTable
     }
 
     /**
-     * Relazioni caricate in anticipo e ordinamento predefinito dell'elenco.
+     * Eager-loaded relations and default sort order of the list.
      *
      * @param  Builder<Publication>  $query
      * @return Builder<Publication>

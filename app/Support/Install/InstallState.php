@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace App\Support\Install;
 
 /**
- * L'applicazione è installata quando esiste il file .env (il pacchetto di rilascio non lo contiene).
- * Finché manca, ogni richiesta porta all'installer web.
+ * The application is installed when the .env file exists (the release package does not contain it).
+ * As long as it is missing, every request leads to the web installer.
  */
 class InstallState
 {

@@ -7,7 +7,7 @@ namespace App\Support\System;
 use RuntimeException;
 
 /**
- * Blocco "# BEGIN resume-app … # END resume-app" nel .htaccess della webroot.
+ * The "# BEGIN resume-app … # END resume-app" block in the web root's .htaccess.
  * The rest of the file (e.g. the PHP version handler added by the hosting panel) is never touched.
  */
 class Htaccess
@@ -19,7 +19,7 @@ class Htaccess
     private ?string $path = null;
 
     /**
-     * Usa un altro file (test, installazioni particolari).
+     * Uses another file (tests, special installations).
      */
     public function usePath(string $path): static
     {
@@ -39,7 +39,7 @@ class Htaccess
     }
 
     /**
-     * Blocco con le opzioni scelte (HTTPS obbligatorio, dominio senza www).
+     * Block with the chosen options (HTTPS required, domain without www).
      */
     public function block(bool $forceHttps, bool $stripWww): string
     {
@@ -59,7 +59,7 @@ class Htaccess
     }
 
     /**
-     * Scrive (o sostituisce) il blocco, conservando il resto del file.
+     * Writes (or replaces) the block, keeping the rest of the file.
      */
     public function write(bool $forceHttps, bool $stripWww): void
     {
@@ -79,7 +79,7 @@ class Htaccess
     }
 
     /**
-     * Opzioni attualmente attive nel blocco.
+     * Options currently active in the block.
      *
      * @return array{installed: bool, force_https: bool, strip_www: bool}
      */

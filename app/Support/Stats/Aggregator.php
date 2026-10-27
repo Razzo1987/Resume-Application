@@ -12,13 +12,13 @@ use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 
 /**
- * Totali giornalieri (stat_daily) a partire dalle singole visite, per pagina e per dimensione: restano anche dopo
- * che le visite vengono cancellate (stats.retention_months) e rendono veloci i grafici sui periodi lunghi.
- * Ricalcolare un giorno lo sostituisce per intero, quindi si può rifare quante volte si vuole.
+ * Daily totals (stat_daily) built from the individual visits, per page and per dimension: they remain even after
+ * the visits are deleted (stats.retention_months) and make the charts over long periods fast.
+ * Recalculating a day replaces it entirely, so it can be redone as many times as needed.
  */
 class Aggregator
 {
-    /** Dimensioni dei totali: colonna della visita (o espressione) => nome */
+    /** Dimensions of the totals: visit column (or expression) => name */
     public const array DIMENSIONS = [
         'locale' => 'locale',
         'device' => 'device',
@@ -36,7 +36,7 @@ class Aggregator
     public function __construct(private readonly Settings $settings) {}
 
     /**
-     * Lavoro "stats" del cron: totali di ieri e di oggi (e dei giorni rimasti indietro), pulizia.
+     * The cron's "stats" job: totals for yesterday and today (and for any days left behind), cleanup.
      */
     public function run(): string
     {
@@ -45,7 +45,7 @@ class Aggregator
         $from = $last !== null ? Carbon::parse((string) $last)->subDay() : (StatVisit::query()->min('day') !== null ? Carbon::parse((string) StatVisit::query()->min('day')) : $today->copy());
         $days = 0;
 
-        // Mai prima del periodo di conservazione: le visite più vecchie non ci sono più e i totali andrebbero persi
+        // Never before the retention period: older visits are gone and the totals would be lost
         $oldest = $today->copy()->subMonths(max(1, (int) $this->settings->get('stats.retention_months', 12)));
 
         for ($day = $from->copy()->max($oldest); $day->lte($today); $day->addDay()) {
@@ -80,7 +80,7 @@ class Aggregator
             }
         }
 
-        // Città con le coordinate (per la mappa): "IT|Milan"
+        // Cities with their coordinates (for the map): "IT|Milan"
         $cities = StatVisit::query()
             ->where('day', $date)
             ->whereNotNull('city')
@@ -105,7 +105,7 @@ class Aggregator
     }
 
     /**
-     * Cancella le visite più vecchie del periodo di conservazione (i totali restano).
+     * Deletes visits older than the retention period (the totals remain).
      */
     public function prune(): int
     {

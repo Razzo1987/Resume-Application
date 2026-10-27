@@ -5,14 +5,14 @@ declare(strict_types=1);
 namespace App\Site\Security;
 
 /**
- * Content Security Policy del sito pubblico: tutto dal nostro dominio, nessuno script in linea
- * tranne quello minimo che segnala "JavaScript attivo" (autorizzato con il suo hash).
+ * Content Security Policy of the public site: everything from our domain, no inline scripts
+ * except the minimal one that signals "JavaScript enabled" (allowed through its hash).
  */
 final class Csp
 {
     /**
-     * Script in linea del layout, prima del rendering: classe "js" su <html> e, se si arriva da un'altra
-     * pagina del sito, anche "js-same-site" (i temi la usano per non ripetere le animazioni d'ingresso).
+     * Inline script of the layout, before rendering: "js" class on <html> and, when coming from another
+     * page of the site, also "js-same-site" (themes use it to avoid repeating the entrance animations).
      */
     public const string JS_FLAG = "var h=document.documentElement;h.classList.add('js');"
         ."try{if(document.referrer&&new URL(document.referrer).origin===location.origin)h.classList.add('js-same-site')}catch(e){}";

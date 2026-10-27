@@ -8,36 +8,36 @@
 
     RewriteEngine On
 
-    # 1) Codice applicativo e file nascosti mai raggiungibili dal browser
+    # 1) Application code and hidden files never reachable from the browser
     RewriteRule ^core(/|$) - [F,L]
     RewriteRule ^core-path\.php$ - [F,L]
     RewriteRule (^|/)\.(?!well-known/) - [F,L]
 
-    # 2) HTTPS e dominio senza www (righe incluse dall'installer solo se richiesto)
+    # 2) HTTPS and domain without www (lines enabled by the installer only if requested)
     #{{FORCE_HTTPS}}RewriteCond %{HTTPS} !=on
     #{{FORCE_HTTPS}}RewriteCond %{HTTP:X-Forwarded-Proto} !=https
     #{{FORCE_HTTPS}}RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
     #{{STRIP_WWW}}RewriteCond %{HTTP_HOST} ^www\.(.+)$ [NC]
     #{{STRIP_WWW}}RewriteRule ^ %{REQUEST_SCHEME}://%1%{REQUEST_URI} [L,R=301]
 
-    # 3) Header Authorization e X-XSRF-Token verso PHP
+    # 3) Authorization and X-XSRF-Token headers passed to PHP
     RewriteCond %{HTTP:Authorization} .
     RewriteRule .* - [E=HTTP_AUTHORIZATION:%{HTTP:Authorization}]
     RewriteCond %{HTTP:x-xsrf-token} .
     RewriteRule .* - [E=HTTP_X_XSRF_TOKEN:%{HTTP:X-XSRF-Token}]
 
-    # 4) Slash finale rimosso (tranne le cartelle reali)
+    # 4) Trailing slash removed (except for real folders)
     RewriteCond %{REQUEST_FILENAME} !-d
     RewriteCond %{REQUEST_URI} (.+)/$
     RewriteRule ^ %1 [L,R=301]
 
-    # 5) Tutto il resto al front controller
+    # 5) Everything else goes to the front controller
     RewriteCond %{REQUEST_FILENAME} !-d
     RewriteCond %{REQUEST_FILENAME} !-f
     RewriteRule ^ index.php [L]
 </IfModule>
 
-# Seconda barriera se mod_rewrite mancasse: file sensibili negati comunque
+# Second barrier in case mod_rewrite is missing: sensitive files are denied anyway
 <FilesMatch "^(\.|core-path\.php$)">
     <IfModule mod_authz_core.c>
         Require all denied
@@ -46,7 +46,7 @@
 
 <IfModule mod_headers.c>
     Header always set X-Content-Type-Options "nosniff"
-    # Asset compilati (hash nel nome) e file caricati (nome casuale) non cambiano mai: cache di un anno
+    # Compiled assets (hash in the name) and uploaded files (random name) never change: one-year cache
     <If "%{REQUEST_URI} =~ m#^(.*/)?(themes/[^/]+/assets|uploads)/#">
         Header set Cache-Control "public, max-age=31536000, immutable"
     </If>

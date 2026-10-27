@@ -7,8 +7,8 @@ namespace App\Support\Languages;
 use Locale;
 
 /**
- * Lingue (ISO 639-1) per la sezione "Lingue conosciute" e per la lingua delle pubblicazioni.
- * I nomi arrivano da intl nella lingua dell'interfaccia.
+ * Languages (ISO 639-1) for the "Lingue conosciute" section and for the language of publications.
+ * The names come from intl in the interface language.
  */
 class IsoLanguages
 {
@@ -20,7 +20,7 @@ class IsoLanguages
     ];
 
     /**
-     * @return array<string, string> codice => nome, ordinati per nome
+     * @return array<string, string> code => name, sorted by name
      */
     public function options(?string $inLocale = null): array
     {

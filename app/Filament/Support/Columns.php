@@ -10,12 +10,12 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 
 /**
- * Colonne ricorrenti nelle tabelle admin.
+ * Columns that recur in the admin tables.
  */
 class Columns
 {
     /**
-     * Testo tradotto nella lingua di default del sito, ricercabile in tutte le lingue.
+     * Text translated into the site's default language, searchable in all languages.
      */
     public static function translated(string $field, ?string $label = null): TextColumn
     {
@@ -29,7 +29,7 @@ class Columns
     }
 
     /**
-     * Lingue in cui mancano traduzioni (badge), per individuare i contenuti da completare.
+     * Languages with missing translations (badges), to spot the content to complete.
      */
     public static function missingTranslations(): TextColumn
     {

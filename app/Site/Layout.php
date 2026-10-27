@@ -7,19 +7,19 @@ namespace App\Site;
 use App\Models\Profile;
 
 /**
- * Dati comuni a tutte le pagine pubbliche (barra laterale, menu, lingue, footer), preparati per il tema.
+ * Data shared by all public pages (sidebar, menu, languages, footer), prepared for the theme.
  */
 final readonly class Layout
 {
     /**
      * @param  list<string>  $headlines
-     * @param  array<string, string|int>  $photo  attributi di <img> (src, width, height) o vuoto
+     * @param  array<string, string|int>  $photo  <img> attributes (src, width, height) or empty
      * @param  list<array{key: string, title: string, url: string, current: bool}>  $menu
      * @param  list<array{code: string, name: string, url: string, current: bool}>  $languages
      * @param  list<array{platform: string, icon: string, url: string, label: string}>  $socials
-     * @param  array{href: string, text: string}|null  $email  valori codificati (vedi Cloak)
-     * @param  array{href: string, text: string}|null  $phone  valori codificati (vedi Cloak)
-     * @param  array<int, string>|null  $icons  icona del sito: dimensione => URL
+     * @param  array{href: string, text: string}|null  $email  encoded values (see Cloak)
+     * @param  array{href: string, text: string}|null  $phone  encoded values (see Cloak)
+     * @param  array<int, string>|null  $icons  site icon: size => URL
      */
     public function __construct(
         public string $locale,

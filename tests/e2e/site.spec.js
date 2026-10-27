@@ -1,8 +1,8 @@
-// Sito pubblico nei browser reali: funzionalità, privacy (niente cookie né risorse esterne) e accessibilità.
+// Public site in real browsers: features, privacy (no cookies or external resources) and accessibility.
 import { expect, test } from '@playwright/test';
 import AxeBuilder from '@axe-core/playwright';
 
-/** Raccoglie errori di console, violazioni CSP e richieste verso altri domini. */
+/** Collects console errors, CSP violations and requests to other domains. */
 function watch(page, baseURL) {
     const problems = [];
     const origin = new URL(baseURL).host;
@@ -74,7 +74,7 @@ test.describe('CV', () => {
     });
 
     test('centres the content on wide screens', async ({ page, isMobile }) => {
-        test.skip(isMobile, 'solo schermi larghi');
+        test.skip(isMobile, 'wide screens only');
         await page.setViewportSize({ width: 1920, height: 1080 });
         await page.goto('/it-IT');
 
@@ -90,7 +90,7 @@ test.describe('CV', () => {
         await page.goto('/it-IT');
 
         await expect(page.locator('.back-to-top')).toBeHidden();
-        // il puntatore sul contenuto: sopra la barra laterale la rotellina scorrerebbe solo quella
+        // pointer over the content: over the sidebar the wheel would scroll only the sidebar
         await page.mouse.move(page.viewportSize().width - 50, 300);
         await page.mouse.wheel(0, 2500);
         await expect(page.locator('.back-to-top')).toBeVisible();
@@ -104,7 +104,7 @@ test.describe('CV', () => {
         await expect(social).toHaveAttribute('rel', /noopener/);
         await expect(social).toHaveAttribute('aria-describedby', 'new-tab-hint');
         await expect(page.locator('#new-tab-hint')).toHaveText('(si apre in una nuova scheda)');
-        // link interni ed email restano nella stessa scheda
+        // internal links and email stay in the same tab
         await expect(page.locator('.site-nav a').first()).not.toHaveAttribute('target', /.+/);
         await expect(page.locator('#about .js-cloak').first()).not.toHaveAttribute('target', /.+/);
     });
@@ -134,7 +134,7 @@ test.describe('CV', () => {
         await expect(page.locator('.site-nav')).toBeHidden();
         await expect(page.locator('.sidebar-actions')).toBeHidden();
         await expect(page.locator('#experience')).toBeVisible();
-        // i dettagli della formazione (piano di studi, tesi…) non si stampano
+        // the education details (study plan, thesis...) are not printed
         await expect(page.locator('#education details.more')).toHaveCount(1);
         await expect(page.locator('#education details.more')).toBeHidden();
     });
@@ -144,7 +144,7 @@ test.describe('accessibility (axe, WCAG 2.1 AA)', () => {
     for (const path of ['/it-IT', '/en-GB/experience/tech-lead-brightline-software', '/en-GB/projects/booking-portal', '/it-IT/blog', '/en-GB/blog/three-rules-for-an-accessible-website', '/it-IT/pagina-inesistente', '/it-IT/privacy', '/en-GB/privacy']) {
         test(path, async ({ page }) => {
             await page.goto(path);
-            // I temi con animazioni: si analizza la pagina a riposo (testo a opacità piena)
+            // Themes with animations: the page is analyzed at rest (text at full opacity)
             await page.evaluate(() => Promise.all(document.getAnimations()
                 .filter((animation) => animation.effect?.getComputedTiming().endTime !== Infinity)
                 .map((animation) => animation.finished.catch(() => null))));

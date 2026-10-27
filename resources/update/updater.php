@@ -1,29 +1,29 @@
 <?php
 
 /**
- * Resume App - estrazione di un pacchetto di aggiornamento, fuori da Laravel.
+ * Resume App - extraction of an update package, outside Laravel.
  *
- * L'admin prepara l'aggiornamento (controlli, copia dei contenuti, manutenzione), copia questo file in
- * core/storage/framework/resume-updater.php e scrive lo stato in core/storage/framework/resume-update.json.
- * Finché lo stato esiste, index.php passa ogni richiesta a resume_updater_handle() senza avviare l'app,
- * perché i suoi file vengono sostituiti proprio in quel momento:
- *  - chi ha il codice dell'aggiornamento (nell'indirizzo o nel cookie resume_update, cioè l'amministratore
- *    che l'ha avviato) vede l'avanzamento; la pagina chiama a ripetizione ?resume-update=CODICE&step=1 (POST),
- *    che estrae un blocco di file per volta (pochi secondi, sotto i limiti di tempo degli hosting) e si può
- *    riprendere dopo un errore;
- *  - tutti gli altri ricevono 503 "Sito in aggiornamento".
- * Alla fine lo stato viene cancellato e il browser torna all'admin, che completa l'aggiornamento
- * (migrazioni, cache, manutenzione): vedi App\Support\Update\UpdateRunner.
+ * The admin prepares the update (checks, content backup, maintenance), copies this file to
+ * core/storage/framework/resume-updater.php and writes the state to core/storage/framework/resume-update.json.
+ * While the state exists, index.php hands every request to resume_updater_handle() without starting the app,
+ * because its files are being replaced at that very moment:
+ *  - whoever has the update code (in the address or in the resume_update cookie, that is the administrator
+ *    who started it) sees the progress; the page repeatedly calls ?resume-update=CODE&step=1 (POST),
+ *    which extracts one chunk of files at a time (a few seconds, under the hosting time limits) and can be
+ *    resumed after an error;
+ *  - everyone else gets 503 "Sito in aggiornamento".
+ * At the end the state is deleted and the browser goes back to the admin, which completes the update
+ * (migrations, cache, maintenance): see App\Support\Update\UpdateRunner.
  *
- * Solo funzioni di PHP: niente classi dell'app né di Composer. Il formato dello stato e la firma di
- * resume_updater_handle() non devono cambiare tra le versioni (index.php nuovo, updater della versione vecchia).
+ * PHP functions only: no app or Composer classes. The state format and the signature of
+ * resume_updater_handle() must not change between versions (new index.php, updater from the old version).
  */
 
 declare(strict_types=1);
 
 if (! function_exists('resume_updater_handle')) {
     /**
-     * Gestisce la richiesta corrente e termina lo script.
+     * Handles the current request and ends the script.
      */
     function resume_updater_handle(string $stateFile, string $webroot, string $core): never
     {
@@ -55,7 +55,7 @@ if (! function_exists('resume_updater_handle')) {
             exit;
         }
 
-        // L'indirizzo con il codice fa da "chiave": il cookie permette di tornare qui anche da altre pagine
+        // The address with the code acts as a "key": the cookie allows coming back here from other pages too
         if (isset($_GET['resume-update'])) {
             resume_updater_cookie((string) $state['token'], 0);
         }
@@ -64,7 +64,7 @@ if (! function_exists('resume_updater_handle')) {
     }
 
     /**
-     * Estrae il blocco successivo di file e salva l'avanzamento.
+     * Extracts the next chunk of files and saves the progress.
      *
      * @return array{next: int, total: int, done: bool, redirect: ?string}
      */
@@ -107,7 +107,7 @@ if (! function_exists('resume_updater_handle')) {
             $finished = $next >= $total;
 
             if ($finished) {
-                // Da qui l'app riparte: la richiesta successiva arriva a Laravel
+                // From here the app starts again: the next request reaches Laravel
                 @unlink($stateFile);
             } else {
                 resume_updater_write($stateFile, $state);
@@ -125,7 +125,7 @@ if (! function_exists('resume_updater_handle')) {
     }
 
     /**
-     * Scrive un elemento del pacchetto: prima in un file temporaneo, poi lo sostituisce all'originale.
+     * Writes a package entry: first to a temporary file, which then replaces the original.
      */
     function resume_updater_extract(ZipArchive $zip, int $index, string $webroot, string $core): void
     {
@@ -178,8 +178,8 @@ if (! function_exists('resume_updater_handle')) {
     }
 
     /**
-     * Percorso di destinazione di un elemento del pacchetto, o null se non va scritto (dati del sito).
-     * "core/..." va nella cartella dell'app (anche fuori dalla webroot, con core-path.php), il resto nella webroot.
+     * Target path of a package entry, or null if it must not be written (site data).
+     * "core/..." goes into the app folder (also outside the webroot, with core-path.php), the rest into the webroot.
      */
     function resume_updater_target(string $name, string $webroot, string $core): ?string
     {
@@ -212,11 +212,11 @@ if (! function_exists('resume_updater_handle')) {
     }
 
     /**
-     * Dati e configurazione del sito che un pacchetto non deve mai sovrascrivere.
+     * Site data and configuration that a package must never overwrite.
      */
     function resume_updater_protected(string $area, string $relative, bool $isDirectory): bool
     {
-        // Temi installati dall'admin (il pacchetto contiene solo "base")
+        // Themes installed from the admin (the package only contains "base")
         if (preg_match('#^themes/(?!base(/|$))#', $relative) === 1) {
             return true;
         }
@@ -277,7 +277,7 @@ if (! function_exists('resume_updater_handle')) {
     }
 
     /**
-     * Pagina per i visitatori durante l'estrazione.
+     * Page for visitors during the extraction.
      *
      * @param  array<string, mixed>|null  $state
      */
@@ -305,7 +305,7 @@ if (! function_exists('resume_updater_handle')) {
     }
 
     /**
-     * Pagina con l'avanzamento, per chi ha avviato l'aggiornamento.
+     * Page with the progress, for whoever started the update.
      *
      * @param  array<string, mixed>  $state
      */
@@ -371,7 +371,7 @@ if (! function_exists('resume_updater_handle')) {
                             data = { error: String(exception) };
                         }
                         if (data.error) {
-                            // Un blocco interrotto dal server (tempo massimo) si riprende da solo, poi si chiede all'utente
+                            // A chunk cut off by the server (time limit) is retried automatically, then the user is asked
                             if (++failures < 4) { await new Promise((resolve) => setTimeout(resolve, 1500 * failures)); continue; }
                             message.textContent = data.error; box.classList.add('on'); return;
                         }

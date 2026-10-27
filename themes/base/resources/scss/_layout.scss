@@ -1,4 +1,4 @@
-// Struttura della pagina: barra laterale (profilo, azioni, menu, social, lingue) e contenuto.
+// Page structure: sidebar (profile, actions, menu, social links, languages) and content.
 
 .icon {
     display: inline-block;
@@ -30,12 +30,12 @@
     @include media-breakpoint-up(lg) {
         display: grid;
         grid-template-columns: 20rem minmax(0, 1fr);
-        // La colonna della barra laterale resta colorata anche oltre l'altezza dello schermo
+        // The sidebar column stays colored even beyond the screen height
         background: linear-gradient(to right, $sidebar-bg 20rem, $body-bg 20rem);
     }
 }
 
-// Barra laterale
+// Sidebar
 .site-sidebar {
     color: $sidebar-color;
     background: $sidebar-bg;
@@ -227,7 +227,7 @@
     }
 }
 
-// Contenuto
+// Content
 .site-body {
     padding: 1.5rem 1rem 2rem;
 
@@ -243,7 +243,7 @@
 .site-main,
 .site-footer {
     max-width: 54rem;
-    // Sugli schermi larghi il contenuto sta al centro dello spazio a destra della barra laterale
+    // On wide screens the content sits in the middle of the space to the right of the sidebar
     margin-inline: auto;
 }
 
@@ -287,7 +287,7 @@
         background: shade-color($primary, 20%);
     }
 
-    // Con JavaScript compare solo dopo un po' di scorrimento
+    // With JavaScript it appears only after some scrolling
     .js & {
         visibility: hidden;
         opacity: 0;
@@ -303,7 +303,7 @@
     }
 }
 
-// Passaggio morbido tra le pagine (browser che lo supportano), solo se l'utente non ha chiesto meno animazioni
+// Smooth transition between pages (in browsers that support it), only if the user has not asked for less motion
 @media (prefers-reduced-motion: no-preference) {
     @view-transition {
         navigation: auto;

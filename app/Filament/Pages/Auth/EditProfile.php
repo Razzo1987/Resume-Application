@@ -10,7 +10,7 @@ use Filament\Forms\Components\Select;
 use Filament\Schemas\Schema;
 
 /**
- * Profilo dell'amministratore: nome, email, password e lingua dell'admin.
+ * Administrator profile: name, email, password and admin language.
  */
 class EditProfile extends BaseEditProfile
 {
@@ -40,7 +40,7 @@ class EditProfile extends BaseEditProfile
     }
 
     /**
-     * Lingua cambiata: si ricarica la pagina, così tutto l'admin è subito nella lingua nuova.
+     * Language changed: the page is reloaded, so the whole admin is in the new language right away.
      */
     protected function afterSave(): void
     {

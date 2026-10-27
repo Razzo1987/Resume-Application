@@ -9,9 +9,9 @@ use Illuminate\Support\Number;
 use Locale;
 
 /**
- * Cartina del mondo in SVG (nessuna libreria né tessere da server esterni): Paesi colorati in base alle visite e
- * un cerchio per città. Forme e parametri della proiezione Equal Earth in resources/stats/world-map.json
- * (scripts/build-world-map.mjs); qui la stessa formula di d3-geo per le coordinate delle città.
+ * SVG world map (no library, no tiles from external servers): countries colored by visits and one circle per
+ * city. Shapes and Equal Earth projection parameters are in resources/stats/world-map.json
+ * (scripts/build-world-map.mjs); here, the same formula as d3-geo for the city coordinates.
  */
 class WorldMap
 {
@@ -19,7 +19,7 @@ class WorldMap
     private ?array $map = null;
 
     /**
-     * @param  array<string, int>  $countries  codice ISO => visite
+     * @param  array<string, int>  $countries  ISO code => visits
      * @param  list<array{label: string, latitude: float, longitude: float, views: int}>  $cities
      */
     public function render(array $countries, array $cities, string $locale): HtmlString
@@ -60,7 +60,7 @@ class WorldMap
     }
 
     /**
-     * Longitudine e latitudine (gradi) → coordinate della cartina, come geoEqualEarth() di d3-geo.
+     * Longitude and latitude (degrees) → map coordinates, like geoEqualEarth() in d3-geo.
      *
      * @return array{0: float, 1: float}
      */

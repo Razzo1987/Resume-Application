@@ -52,7 +52,7 @@ it('runs only the light jobs from the admin, at most once an hour, when there is
     expect($this->cron->run(fromCron: false))->toBe(['light' => 'done'])
         ->and($this->cron->isActive())->toBeFalse();
 
-    // Il giro dall'admin parte dopo aver risposto (terminating) e non più di una volta l'ora
+    // The run from the admin starts after the response is sent (terminating) and at most once an hour
     expect($this->cron->runFromAdminIfNeeded())->toBeFalse();
 
     $this->travel(Cron::FALLBACK_MINUTES + 1)->minutes();
@@ -64,7 +64,7 @@ it('runs only the light jobs from the admin, at most once an hour, when there is
     expect($this->runs->getArrayCopy())->toBe(['light:admin', 'light:admin'])
         ->and($this->cron->runFromAdminIfNeeded())->toBeFalse();
 
-    // Con il cron attivo l'admin non fa partire niente
+    // With the cron active the admin does not start anything
     $this->cron->run(fromCron: true, only: 'heavy');
     $this->travel(Cron::FALLBACK_MINUTES + 1)->minutes();
 

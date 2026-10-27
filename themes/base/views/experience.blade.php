@@ -1,4 +1,4 @@
-{{-- Pagina dedicata di un'esperienza (lavoro o volontariato): $experience --}}
+{{-- Dedicated page of an experience (work or volunteering): $experience --}}
 @extends('theme::layouts.site')
 
 @section('content')

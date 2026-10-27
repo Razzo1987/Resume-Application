@@ -1,4 +1,4 @@
-{{-- Cliente, settore e ruolo di un progetto: $project --}}
+{{-- Client, industry and role of a project: $project --}}
 @php
     $facts = array_filter([
         'client' => $project->client?->name,

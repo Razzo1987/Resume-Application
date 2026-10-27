@@ -13,7 +13,7 @@ use Filament\Widgets\StatsOverviewWidget;
 use Filament\Widgets\StatsOverviewWidget\Stat;
 
 /**
- * Dashboard, gruppo Lingue: lingue del sito e, per ognuna, i testi ancora da tradurre.
+ * Dashboard, Languages group: site languages and, for each one, the texts still to translate.
  */
 class LanguagesOverviewWidget extends StatsOverviewWidget
 {
@@ -44,7 +44,7 @@ class LanguagesOverviewWidget extends StatsOverviewWidget
                 ->description($missing === 0 ? __('admin.widgets.translations_complete') : __('admin.widgets.translations_missing'))
                 ->descriptionIcon($missing === 0 ? null : 'heroicon-m-arrow-right')
                 ->color($missing === 0 ? 'success' : 'warning')
-                // Elenco di cosa manca, con il link per modificarlo
+                // List of what is missing, with the link to edit it
                 ->url(Translations::getUrl(['locale' => $locale]));
         }
 

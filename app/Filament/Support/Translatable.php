@@ -14,13 +14,13 @@ use Illuminate\Support\Facades\Lang;
 use Illuminate\Support\Str;
 
 /**
- * Campi tradotti nei form admin: una scheda per ogni lingua attiva del sito.
+ * Translated fields in the admin forms: one tab for each active language of the site.
  *
  *   Translatable::tabs(fn (string $locale, bool $isDefault) => [
  *       TextInput::make("title.{$locale}")->required($isDefault),
  *   ])
  *
- * La lingua di default è la prima scheda ed è l'unica con i campi obbligatori.
+ * The default language is the first tab and the only one with required fields.
  */
 class Translatable
 {

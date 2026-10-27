@@ -14,8 +14,8 @@ use Illuminate\Support\Facades\File;
 use Livewire\Livewire;
 
 /*
-| Temi installati da zip: si lavora in cartelle temporanee (temi + webroot), con il tema base
-| collegato a quello vero, così i test non toccano themes/ e public/themes/ del progetto.
+| Themes installed from a zip: the tests work in temporary folders (themes + webroot), with the base theme
+| linked to the real one, so they do not touch the project's themes/ and public/themes/.
 */
 
 beforeEach(function () {
@@ -42,7 +42,7 @@ afterEach(function () {
 });
 
 /**
- * Zip di un tema di prova: $extra aggiunge o sostituisce file, null li toglie.
+ * Zip of a test theme: $extra adds or replaces files, null removes them.
  *
  * @param  array<string, mixed>  $manifest
  * @param  array<string, string|null>  $extra

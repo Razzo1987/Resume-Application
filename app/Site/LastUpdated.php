@@ -8,7 +8,7 @@ use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 
 /**
- * Data dell'ultima modifica ai contenuti del CV ("Aggiornato a…" nel footer, dateModified nel JSON-LD).
+ * Date of the last change to the CV content ("Aggiornato a…" in the footer, dateModified in the JSON-LD).
  */
 final class LastUpdated
 {
@@ -28,7 +28,7 @@ final class LastUpdated
         if (! $this->resolved) {
             $this->resolved = true;
 
-            // Una sola query: il massimo tra i massimi di ogni tabella
+            // A single query: the maximum of the maximums of each table
             $union = null;
 
             foreach (self::TABLES as $table) {

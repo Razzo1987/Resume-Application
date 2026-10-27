@@ -13,8 +13,9 @@ use Illuminate\Support\Facades\Http;
 use Throwable;
 
 /**
- * Nuove versioni pubblicate su GitHub. Il controllo si fa al massimo ogni 12 ore (all'apertura della dashboard,
- * dopo aver risposto) o con "Controlla ora"; l'esito resta in core/storage, così la dashboard non aspetta GitHub.
+ * New versions published on GitHub. The check runs at most every 12 hours (when the dashboard is opened, after
+ * the response is sent) or with "Controlla ora"; the result is kept in core/storage, so the dashboard does not
+ * wait for GitHub.
  */
 class ReleaseChecker
 {
@@ -24,7 +25,7 @@ class ReleaseChecker
     ) {}
 
     /**
-     * Esito dell'ultimo controllo, senza chiamare GitHub.
+     * Result of the last check, without calling GitHub.
      *
      * @return array{checked_at: ?Carbon, release: ?Release, error: ?string}
      */
@@ -40,7 +41,7 @@ class ReleaseChecker
     }
 
     /**
-     * La release più recente, se è più nuova della versione installata (in base all'ultimo controllo).
+     * The latest release, if it is newer than the installed version (based on the last check).
      */
     public function available(): ?Release
     {
@@ -53,7 +54,7 @@ class ReleaseChecker
     {
         $current = $this->updater->codeVersion();
 
-        // Copia di sviluppo (VERSION "dev" o "2.1.0-dev"): nessun avviso
+        // Development copy (VERSION "dev" or "2.1.0-dev"): no notice
         return preg_match(Release::VERSION_PATTERN, $current) === 1 && version_compare($version, $current, '>');
     }
 
@@ -72,7 +73,7 @@ class ReleaseChecker
     }
 
     /**
-     * Chiede a GitHub l'ultima release e salva l'esito.
+     * Asks GitHub for the latest release and saves the result.
      *
      * @return array{checked_at: ?Carbon, release: ?Release, error: ?string}
      */
@@ -100,7 +101,7 @@ class ReleaseChecker
 
         $this->storage->writeJson($this->storage->checkFile(), [
             'checked_at' => now()->toAtomString(),
-            // Se GitHub non risponde si tiene l'ultima release nota
+            // If GitHub does not respond, the last known release is kept
             'release' => ($release ?? $previous)?->toArray(),
             'error' => $error,
         ]);
@@ -109,7 +110,7 @@ class ReleaseChecker
     }
 
     /**
-     * Richiesta all'API di GitHub, con il token se c'è.
+     * Request to the GitHub API, with the token if there is one.
      */
     public function api(): PendingRequest
     {

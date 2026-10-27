@@ -64,7 +64,7 @@ return [
             ]) : [],
         ],
 
-        // Database della versione 1 (solo per php artisan resume:import-v1)
+        // Version 1 database (only for php artisan resume:import-v1)
         'legacy' => [
             'driver' => env('LEGACY_DB_CONNECTION', 'mysql'),
             'host' => env('LEGACY_DB_HOST', env('DB_HOST', '127.0.0.1')),

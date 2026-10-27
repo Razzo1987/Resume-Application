@@ -1,8 +1,8 @@
 <?php
 
 /*
- * Resume App — stringhe del sito pubblico (it-IT), comuni a tutti i temi.
- * I temi aggiungono solo le stringhe proprie. Ogni stringa è sovrascrivibile da admin.
+ * Resume App — public site strings (it-IT), shared by all themes.
+ * Themes only add their own strings. Every string can be overridden from the admin.
  */
 
 return [

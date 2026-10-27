@@ -7,15 +7,15 @@ namespace App\Themes;
 use InvalidArgumentException;
 
 /**
- * Un tema installato, descritto dal suo theme.json.
+ * An installed theme, described by its theme.json.
  */
 final readonly class Theme
 {
     /**
-     * @param  list<string>  $entrypoints  chiavi del manifest Vite da includere nelle pagine
-     * @param  string|null  $sprite  chiave del manifest Vite dello sprite SVG delle icone
-     * @param  string|null  $themeColor  colore della barra del browser su mobile (meta theme-color)
-     * @param  string|null  $requires  versioni compatibili dell'app (es. "^2.0")
+     * @param  list<string>  $entrypoints  Vite manifest keys to include in the pages
+     * @param  string|null  $sprite  Vite manifest key of the SVG icon sprite
+     * @param  string|null  $themeColor  color of the browser bar on mobile (meta theme-color)
+     * @param  string|null  $requires  compatible app versions (e.g. "^2.0")
      */
     public function __construct(
         public string $name,
@@ -45,7 +45,7 @@ final readonly class Theme
     }
 
     /**
-     * @param  mixed  $data  contenuto di theme.json
+     * @param  mixed  $data  contents of theme.json
      */
     public static function fromArray(mixed $data, string $path): self
     {
@@ -85,7 +85,7 @@ final readonly class Theme
     }
 
     /**
-     * Asset compilati presenti (manifest di Vite nella webroot)?
+     * Are the compiled assets present (Vite manifest in the webroot)?
      */
     public function hasAssets(string $publicPath): bool
     {
@@ -93,7 +93,7 @@ final readonly class Theme
     }
 
     /**
-     * Cartella degli asset compilati, relativa alla webroot (usata da Vite).
+     * Folder of the compiled assets, relative to the webroot (used by Vite).
      */
     public function buildDirectory(): string
     {
@@ -101,7 +101,7 @@ final readonly class Theme
     }
 
     /**
-     * Mappa icone semantiche → classi/identificativi del set di icone del tema.
+     * Map of semantic icons → classes/identifiers of the theme's icon set.
      *
      * @return array<string, string>
      */

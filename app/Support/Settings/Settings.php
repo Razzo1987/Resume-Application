@@ -12,41 +12,41 @@ use Illuminate\Support\Facades\Schema;
 use Throwable;
 
 /**
- * Impostazioni dell'applicazione (tabella settings, chiave → valore JSON) con valori di default.
- * I valori tradotti sono array {"it-IT": "...", "en-GB": "..."}.
+ * Application settings (settings table, key → JSON value) with default values.
+ * Translated values are arrays {"it-IT": "...", "en-GB": "..."}.
  */
 class Settings
 {
     private const string CACHE_KEY = 'resume.settings';
 
     /**
-     * Valori di default. Le chiavi elencate in TRANSLATABLE contengono testi per lingua.
+     * Default values. The keys listed in TRANSLATABLE hold per-language texts.
      *
      * @var array<string, mixed>
      */
     public const array DEFAULTS = [
-        'site.theme' => null,                         // null = tema da configurazione (RESUME_THEME)
+        'site.theme' => null,                         // null = theme from the configuration (RESUME_THEME)
         'cv.filename_pattern' => 'CV {name} - {lang}.pdf',
-        'cv.fallback_to_default' => false,           // lingua senza CV → offri il CV della lingua di default
+        'cv.fallback_to_default' => false,           // language without a CV → offer the default language's CV
         'seo.title' => [],
         'seo.description' => [],
         'seo.og_image' => null,
-        'site.icon' => null,                          // icona del sito (favicon), PNG quadrato
+        'site.icon' => null,                          // site icon (favicon), square PNG
         'footer.gdpr_text' => [],
-        'footer.show_last_updated' => false,         // "Aggiornato a…" nel footer: spento di default
-        'print.enabled' => true,                      // versione di stampa + pulsante "Stampa"
-        'privacy.show_email' => true,                 // dati di contatto visibili nella pagina (con cloaking)
+        'footer.show_last_updated' => false,         // "Aggiornato a…" in the footer: off by default
+        'print.enabled' => true,                      // print version + "Stampa" button
+        'privacy.show_email' => true,                 // contact details visible on the page (with cloaking)
         'privacy.show_phone' => true,
         'privacy.show_birthdate' => false,
-        'jsonld.include_email' => false,              // dati personali nel JSON-LD: spenti di default
+        'jsonld.include_email' => false,              // personal data in the JSON-LD: off by default
         'jsonld.include_phone' => false,
         'jsonld.include_birthdate' => false,
-        'updates.auto' => 'download',                 // aggiornamenti automatici col cron: off, download, patch
-        'privacy.page' => false,                      // pagina Privacy e link nel footer (sempre attiva con le statistiche)
-        'privacy.text' => [],                         // testo dell'informativa per lingua (vuoto = testo modello)
-        'stats.enabled' => false,                     // statistiche delle visite (senza cookie)
-        'stats.retention_months' => 12,               // dopo quanti mesi si cancellano i dati delle singole visite
-        'stats.admin_ip_days' => 14,                  // per quanti giorni l'IP usato nell'admin non conta nelle visite
+        'updates.auto' => 'download',                 // automatic updates via the cron: off, download, patch
+        'privacy.page' => false,                      // Privacy page and footer link (always on when statistics are on)
+        'privacy.text' => [],                         // privacy notice text per language (empty = template text)
+        'stats.enabled' => false,                     // visit statistics (without cookies)
+        'stats.retention_months' => 12,               // after how many months the data of single visits is deleted
+        'stats.admin_ip_days' => 14,                  // for how many days the admin's IP is not counted in the visits
         'site.timezone' => null,                      // time zone of the site (null = guessed from the default language)
     ];
 
@@ -102,7 +102,7 @@ class Settings
     }
 
     /**
-     * Testo tradotto con fallback sulla lingua di default.
+     * Translated text, falling back to the default language.
      */
     public function translated(string $key, ?string $locale = null): ?string
     {
@@ -124,9 +124,9 @@ class Settings
     }
 
     /**
-     * Testi delle impostazioni scritti in almeno una lingua ma mancanti in quella indicata.
+     * Settings texts written in at least one language but missing in the given one.
      *
-     * @return list<string> chiavi, es. "seo.title"
+     * @return list<string> keys, e.g. "seo.title"
      */
     public function missingTranslations(string $locale): array
     {
@@ -171,7 +171,7 @@ class Settings
         Cache::forget(self::CACHE_KEY);
         $this->values = null;
 
-        // Le impostazioni cambiano le pagine pubbliche
+        // Settings change the public pages
         app(PageCache::class)->flush();
     }
 

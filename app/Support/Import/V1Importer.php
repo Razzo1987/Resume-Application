@@ -33,12 +33,12 @@ use Illuminate\Support\Str;
 use stdClass;
 
 /**
- * Importa i contenuti della versione 1 di Resume Application (una riga per lingua, coppie IT/EN
- * collegate per convenzione: id dispari = prima lingua, id pari = seconda).
+ * Imports the content of Resume Application version 1 (one row per language, IT/EN pairs
+ * linked by convention: odd id = first language, even id = second).
  *
- * Profilo, social, esperienze (lavoro e volontariato) con organizzazioni e competenze, progetti
- * (collegati all'esperienza in cui ricadono le date), formazione, certificazioni con badge e PDF,
- * redirect dai vecchi indirizzi dei file. Le immagini vengono ottimizzate come quelle caricate dall'admin.
+ * Profile, social links, experiences (work and volunteering) with organizations and skills, projects
+ * (linked to the experience their dates fall into), education, certifications with badges and PDFs,
+ * redirects from the old file URLs. Images are optimized like those uploaded from the admin.
  */
 class V1Importer
 {
@@ -59,10 +59,10 @@ class V1Importer
     ) {}
 
     /**
-     * @param  string  $files  cartella public_html della v1 (immagini, attachment/, resume/)
-     * @param  list<int>  $volunteering  id v1 (di una qualsiasi lingua) delle esperienze di volontariato
-     * @param  array<string, string>  $cvs  lingua => PDF del CV corrente
-     * @return list<string> resoconto
+     * @param  string  $files  v1 public_html folder (images, attachment/, resume/)
+     * @param  list<int>  $volunteering  v1 ids (of any language) of the volunteering experiences
+     * @param  array<string, string>  $cvs  language => PDF of the current CV
+     * @return list<string> report
      */
     public function import(ConnectionInterface $legacy, string $files, array $volunteering = [], array $cvs = [], bool $fresh = false): array
     {
@@ -153,7 +153,7 @@ class V1Importer
     }
 
     /**
-     * @return array<int, int> chiave della coppia v1 => id della competenza
+     * @return array<int, int> v1 pair key => skill id
      */
     private function skills(ConnectionInterface $legacy): array
     {
@@ -186,7 +186,7 @@ class V1Importer
     /**
      * @param  array<int, int>  $skills
      * @param  list<int>  $volunteering
-     * @return Collection<int, Experience> per chiave della coppia v1
+     * @return Collection<int, Experience> by v1 pair key
      */
     private function experiences(ConnectionInterface $legacy, array $skills, array $volunteering): Collection
     {
@@ -215,7 +215,7 @@ class V1Importer
             $experiences[$key] = $experience;
         }
 
-        // Competenze: le righe di tutte le lingue, ricondotte alle coppie (corregge i collegamenti incrociati)
+        // Skills: the rows of all languages, mapped back to the pairs (fixes cross-language links)
         $links = [];
 
         foreach ($legacy->table('experience_skill')->get() as $link) {
@@ -255,7 +255,7 @@ class V1Importer
 
             $start = Carbon::parse($main->start);
 
-            // Esperienza in cui ricade l'inizio del progetto (la più recente, se più d'una)
+            // Experience the project's start date falls into (the most recent one, if more than one)
             $experience = $work
                 ->filter(fn (Experience $item): bool => $item->start_date->lte($start) && ($item->end_date === null || $item->end_date->gte($start)))
                 ->sortByDesc(fn (Experience $item): int => $item->start_date->getTimestamp())
@@ -288,7 +288,7 @@ class V1Importer
 
     private function educations(ConnectionInterface $legacy): void
     {
-        // Senza id: le lingue di uno stesso titolo hanno le stesse date
+        // No id: the languages of the same degree have the same dates
         $groups = $legacy->table('educations')->get()
             ->groupBy(fn (stdClass $row): string => $row->start.'|'.$row->end)
             ->map(fn (Collection $rows): Collection => $rows->keyBy('language'));
@@ -339,7 +339,7 @@ class V1Importer
                 $this->warn("Certificazione \"{$title}\": date diverse tra le lingue ({$dates->implode(', ')}), usata {$main->date}");
             }
 
-            // Link: PDF locale (attachment/…, anche con il percorso duplicato) oppure pagina di verifica
+            // Link: local PDF (attachment/…, also with the duplicated path) or verification page
             $link = $group->pluck('link')->filter()->map(fn (string $value): string => (string) preg_replace('#^(attachment/)+#', 'attachment/', trim($value)));
             $local = $link->first(fn (string $value): bool => str_starts_with($value, 'attachment/'));
             $remote = $link->first(fn (string $value): bool => str_starts_with($value, 'http'));
@@ -358,7 +358,7 @@ class V1Importer
             if ($file !== null) {
                 $files++;
 
-                // Vecchi indirizzi del PDF (anche quello rotto con attachment/attachment/)
+                // Old URLs of the PDF (including the broken one with attachment/attachment/)
                 foreach (['/'.$local, '/attachment/'.$local] as $old) {
                     Redirect::query()->updateOrCreate(['from_path' => Redirect::normalizePath($old)], ['to_path' => '/uploads/'.$file, 'status_code' => 301, 'is_active' => true]);
                 }
@@ -398,13 +398,13 @@ class V1Importer
             $this->note("CV {$code}: ".basename($source));
         }
 
-        // Le lingue senza CV propongono quello della lingua di default, come faceva la v1
+        // Languages without a CV offer the one of the default language, as v1 did
         if ($cvs !== [] && Language::query()->where('is_active', true)->count() > count($cvs)) {
             $this->settings->set('cv.fallback_to_default', true);
             $this->note('Lingue senza CV: si scarica quello della lingua di default');
         }
 
-        // Vecchi indirizzi dei CV (cartella resume/) → download del CV corrente
+        // Old CV URLs (resume/ folder) → download of the current CV
         $count = 0;
 
         foreach (glob($this->files.'/resume/*') ?: [] as $old) {
@@ -424,13 +424,13 @@ class V1Importer
     }
 
     /**
-     * Dall'indirizzo completo della v1 alla sola città ("Piazza Tre Torri 2, 20145 Milano" → "Milano"),
-     * quando l'indirizzo termina con CAP e città. Altrimenti resta com'è.
+     * From the full v1 address to the city only ("Piazza Tre Torri 2, 20145 Milano" → "Milano"),
+     * when the address ends with postal code and city. Otherwise it stays as it is.
      */
     private function city(string $place): string
     {
         if (preg_match('/^(.*),\s*\d{4,5}\s+([^,\d]+)$/u', $place, $match) === 1) {
-            // "…, 76131 Germania": la città è l'ultima parola prima della virgola
+            // "…, 76131 Germania": the city is the last word before the comma
             if (preg_match('/^(italia|italy|germania|germany|deutschland|francia|france|spagna|spain|svizzera|switzerland)$/iu', trim($match[2])) === 1) {
                 $words = preg_split('/\s+/u', trim($match[1])) ?: [];
 
@@ -448,8 +448,8 @@ class V1Importer
     }
 
     /**
-     * Testi del footer della v1 (copyright, immagini, consenso GDPR) dai file languages/{lingua}.php,
-     * letti come testo (senza eseguirli).
+     * v1 footer texts (copyright, images, GDPR consent) from the languages/{language}.php files,
+     * read as text (without executing them).
      */
     private function footer(): void
     {
@@ -477,7 +477,7 @@ class V1Importer
     }
 
     /**
-     * Icona del sito dalla favicon della v1 (la versione più grande), se non ce n'è già una.
+     * Site icon from the v1 favicon (the largest version), if there is not one already.
      */
     private function siteIcon(): void
     {
@@ -586,8 +586,8 @@ class V1Importer
     }
 
     /**
-     * Righe raggruppate per coppia di lingue (id 1-2, 3-4, …), ciascuna indicizzata per lingua.
-     * Se una coppia ha due righe della stessa lingua, le righe restano separate.
+     * Rows grouped by language pair (ids 1-2, 3-4, …), each keyed by language.
+     * If a pair has two rows in the same language, the rows stay separate.
      *
      * @param  Collection<int, stdClass>  $rows
      * @return Collection<int, Collection<string, stdClass>>
@@ -627,7 +627,7 @@ class V1Importer
     }
 
     /**
-     * Valori per lingua di una colonna (o di una funzione), senza i vuoti.
+     * Per-language values of a column (or of a function), without the empty ones.
      *
      * @param  Collection<string, stdClass>  $group
      * @param  string|callable(stdClass): string  $column

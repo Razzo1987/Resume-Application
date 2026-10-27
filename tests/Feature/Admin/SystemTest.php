@@ -85,7 +85,7 @@ it('removes only the files left over by older versions, with their empty folders
         'core/app/Legacy/Deep/Other.php' => false,
         'themes/base/assets/app-NEW.css' => true,
         'themes/base/assets/app-OLD.css' => false,
-        'uploads/photo.jpg' => null,          // dati: mai considerati
+        'uploads/photo.jpg' => null,          // data: never considered
         'core/storage/app/cv/cv.pdf' => null,
     ];
 
@@ -105,7 +105,7 @@ it('removes only the files left over by older versions, with their empty folders
         'themes/base/assets/app-OLD.css',
     ]);
 
-    // Un file non orfano passato per errore non viene cancellato
+    // A non-orphan file passed by mistake is not deleted
     expect($orphans->delete(['core/app/Legacy/Deep/OldThing.php', 'core/app/Kept.php', 'uploads/photo.jpg']))->toBe(1)
         ->and(is_dir("{$web}/core/app/Legacy/Deep"))->toBeTrue();
 
@@ -126,7 +126,7 @@ it('restores an export, keeping users and the installed version', function () {
     $photo = Profile::current()->photo;
     $experiences = Experience::query()->count();
 
-    // Contenuti cambiati dopo l'esportazione
+    // Content changed after the export
     Experience::query()->get()->each->delete();
     Profile::current()->update(['full_name' => 'Altro Nome']);
     Storage::disk('uploads')->delete($photo);
@@ -152,7 +152,7 @@ it('restores an export, keeping users and the installed version', function () {
 it('repeats on an older export the data changes of the migrations it did not have', function () {
     $export = app(Backup::class)->create();
 
-    // Esportazione "di una 2.0.1": senza la migrazione della voce Blog, con la sezione fuori dal menu
+    // Export "from a 2.0.1": without the Blog menu item migration, with the section out of the menu
     $zip = new ZipArchive;
     $zip->open($export);
     $data = json_decode((string) $zip->getFromName('database.json'), true);
@@ -165,7 +165,7 @@ it('repeats on an older export the data changes of the migrations it did not hav
 
     expect(PageSection::query()->where('key', 'latest_articles')->value('in_menu'))->toBeTruthy();
 
-    // Un'esportazione della stessa versione resta com'è
+    // An export from the same version stays as it is
     PageSection::query()->where('key', 'latest_articles')->first()->update(['in_menu' => false]);
     $current = app(Backup::class)->create();
     $second = app(Backup::class)->restore($current);

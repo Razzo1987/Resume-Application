@@ -7,12 +7,12 @@ namespace App\Filament\Support;
 use Illuminate\Support\Str;
 
 /**
- * Etichette tradotte delle risorse admin (lang/{it,en}/admin.php → resources.{chiave}).
- * La risorsa definisce $labelKey e $navigationGroupKey ("cv", "content", "site").
+ * Translated labels of the admin resources (lang/{it,en}/admin.php → resources.{key}).
+ * The resource defines $labelKey and $navigationGroupKey ("cv", "content", "site").
  *
- * Le etichette sono scritte in minuscolo perché Filament le inserisce dentro le frasi
- * ("Modifica esperienza", "Elimina progetto"); dove stanno da sole (titoli, menu, briciole)
- * si usa solo l'iniziale maiuscola invece del "Title Case" all'inglese di Filament.
+ * Labels are written in lowercase because Filament inserts them into sentences
+ * ("Modifica esperienza", "Elimina progetto"); where they stand alone (titles, menus, breadcrumbs)
+ * only the first letter is capitalized, instead of Filament's English-style "Title Case".
  */
 trait HasAdminLabels
 {

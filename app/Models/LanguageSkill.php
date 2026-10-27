@@ -14,7 +14,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Locale;
 
 /**
- * Lingua conosciuta, con livelli QCER (A1–C2) per orale e scritto e comprensione facoltativa.
+ * Known language, with CEFR levels (A1–C2) for speaking and writing and optional comprehension.
  *
  * @property int $id
  * @property string $language_code
@@ -61,7 +61,7 @@ class LanguageSkill extends Model implements Translatable
     }
 
     /**
-     * Nome della lingua nella lingua indicata (da intl), es. "inglese" o "English".
+     * Name of the language in the given language (from intl), e.g. "inglese" or "English".
      */
     public function displayName(?string $inLocale = null): string
     {

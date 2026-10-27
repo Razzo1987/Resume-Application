@@ -17,8 +17,8 @@ use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 
 /**
- * Blog: elenco paginato ("/{lingua}/blog?page=2") e feed RSS ("/{lingua}/feed.xml").
- * Una lingua senza articoli pubblicati non ha il blog (404).
+ * Blog: paginated list ("/{language}/blog?page=2") and RSS feed ("/{language}/feed.xml").
+ * A language without published articles has no blog (404).
  */
 class BlogController extends Controller
 {
@@ -31,7 +31,7 @@ class BlogController extends Controller
     {
         $page = $request->query('page');
 
-        // "?page=1" è la prima pagina: un solo indirizzo
+        // "?page=1" is the first page: a single URL
         if ($page === '1') {
             return redirect()->to(url($this->urls->blogPath($locale)), 301);
         }

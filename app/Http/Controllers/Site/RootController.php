@@ -10,14 +10,14 @@ use App\Support\Languages\Locales;
 use Illuminate\Http\RedirectResponse;
 
 /**
- * "/" porta alla lingua di default; "/it" o "/en" alla lingua attiva corrispondente.
+ * "/" leads to the default language; "/it" or "/en" to the matching active language.
  */
 class RootController extends Controller
 {
     public function __invoke(Locales $locales): RedirectResponse
     {
-        // Permanente, ma memorizzato dal browser per un giorno: se l'admin cambia la lingua di default
-        // i visitatori vengono reindirizzati alla nuova entro 24 ore.
+        // Permanent, but cached by the browser for one day: if the admin changes the default language,
+        // visitors are redirected to the new one within 24 hours.
         return redirect()->to(url('/'.$locales->default()), 301)
             ->header('Cache-Control', 'public, max-age=86400');
     }

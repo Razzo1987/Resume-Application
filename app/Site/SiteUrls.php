@@ -11,8 +11,8 @@ use App\Support\Languages\LanguagePacks;
 use App\Support\Languages\Locales;
 
 /**
- * Indirizzi del sito pubblico. I percorsi sono relativi alla radice del sito ("/it-IT/progetti/slug");
- * url() li rende assoluti (in produzione sempre sul dominio di APP_URL).
+ * Addresses of the public site. Paths are relative to the site root ("/it-IT/progetti/slug");
+ * url() makes them absolute (in production always on the APP_URL domain).
  */
 final class SiteUrls
 {
@@ -22,7 +22,7 @@ final class SiteUrls
     ) {}
 
     /**
-     * Segmento tradotto di una lingua (es. "projects" in it-IT → "progetti").
+     * Translated segment of a language (e.g. "projects" in it-IT → "progetti").
      */
     public function segment(string $locale, string $key): string
     {
@@ -36,8 +36,8 @@ final class SiteUrls
     }
 
     /**
-     * Chiave del segmento (projects, experience, blog, cv, privacy) a cui corrisponde una parola dell'URL.
-     * Si accettano anche i segmenti delle altre lingue attive: il controller poi reindirizza all'URL corretto.
+     * Key of the segment (projects, experience, blog, cv, privacy) that a word of the URL corresponds to.
+     * Segments of the other active languages are accepted too: the controller then redirects to the correct URL.
      */
     public function segmentKey(string $locale, string $segment): ?string
     {
@@ -104,7 +104,7 @@ final class SiteUrls
     }
 
     /**
-     * Percorso della pagina dedicata di un contenuto, se il tipo ne ha una.
+     * Path of the dedicated page of a content item, if its type has one.
      */
     public function pathFor(object $model, string $locale): ?string
     {
@@ -117,7 +117,7 @@ final class SiteUrls
     }
 
     /**
-     * Versioni linguistiche di una pagina: codice lingua → URL assoluto (lingua di default per prima).
+     * Language versions of a page: language code → absolute URL (default language first).
      *
      * @param  callable(string): ?string  $path
      * @return array<string, string>

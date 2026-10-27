@@ -5,13 +5,13 @@ declare(strict_types=1);
 namespace App\Site;
 
 /**
- * Metadati di una pagina pubblica: titolo, descrizione, URL canonico, versioni linguistiche,
- * Open Graph e dati strutturati. Lo prepara il controller, lo usa il layout del tema.
+ * Metadata of a public page: title, description, canonical URL, language versions,
+ * Open Graph and structured data. The controller prepares it, the theme layout uses it.
  */
 final class Page
 {
     /**
-     * @param  array<string, string>  $alternates  codice lingua → URL assoluto (la prima è la lingua di default)
+     * @param  array<string, string>  $alternates  language code → absolute URL (the first one is the default language)
      * @param  list<array<string, mixed>>  $jsonLd
      * @param  list<array{label: string, url: string|null}>  $breadcrumbs
      */
@@ -36,7 +36,7 @@ final class Page
     }
 
     /**
-     * URL della pagina nella lingua indicata, se esiste.
+     * URL of the page in the given language, if it exists.
      */
     public function alternate(string $locale): ?string
     {

@@ -1,13 +1,13 @@
 import { defineConfig, devices } from '@playwright/test';
 
 /**
- * Test end-to-end del sito pubblico (tests/e2e).
- * Servono database con i dati demo e asset compilati:
+ * End-to-end tests of the public site (tests/e2e).
+ * They need a database with the demo data and compiled assets:
  *   php artisan migrate:fresh --seed && php artisan db:seed --class=DemoSeeder && npm run build
- * Poi: npx playwright test (avvia da solo "php artisan serve" sulla porta 8001).
- * Con E2E_BASE_URL si prova un sito già avviato (es. Apache).
- * Con E2E_THEME=nome si prova un altro tema (copiato in themes/ da scripts/build-theme.sh):
- * gira la suite generale con quel tema attivo, più i test del tema in themes/{nome}/tests/e2e.
+ * Then: npx playwright test (starts "php artisan serve" on port 8001 by itself).
+ * With E2E_BASE_URL an already running site is tested (e.g. Apache).
+ * With E2E_THEME=name another theme is tested (copied to themes/ by scripts/build-theme.sh):
+ * the general suite runs with that theme active, plus the theme's tests in themes/{name}/tests/e2e.
  */
 const baseURL = process.env.E2E_BASE_URL ?? 'http://127.0.0.1:8001';
 const theme = process.env.E2E_THEME;
@@ -15,7 +15,7 @@ const root = process.cwd().replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 
 export default defineConfig({
     testDir: theme ? '.' : 'tests/e2e',
-    // con un tema: la suite generale + quella del tema (percorsi assoluti, per non prendere altri tests/e2e)
+    // with a theme: the general suite + the theme's one (absolute paths, so no other tests/e2e is picked up)
     testMatch: theme
         ? [new RegExp(`^${root}/tests/e2e/.*\\.spec\\.js$`), new RegExp(`^${root}/themes/${theme}/tests/e2e/.*\\.spec\\.js$`)]
         : '**/*.spec.js',

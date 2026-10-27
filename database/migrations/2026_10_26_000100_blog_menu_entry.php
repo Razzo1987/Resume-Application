@@ -5,9 +5,9 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Support\Facades\DB;
 
 /**
- * Dalla 2.0.2 la voce "Blog" del menu è decisa dalla sezione "Ultimi articoli" (Nel menu sì/no, posizione, titolo).
- * Prima la voce compariva sempre, in fondo: si accende "Nel menu" perché i siti esistenti la mantengano.
- * Si ripete anche importando contenuti esportati con una versione precedente.
+ * Since 2.0.2 the "Blog" menu item is controlled by the "Ultimi articoli" section ("Nel menu" yes/no, position,
+ * title). Before, the item always appeared, at the end: "Nel menu" is turned on so that existing sites keep it.
+ * This also runs again when importing content exported with an earlier version.
  */
 return new class extends Migration implements ReplaysOnImport
 {

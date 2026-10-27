@@ -1,4 +1,4 @@
-{{-- Articolo del blog: $article --}}
+{{-- Blog article: $article --}}
 @extends('theme::layouts.site')
 
 @section('content')

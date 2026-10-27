@@ -5,9 +5,9 @@ declare(strict_types=1);
 namespace App\Themes;
 
 /**
- * Controllo minimo dei vincoli di versione dei temi ("requires": {"resume-app": "^2.0"}).
- * Vincoli ammessi: "*", "^2.0", "~2.1", ">=2.0", "2.1.*", "2.1.3"; più vincoli separati da "||".
- * Le versioni di sviluppo ("2.0.0-dev", "2.1.0-rc1") valgono come la versione finale.
+ * Minimal check of theme version constraints ("requires": {"resume-app": "^2.0"}).
+ * Allowed constraints: "*", "^2.0", "~2.1", ">=2.0", "2.1.*", "2.1.3"; several constraints separated by "||".
+ * Development versions ("2.0.0-dev", "2.1.0-rc1") count as the final version.
  */
 final class Compatibility
 {
@@ -16,7 +16,7 @@ final class Compatibility
         $version = self::normalize($version);
 
         if ($version === null) {
-            return true; // copia di sviluppo senza VERSION: nessun controllo
+            return true; // development copy without VERSION: no check
         }
 
         foreach (explode('||', $constraint) as $alternative) {
@@ -62,7 +62,7 @@ final class Compatibility
     }
 
     /**
-     * "2.0.0-dev" → "2.0.0", "2.1" → "2.1.0"; null se non è una versione.
+     * "2.0.0-dev" → "2.0.0", "2.1" → "2.1.0"; null if it is not a version.
      */
     private static function normalize(string $version): ?string
     {

@@ -14,8 +14,8 @@ use Illuminate\Database\Eloquent\Model;
 use NumberFormatter;
 
 /**
- * Numero chiave: valore inserito a mano o calcolato (anni di esperienza, n. progetti, ...),
- * mostrato esatto ("460") o con il più ("460+").
+ * Key figure: value entered by hand or calculated (years of experience, number of projects, ...),
+ * shown exact ("460") or with a plus ("460+").
  *
  * @property int $id
  * @property HighlightSource $source
@@ -51,14 +51,14 @@ class Highlight extends Model implements Translatable
         ];
     }
 
-    /**
-     * Valore numerico: quello inserito oppure calcolato dai contenuti del sito.
-     */
-    /** Valore calcolato (memorizzato: i contatori automatici fanno una query). */
+    /** Calculated value (memoized: the automatic counters run a query). */
     private ?float $resolved = null;
 
     private bool $isResolved = false;
 
+    /**
+     * Numeric value: the one entered or calculated from the site content.
+     */
     public function resolvedValue(): ?float
     {
         if ($this->isResolved) {
@@ -80,7 +80,7 @@ class Highlight extends Model implements Translatable
     }
 
     /**
-     * Valore formattato secondo la lingua, con "+" e unità: "100.000+", "4", "98%".
+     * Value formatted for the language, with "+" and unit: "100.000+", "4", "98%".
      */
     public function formattedValue(?string $locale = null): ?string
     {
@@ -99,7 +99,7 @@ class Highlight extends Model implements Translatable
     }
 
     /**
-     * Testo sotto il numero: quello inserito o, per le fonti automatiche, quello del language pack.
+     * Text below the number: the one entered or, for automatic sources, the one from the language pack.
      */
     public function displayLabel(?string $locale = null): ?string
     {

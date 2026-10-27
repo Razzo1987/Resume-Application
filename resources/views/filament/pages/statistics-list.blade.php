@@ -1,4 +1,4 @@
-{{-- Classifica a barre orizzontali: $title, $items (key, label, views), $filter (clic = filtra per pagina), $empty --}}
+{{-- Horizontal bar ranking: $title, $items (key, label, views), $filter (click = filter by page), $empty --}}
 @php($max = max([1, ...array_column($items, 'views')]))
 <x-filament::section compact>
     <x-slot name="heading">{{ $title }}</x-slot>

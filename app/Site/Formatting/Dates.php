@@ -9,7 +9,7 @@ use Carbon\CarbonInterface;
 use Illuminate\Support\Carbon;
 
 /**
- * Date e durate nella lingua della pagina: "gen 2021 - in corso", "2 anni e 3 mesi".
+ * Dates and durations in the page language: "gen 2021 - in corso", "2 anni e 3 mesi".
  */
 final class Dates
 {
@@ -33,7 +33,7 @@ final class Dates
     }
 
     /**
-     * Periodo "inizio - fine". Senza fine: "in corso" (se c'è un inizio) oppure solo la data di inizio.
+     * Period "start - end". Without an end: "in corso" (if there is a start) or just the start date.
      */
     public function period(?CarbonInterface $start, ?CarbonInterface $end, bool $ongoingIfOpen = true): string
     {
@@ -55,7 +55,7 @@ final class Dates
     }
 
     /**
-     * Durata in anni e mesi, contando i mesi di inizio e fine (gen–mar = 3 mesi).
+     * Duration in years and months, counting both the start and end months (Jan–Mar = 3 months).
      */
     public function duration(?CarbonInterface $start, ?CarbonInterface $end = null): ?string
     {
@@ -86,7 +86,7 @@ final class Dates
     }
 
     /**
-     * Valore per l'attributo datetime di <time> (anno-mese).
+     * Value for the datetime attribute of <time> (year-month).
      */
     public function machine(?CarbonInterface $date, bool $withDay = false): ?string
     {

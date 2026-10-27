@@ -1,9 +1,9 @@
-// Comportamenti comuni del sito (tema base e temi che lo estendono): contatti codificati, stampa,
-// "torna su", voce di menu della sezione in lettura. Nessuna dipendenza, nessun contenuto nascosto.
+// Common site behaviors (base theme and the themes that extend it): encoded contacts, print,
+// "back to top", menu item of the section being read. No dependencies, no hidden content.
 
 /**
- * Email e telefono arrivano codificati (base64 dei byte in ordine inverso) e vengono ricomposti qui:
- * nell'HTML non compaiono in chiaro.
+ * Email and phone arrive encoded (base64 of the bytes in reverse order) and are decoded here:
+ * they never appear in plain text in the HTML.
  */
 function decode(value) {
     try {
@@ -31,7 +31,7 @@ document.querySelectorAll('.js-cloak').forEach((link) => {
     }
 });
 
-// Link esterni (altri domini) in una nuova scheda; i lettori di schermo lo annunciano (#new-tab-hint)
+// External links (other domains) open in a new tab; screen readers announce it (#new-tab-hint)
 document.querySelectorAll('a[href]').forEach((link) => {
     if (!/^https?:$/.test(link.protocol) || link.host === window.location.host || link.target) {
         return;
@@ -46,13 +46,13 @@ document.querySelectorAll('a[href]').forEach((link) => {
     }
 });
 
-// Pulsante "Stampa" (nascosto senza JavaScript)
+// "Print" button (hidden without JavaScript)
 document.querySelectorAll('.js-print').forEach((button) => {
     button.hidden = false;
     button.addEventListener('click', () => window.print());
 });
 
-// In stampa i dettagli chiusi (<details>) vengono aperti, poi richiusi
+// When printing, closed <details> are opened, then closed again
 let openedForPrint = [];
 
 window.addEventListener('beforeprint', () => {
@@ -69,7 +69,7 @@ window.addEventListener('afterprint', () => {
     openedForPrint = [];
 });
 
-// "Torna su" compare dopo un po' di scorrimento
+// "Back to top" appears after some scrolling
 const backToTop = document.querySelector('.back-to-top');
 
 if (backToTop) {
@@ -79,9 +79,9 @@ if (backToTop) {
     toggle();
 }
 
-// Menu: evidenzia la sezione che si sta leggendo (l'ultima il cui titolo ha superato un terzo dello schermo).
-// In fondo alla pagina, dove le ultime sezioni non possono salire fin lassù, vale quella aperta dal menu
-// (#indirizzo) se è visibile, altrimenti l'ultima visibile.
+// Menu: highlights the section being read (the last one whose title has passed a third of the screen).
+// At the bottom of the page, where the last sections cannot scroll that high, the one opened from the menu
+// (#hash) wins if it is visible, otherwise the last visible one.
 const menuLinks = [...document.querySelectorAll('.site-nav a[href^="#"]')];
 const menuSections = menuLinks
     .map((link) => [link, document.getElementById(decodeURIComponent(link.hash.slice(1)))])

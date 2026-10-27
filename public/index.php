@@ -3,15 +3,15 @@
 /**
  * Resume App — front controller.
  *
- * Funziona con due disposizioni:
- *  - pacchetto di rilascio: questo file sta nella webroot (es. public_html/)
- *    e il codice dell'app sta in ./core, protetto da .htaccess;
- *  - sviluppo (layout Laravel standard): questo file sta in public/
- *    e il codice dell'app sta nella cartella superiore.
+ * It works with two layouts:
+ *  - release package: this file is in the webroot (e.g. public_html/)
+ *    and the app code is in ./core, protected by .htaccess;
+ *  - development (standard Laravel layout): this file is in public/
+ *    and the app code is in the parent folder.
  *
- * Se l'hosting permette di tenere il codice fuori dalla webroot, crea accanto
- * a questo file un core-path.php (non incluso nei pacchetti, quindi non viene
- * sovrascritto dagli aggiornamenti) con il percorso assoluto del core:
+ * If the hosting allows keeping the code outside the webroot, create next
+ * to this file a core-path.php (not included in the packages, so it is not
+ * overwritten by updates) with the absolute path of the core:
  *
  *     <?php return '/home/utente/resume-core';
  */
@@ -30,8 +30,8 @@ $corePath = match (true) {
 };
 $corePath = rtrim($corePath, '/\\');
 
-// Aggiornamento avviato dall'admin: finché i file vengono sostituiti l'app non si avvia
-// (estrazione a blocchi e pagina "Sito in aggiornamento", vedi resources/update/updater.php)
+// Update started from the admin: while the files are being replaced the app does not start
+// (chunked extraction and "Sito in aggiornamento" page, see resources/update/updater.php)
 if (is_file($corePath.'/storage/framework/resume-update.json') && is_file($corePath.'/storage/framework/resume-updater.php')) {
     require $corePath.'/storage/framework/resume-updater.php';
     resume_updater_handle($corePath.'/storage/framework/resume-update.json', __DIR__, $corePath);
@@ -45,7 +45,7 @@ if (! is_file($corePath.'/bootstrap/app.php') || ! is_file($corePath.'/vendor/au
     exit;
 }
 
-// Modalità manutenzione (attivata dall'admin durante gli aggiornamenti)
+// Maintenance mode (enabled by the admin during updates)
 if (file_exists($maintenance = $corePath.'/storage/framework/maintenance.php')) {
     require $maintenance;
 }
@@ -55,7 +55,7 @@ require $corePath.'/vendor/autoload.php';
 /** @var Application $app */
 $app = require_once $corePath.'/bootstrap/app.php';
 
-// La webroot è sempre la cartella di questo file
+// The webroot is always the folder of this file
 $app->usePublicPath(__DIR__);
 
 $app->handleRequest(Request::capture());

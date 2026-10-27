@@ -21,8 +21,8 @@ use Symfony\Component\HttpFoundation\BinaryFileResponse;
 use Symfony\Component\HttpFoundation\ResponseHeaderBag;
 
 /**
- * Indirizzi "/{lingua}/{segmento}": download del CV, blog, informativa privacy; per progetti ed esperienze
- * (che non hanno una pagina elenco) rimanda alla sezione del CV.
+ * URLs "/{language}/{segment}": CV download, blog, privacy policy; for projects and experiences
+ * (which have no list page) redirects to the CV section.
  */
 class SegmentController extends Controller
 {
@@ -49,7 +49,7 @@ class SegmentController extends Controller
     }
 
     /**
-     * Informativa privacy (attiva dalle impostazioni o con le statistiche).
+     * Privacy policy (enabled from the settings or together with the statistics).
      */
     private function privacy(string $locale): View
     {
@@ -72,7 +72,7 @@ class SegmentController extends Controller
 
         $response = new BinaryFileResponse($disk->path($document->path), 200, [
             'Content-Type' => 'application/pdf',
-            // Il CV contiene dati di contatto: non serve che finisca nei risultati di ricerca
+            // The CV contains contact details: it does not need to end up in search results
             'X-Robots-Tag' => 'noindex',
             'Cache-Control' => 'no-cache',
         ], public: false, autoEtag: false, autoLastModified: true);

@@ -5,7 +5,7 @@ use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
 /*
- * Convenzione: le colonne json marcate (T) contengono testi per lingua {"it-IT": "...", "en-GB": "..."}.
+ * Convention: the json columns marked (T) contain texts per language {"it-IT": "...", "en-GB": "..."}.
  */
 return new class extends Migration
 {
@@ -19,11 +19,11 @@ return new class extends Migration
             $table->date('birth_date')->nullable();
             $table->string('email')->nullable();
             $table->string('phone', 40)->nullable();
-            $table->json('location')->nullable()->comment('(T) città, es. Milano');
-            $table->char('country_code', 2)->nullable()->comment('ISO 3166-1, per il JSON-LD');
-            $table->json('headlines')->nullable()->comment('(T) qualifiche, una per riga');
+            $table->json('location')->nullable()->comment('(T) city, e.g. Milano');
+            $table->char('country_code', 2)->nullable()->comment('ISO 3166-1, for the JSON-LD');
+            $table->json('headlines')->nullable()->comment('(T) headlines, one per line');
             $table->json('bio')->nullable()->comment('(T) HTML');
-            $table->date('career_start_date')->nullable()->comment('Se vuota si usa la prima esperienza di lavoro');
+            $table->date('career_start_date')->nullable()->comment('If empty, the first work experience is used');
             $table->timestamps();
         });
 

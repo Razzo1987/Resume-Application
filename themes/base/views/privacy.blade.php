@@ -1,4 +1,4 @@
-{{-- Informativa privacy: $policy (HTML già sanificato, vedi App\Site\PrivacyPolicy) --}}
+{{-- Privacy notice: $policy (HTML already sanitized, see App\Site\PrivacyPolicy) --}}
 @extends('theme::layouts.site')
 
 @section('content')

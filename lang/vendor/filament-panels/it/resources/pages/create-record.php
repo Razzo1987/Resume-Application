@@ -1,6 +1,6 @@
 <?php
 
-// "Crea esperienza" invece di "Nuovo esperienza": il verbo evita l'accordo di genere con l'etichetta
+// "Crea esperienza" instead of "Nuovo esperienza": the verb avoids gender agreement with the label
 return [
     'title' => 'Crea :label',
 ];

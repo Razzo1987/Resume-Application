@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Carbon;
 
 /**
- * Redirect gestito da admin (o creato in automatico quando cambia uno slug o un segmento URL).
+ * Redirect managed from the admin (or created automatically when a slug or a URL segment changes).
  *
  * @property int $id
  * @property string $from_path

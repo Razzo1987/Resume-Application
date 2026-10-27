@@ -16,7 +16,7 @@ use Illuminate\Http\Response;
 use Illuminate\Support\Carbon;
 
 /**
- * sitemap.xml: CV e pagine dedicate in tutte le lingue attive, con le versioni alternative (hreflang).
+ * sitemap.xml: CV and dedicated pages in all active languages, with the alternate versions (hreflang).
  */
 class SitemapController extends Controller
 {
@@ -25,7 +25,7 @@ class SitemapController extends Controller
         $entries = [];
         $default = $locales->default();
 
-        // Pagina CV
+        // CV page
         $entries[] = [
             'alternates' => $urls->alternates(fn (string $code): string => $urls->homePath($code)),
             'lastmod' => $lastUpdated->date(),
@@ -52,7 +52,7 @@ class SitemapController extends Controller
             ];
         }
 
-        // Blog: elenco nelle lingue che hanno articoli, poi ogni articolo nelle lingue in cui è scritto
+        // Blog: list in the languages that have articles, then each article in the languages it is written in
         $blogAlternates = $urls->alternates(fn (string $code): ?string => $blog->hasArticles($code) ? $urls->blogPath($code) : null);
 
         if ($blogAlternates !== []) {

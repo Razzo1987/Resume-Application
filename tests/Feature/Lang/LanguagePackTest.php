@@ -1,10 +1,10 @@
 <?php
 
 /*
- * Controlli sui language pack in lang/{codice}/.
+ * Checks on the language packs in lang/{code}/.
  */
 
-// Il dataset viene valutato prima dell'avvio dell'app: percorso calcolato a mano
+// The dataset is evaluated before the app boots: the path is built by hand
 dataset('language packs', function (): array {
     $codes = array_map('basename', glob(dirname(__DIR__, 3).'/lang/*-*', GLOB_ONLYDIR) ?: []);
 

@@ -7,10 +7,10 @@ use Tests\TestCase;
 
 /*
 |--------------------------------------------------------------------------
-| Configurazione dei test
+| Test configuration
 |--------------------------------------------------------------------------
-| Feature: applicazione completa con database MySQL di test (ripulito a ogni test).
-| Unit: classi isolate, senza applicazione.
+| Feature: full application with a MySQL test database (reset for every test).
+| Unit: isolated classes, without the application.
 */
 
 pest()->extend(TestCase::class)
@@ -18,7 +18,7 @@ pest()->extend(TestCase::class)
     ->in('Feature');
 
 /**
- * CV dimostrativo bilingue (it-IT di default, en-GB) con i PDF su un disco finto.
+ * Bilingual demo CV (it-IT by default, en-GB) with the PDFs on a fake disk.
  */
 function seedDemo(): void
 {
@@ -28,7 +28,7 @@ function seedDemo(): void
 }
 
 /**
- * Host delle risorse caricate dalla pagina (script, stili, immagini, font), esclusi i normali link.
+ * Hosts of the resources loaded by the page (scripts, styles, images, fonts), excluding normal links.
  *
  * @return list<string>
  */
@@ -49,7 +49,7 @@ function resourceHosts(string $html): array
 }
 
 /**
- * Dati strutturati JSON-LD della pagina (tutti i nodi di tutti i blocchi).
+ * JSON-LD structured data of the page (all nodes of all blocks).
  *
  * @return list<array<string, mixed>>
  */

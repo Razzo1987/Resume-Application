@@ -1,4 +1,4 @@
-{{-- "Vai al sito" nella barra in alto, tra la ricerca e il menu utente: su schermi piccoli solo l'icona --}}
+{{-- "Vai al sito" in the top bar, between the search and the user menu: only the icon on small screens --}}
 <x-filament::button
     tag="a"
     :href="$url"

@@ -18,7 +18,7 @@ it('shows the admin in the language chosen by each administrator, with the defau
     $this->actingAs($english)->get('/admin/settings')->assertOk()->assertSee('Settings')->assertDontSee('Impostazioni');
     $this->actingAs($italian)->get('/admin/settings')->assertOk()->assertSee('Impostazioni');
 
-    // Lingua non più disponibile: si torna alla predefinita
+    // Language no longer available: falls back to the default one
     $english->update(['locale' => 'xx']);
     $this->actingAs($english)->get('/admin/settings')->assertOk()->assertSee('Impostazioni');
 });

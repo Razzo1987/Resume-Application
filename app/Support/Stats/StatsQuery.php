@@ -11,9 +11,9 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Carbon;
 
 /**
- * Dati della pagina Statistiche, dai totali giornalieri (stat_daily): visualizzazioni e download del CV nel tempo,
- * pagine più viste e classifiche per provenienza, campagne, Paese, città, dispositivo, sistema, browser, lingua, rete.
- * Senza filtro di pagina le classifiche riguardano le pagine viste (i download del CV hanno il loro totale).
+ * Data for the Statistics page, from the daily totals (stat_daily): views and CV downloads over time, most viewed
+ * pages and rankings by referrer, campaign, country, city, device, operating system, browser, language, network.
+ * Without a page filter the rankings cover page views (CV downloads have their own total).
  */
 class StatsQuery
 {
@@ -26,7 +26,7 @@ class StatsQuery
     ) {}
 
     /**
-     * @param  string  $period  giorni ("7", "30", "90", "365") o "all"
+     * @param  string  $period  days ("7", "30", "90", "365") or "all"
      */
     public static function forPeriod(string $period, ?string $page = null): self
     {
@@ -66,7 +66,7 @@ class StatsQuery
     }
 
     /**
-     * Visualizzazioni e download per giorno (tutti i giorni del periodo, anche quelli a zero).
+     * Views and downloads per day (every day of the period, including those at zero).
      *
      * @return array{labels: list<string>, views: list<int>, downloads: list<int>}
      */
@@ -87,7 +87,7 @@ class StatsQuery
     }
 
     /**
-     * Pagine più viste: chiave => visualizzazioni.
+     * Most viewed pages: key => views.
      *
      * @return array<string, int>
      */
@@ -105,7 +105,7 @@ class StatsQuery
     }
 
     /**
-     * Classifica di una dimensione: valore => visualizzazioni (i primi $limit).
+     * Ranking of a dimension: value => views (the top $limit).
      *
      * @return array<string, int>
      */
@@ -122,7 +122,7 @@ class StatsQuery
     }
 
     /**
-     * Città con coordinate, per la mappa.
+     * Cities with coordinates, for the map.
      *
      * @return list<array{country: string, city: string, latitude: float, longitude: float, views: int}>
      */
@@ -151,7 +151,7 @@ class StatsQuery
     }
 
     /**
-     * Totali di una dimensione nel periodo, con il filtro di pagina (o tutte le pagine tranne i download).
+     * Totals of a dimension in the period, with the page filter (or all pages except downloads).
      *
      * @return Builder<StatDaily>
      */

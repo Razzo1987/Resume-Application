@@ -9,8 +9,8 @@ use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
 
 /**
- * Il sito pubblico non usa cookie (né sessione né CSRF).
- * Questa è una seconda barriera: qualunque cookie aggiunto per errore viene rimosso.
+ * The public site does not use cookies (no session, no CSRF).
+ * This is a second barrier: any cookie added by mistake is removed.
  */
 class StripCookies
 {

@@ -17,13 +17,13 @@ use RuntimeException;
 use ZipArchive;
 
 /**
- * Esportazione dei contenuti in uno zip: tabelle in JSON, immagini caricate e PDF dei CV.
- * Non contiene il .env né gli utenti (password e segreti 2FA restano solo sul server).
- * Lo stesso zip si può reimportare (restore): serve anche a portare i contenuti da un'installazione all'altra.
+ * Content export to a zip: tables as JSON, uploaded images and CV PDFs.
+ * It contains neither the .env nor the users (passwords and 2FA secrets stay on the server only).
+ * The same zip can be imported again (restore): it is also used to move content from one installation to another.
  */
 class Backup
 {
-    /** Tabelle tecniche escluse */
+    /** Excluded technical tables */
     public const array SKIP = ['users', 'sessions', 'cache', 'cache_locks', 'jobs', 'job_batches', 'failed_jobs', 'password_reset_tokens', 'stat_visits', 'stat_daily', 'stat_admin_ips'];
 
     public function create(): string
@@ -37,7 +37,7 @@ class Backup
         $name = 'resume-backup-'.now()->format('Ymd-His');
         $path = "{$directory}/{$name}.zip";
 
-        // Due esportazioni nello stesso secondo (es. la copia di sicurezza prima di importare) non si sovrascrivono
+        // Two exports in the same second (e.g. the safety copy before an import) do not overwrite each other
         for ($copy = 2; file_exists($path); $copy++) {
             $path = "{$directory}/{$name}-{$copy}.zip";
         }
@@ -70,7 +70,7 @@ class Backup
     }
 
     /**
-     * Cartella delle esportazioni sul server (anche quelle copiate a mano con il File Manager).
+     * Folder of the exports on the server (including those copied by hand with the File Manager).
      */
     public function directory(): string
     {
@@ -78,7 +78,7 @@ class Backup
     }
 
     /**
-     * Data dell'esportazione dei contenuti più recente (fatta a mano o prima di un aggiornamento o di un'importazione).
+     * Date of the most recent content export (made by hand or before an update or an import).
      */
     public function lastCreatedAt(): ?Carbon
     {
@@ -88,7 +88,7 @@ class Backup
     }
 
     /**
-     * Esportazioni presenti sul server, dalla più recente: nome file => descrizione.
+     * Exports present on the server, most recent first: file name => description.
      *
      * @return array<string, string>
      */
@@ -107,7 +107,7 @@ class Backup
     }
 
     /**
-     * Percorso di un'esportazione presente sul server (solo il nome del file, mai percorsi).
+     * Path of an export present on the server (the file name only, never paths).
      */
     public function find(string $name): ?string
     {
@@ -121,7 +121,7 @@ class Backup
      */
     public function tables(): array
     {
-        // Solo le tabelle del database dell'app (l'utente MySQL potrebbe vederne altri)
+        // Only the tables of the app's database (the MySQL user might see others)
         $tables = array_map(
             fn (array $table): string => (string) $table['name'],
             Schema::getTables(DB::connection()->getDatabaseName()),
@@ -131,8 +131,8 @@ class Backup
     }
 
     /**
-     * Sostituisce i contenuti con quelli di un'esportazione. Utenti, versione installata e .env non cambiano.
-     * Prima di scrivere viene fatta un'esportazione dei contenuti attuali (percorso nel risultato).
+     * Replaces the content with that of an export. Users, installed version and .env do not change.
+     * Before writing, an export of the current content is made (path in the result).
      *
      * @return array{tables: int, rows: int, files: int, backup: string}
      */
@@ -155,7 +155,7 @@ class Backup
             $tables = $data['tables'];
             $notExported = $this->checkSchema($tables['migrations'] ?? []);
 
-            // Percorsi dei file: solo uploads/… e cv/…, senza risalite
+            // File paths: only uploads/… and cv/…, no parent traversal
             $files = [];
 
             for ($index = 0; $index < $zip->numFiles; $index++) {
@@ -204,7 +204,7 @@ class Backup
                 Schema::enableForeignKeyConstraints();
             }
 
-            // File: si sostituiscono caricamenti e CV
+            // Files: uploads and CVs are replaced
             $uploads = Storage::disk('uploads');
             $cvs = Storage::disk(CvDocument::DISK);
 
@@ -238,10 +238,10 @@ class Backup
     }
 
     /**
-     * Un'esportazione fatta con una versione più recente (migrazioni sconosciute) non si importa.
-     * Restituisce le migrazioni eseguite qui ma non ancora quando è stata fatta l'esportazione.
+     * An export made with a newer version (unknown migrations) is not imported.
+     * Returns the migrations run here but not yet run when the export was made.
      *
-     * @param  mixed  $migrations  righe della tabella migrations nell'esportazione
+     * @param  mixed  $migrations  rows of the migrations table in the export
      * @return list<string>
      */
     private function checkSchema(mixed $migrations): array
@@ -253,13 +253,13 @@ class Backup
             throw new RuntimeException((string) __('admin.system.restore_errors.newer'));
         }
 
-        // Senza elenco delle migrazioni non si sa da che versione venga: non si ripete niente
+        // Without the list of migrations there is no way to know which version it comes from: nothing is replayed
         return $incoming === [] ? [] : array_values(array_diff($known, $incoming));
     }
 
     /**
-     * Ripete sui contenuti importati le migrazioni di dati che l'esportazione non aveva ancora (es. la voce "Blog"
-     * del menu nella 2.0.2): senza, importare un'esportazione più vecchia annullerebbe quelle modifiche.
+     * Replays on the imported content the data migrations that the export did not have yet (e.g. the "Blog" menu
+     * item in 2.0.2): without this, importing an older export would undo those changes.
      *
      * @param  list<string>  $migrations
      */

@@ -13,10 +13,10 @@ use RuntimeException;
 use ZipArchive;
 
 /**
- * Aggiornamento dall'admin, in tre tempi:
- *  1. start(): controlli sul pacchetto, esportazione dei contenuti, manutenzione, stato per lo script di estrazione;
- *  2. estrazione fuori da Laravel (index.php → resources/update/updater.php), a blocchi, con la sua pagina;
- *  3. finish(): con i file nuovi, migrazioni e cache (Updater::complete()), manutenzione com'era prima, pulizia.
+ * Update from the admin, in three steps:
+ *  1. start(): package checks, content export, maintenance, state for the extraction script;
+ *  2. extraction outside Laravel (index.php → resources/update/updater.php), in chunks, with its own page;
+ *  3. finish(): with the new files, migrations and cache (Updater::complete()), maintenance back as it was, cleanup.
  */
 class UpdateRunner
 {
@@ -29,10 +29,10 @@ class UpdateRunner
     ) {}
 
     /**
-     * Prepara l'aggiornamento e restituisce l'indirizzo della pagina di avanzamento.
+     * Prepares the update and returns the URL of the progress page.
      *
-     * @param  string  $returnUrl  dove tornare a estrazione finita (la pagina Sistema)
-     * @param  string  $mode  "admin" (pagina di avanzamento nel browser) o "auto" (cron, vedi AutoUpdate)
+     * @param  string  $returnUrl  where to return once the extraction is done (the System page)
+     * @param  string  $mode  "admin" (progress page in the browser) or "auto" (cron, see AutoUpdate)
      */
     public function start(string $package, string $returnUrl, string $mode = 'admin'): string
     {
@@ -70,7 +70,7 @@ class UpdateRunner
             'started_at' => now()->toAtomString(),
         ]);
 
-        // Per ultimo: da qui index.php passa le richieste allo script di estrazione
+        // Last: from here on, index.php hands requests over to the extraction script
         $this->storage->writeJson($this->storage->stateFile(), [
             'token' => $token,
             'zip' => $package,
@@ -86,7 +86,7 @@ class UpdateRunner
     }
 
     /**
-     * Estrazione finita, da completare (i file nuovi ci sono, il database non ancora).
+     * Extraction finished, still to be completed (the new files are in place, the database is not yet).
      */
     public function isExtracted(): bool
     {
@@ -94,7 +94,7 @@ class UpdateRunner
     }
 
     /**
-     * Dati dell'aggiornamento in corso o da completare (versioni, modo, copia dei contenuti).
+     * Data of the update in progress or still to be completed (versions, mode, content backup).
      *
      * @return array<string, mixed>|null
      */
@@ -104,7 +104,7 @@ class UpdateRunner
     }
 
     /**
-     * Indirizzo della pagina di avanzamento dell'estrazione in corso (con il suo codice), o null.
+     * URL of the progress page for the extraction in progress (with its token), or null.
      */
     public function progressUrl(): ?string
     {
@@ -114,7 +114,7 @@ class UpdateRunner
     }
 
     /**
-     * Completa l'aggiornamento: anche dopo un'estrazione fatta a mano (FTP, File Manager).
+     * Completes the update, also after a manual extraction (FTP, File Manager).
      *
      * @return list<string>
      */
@@ -131,7 +131,7 @@ class UpdateRunner
 
             $package = is_string($run['package'] ?? null) ? $run['package'] : '';
 
-            // Il pacchetto non serve più (è stato scaricato o caricato qui); l'esportazione dei contenuti resta
+            // The package is no longer needed (it was downloaded or uploaded here); the content export is kept
             if ($package !== '' && dirname($package) === $this->storage->packagesDirectory()) {
                 File::delete($package);
             }
@@ -144,7 +144,7 @@ class UpdateRunner
     }
 
     /**
-     * Testi della pagina di avanzamento (lingua dell'admin) e della pagina per i visitatori (lingua del sito).
+     * Texts for the progress page (admin language) and for the visitors' page (site language).
      *
      * @return array<string, string>
      */

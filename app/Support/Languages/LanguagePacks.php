@@ -7,15 +7,15 @@ namespace App\Support\Languages;
 use Locale;
 
 /**
- * Language pack inclusi nel progetto: lang/{codice}/routes.php e lang/{codice}/site.php.
+ * Language packs included in the project: lang/{code}/routes.php and lang/{code}/site.php.
  */
 class LanguagePacks
 {
-    /** Chiavi dei segmenti URL tradotti. */
+    /** Keys of the translated URL segments. */
     public const array SEGMENTS = ['projects', 'experience', 'blog', 'cv', 'privacy'];
 
     /**
-     * Codici dei language pack disponibili (cartelle con routes.php).
+     * Codes of the available language packs (folders with routes.php).
      *
      * @return list<string>
      */
@@ -45,7 +45,7 @@ class LanguagePacks
     }
 
     /**
-     * Segmenti URL di default del pack (vuoto se il pack non esiste).
+     * Default URL segments of the pack (empty if the pack does not exist).
      *
      * @return array<string, string>
      */
@@ -64,11 +64,8 @@ class LanguagePacks
     }
 
     /**
-     * Nome della lingua nella lingua indicata (da intl), es. "inglese (Regno Unito)".
-     */
-    /**
-     * Nome della lingua nella lingua stessa, senza paese (es. "Deutsch", "Italiano"):
-     * è il valore proposto per il selettore lingua del sito, modificabile dall'admin.
+     * Name of the language in the language itself, without country (e.g. "Deutsch", "Italiano"):
+     * it is the value suggested for the site's language switcher, editable from the admin.
      */
     public function nativeName(string $code): string
     {
@@ -77,6 +74,9 @@ class LanguagePacks
         return $name !== false ? mb_strtoupper(mb_substr($name, 0, 1)).mb_substr($name, 1) : $code;
     }
 
+    /**
+     * Name of the language in the given language (from intl), e.g. "inglese (Regno Unito)".
+     */
     public function displayName(string $code, ?string $inLocale = null): string
     {
         $name = Locale::getDisplayName($code, $inLocale ?? $code);
@@ -85,7 +85,7 @@ class LanguagePacks
     }
 
     /**
-     * Elenco per le select dell'admin: codice => "Nome nativo (codice)".
+     * List for the admin selects: code => "Native name (code)".
      *
      * @return array<string, string>
      */

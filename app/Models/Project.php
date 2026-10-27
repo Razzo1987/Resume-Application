@@ -15,7 +15,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Support\Carbon;
 
 /**
- * Progetto, collegato all'esperienza in cui è stato svolto e al cliente.
+ * Project, linked to the experience it was carried out in and to the client.
  *
  * @property int $id
  * @property int|null $experience_id
@@ -75,7 +75,7 @@ class Project extends Model implements Translatable
     }
 
     /**
-     * Ha una pagina dedicata solo se c'è un testo di dettaglio o un'immagine.
+     * Has a dedicated page only if there is a detail text or an image.
      */
     public function hasDetailPage(): bool
     {

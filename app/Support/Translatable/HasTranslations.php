@@ -9,10 +9,10 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 
 /**
- * Campi tradotti salvati in colonne JSON: {"it-IT": "...", "en-GB": "..."}.
+ * Translated fields stored in JSON columns: {"it-IT": "...", "en-GB": "..."}.
  *
- * Il modello dichiara i campi in `protected array $translatable = [...]`.
- * Date, link, immagini e relazioni NON si traducono: esistono una sola volta per entità.
+ * The model declares the fields in `protected array $translatable = [...]`.
+ * Dates, links, images and relations are NOT translated: they exist only once per entity.
  *
  * @phpstan-require-extends Model
  */
@@ -34,8 +34,8 @@ trait HasTranslations
     }
 
     /**
-     * Valore tradotto. Se manca nella lingua richiesta (e $fallback è vero) usa la lingua
-     * di default del sito e poi la prima traduzione disponibile.
+     * Translated value. If it is missing in the requested language (and $fallback is true) it uses the site's
+     * default language and then the first available translation.
      */
     public function t(string $field, ?string $locale = null, bool $fallback = true): ?string
     {
@@ -90,7 +90,7 @@ trait HasTranslations
     }
 
     /**
-     * Campi tradotti che hanno un valore in almeno una lingua ma mancano nella lingua indicata.
+     * Translated fields that have a value in at least one language but are missing in the given language.
      *
      * @return list<string>
      */
@@ -110,7 +110,7 @@ trait HasTranslations
     }
 
     /**
-     * Ricerca su un campo tradotto, es. lo slug: Project::whereTranslation('slug', 'it-IT', 'data-catalog').
+     * Query on a translated field, e.g. the slug: Project::whereTranslation('slug', 'it-IT', 'data-catalog').
      *
      * @param  Builder<static>  $query
      * @return Builder<static>

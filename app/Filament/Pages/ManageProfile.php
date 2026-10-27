@@ -23,7 +23,7 @@ use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 
 /**
- * Dati della persona: nome, foto, contatti, qualifiche, presentazione.
+ * Personal details: name, photo, contacts, headlines, bio.
  *
  * @property-read Schema $form
  */

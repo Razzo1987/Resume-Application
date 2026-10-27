@@ -1,4 +1,4 @@
-// Versione di stampa: una pagina pulita, senza menu, pulsanti e colori di sfondo.
+// Print version: a clean page, without menu, buttons and background colors.
 
 @media print {
     @page {
@@ -30,7 +30,7 @@
         padding: 0 0 .75rem;
     }
 
-    // Foto a sinistra, nome e qualifiche accanto
+    // Photo on the left, name and qualifications next to it
     .profile {
         display: grid;
         grid-template-columns: auto 1fr;
@@ -75,7 +75,7 @@
         align-self: start;
     }
 
-    // Dettagli espandibili (es. piani di studio della formazione): non stampati
+    // Expandable details (e.g. study plans in education): not printed
     details.more,
     .skip-link,
     .sidebar-actions,
@@ -90,7 +90,7 @@
         display: none !important;
     }
 
-    // Profili social: indirizzo scritto per esteso
+    // Social profiles: address written out in full
     .socials {
         display: block;
         margin-top: .5rem;

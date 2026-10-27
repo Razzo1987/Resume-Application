@@ -1,33 +1,34 @@
 <?php
 
 /*
- * Resume App — configurazione di base.
+ * Resume App — base configuration.
  *
- * Questi valori sono i default di installazione. Dalla fase M1 il tema attivo,
- * le lingue e le altre preferenze si gestiscono dal pannello admin (tabella settings).
+ * These values are the installation defaults. From phase M1 on, the active theme,
+ * the languages and the other preferences are managed from the admin panel (settings table).
  */
 
 return [
 
-    // Percorso del pannello di amministrazione (es. "admin" → https://sito/admin).
+    // Path of the administration panel (e.g. "admin" → https://sito/admin).
     'admin_path' => env('RESUME_ADMIN_PATH', 'admin'),
 
-    // Lingua dell'interfaccia admin (traduzioni Filament: "it", "en", ...).
+    // Language of the admin interface (Filament translations: "it", "en", ...).
     'admin_locale' => env('RESUME_ADMIN_LOCALE', 'it'),
 
-    // Pagina del progetto open source (link "Realizzato con Resume App" nel footer).
+    // Page of the open source project ("Realizzato con Resume App" link in the footer).
     'project_url' => 'https://github.com/Razzo1987/Resume-Application',
 
-    // Cache HTML delle pagine pubbliche (disattivabile in sviluppo con RESUME_PAGE_CACHE=false).
+    // HTML cache of the public pages (can be disabled in development with RESUME_PAGE_CACHE=false).
     'page_cache' => (bool) env('RESUME_PAGE_CACHE', true),
 
-    // Installer: percorso del .env che segna l'installazione (vuoto = quello di Laravel). Serve solo ai test.
+    // Installer: path of the .env that marks the installation (empty = Laravel's one). Only used by the tests.
     'installer' => [
         'env_path' => null,
     ],
 
-    // Aggiornamenti: nuove versioni dalle release del repository GitHub (tag vX.Y.Z con lo zip del pacchetto).
-    // Il token serve solo se il repository è privato: di solito si inserisce dall'admin (Sistema), qui ha la precedenza.
+    // Updates: new versions from the GitHub repository releases (vX.Y.Z tag with the package zip).
+    // The token is only needed if the repository is private: it is usually entered in the admin (System page),
+    // but this value takes precedence.
     'updates' => [
         'repository' => env('RESUME_UPDATE_REPOSITORY', 'Razzo1987/Resume-Application'),
         'api' => env('RESUME_UPDATE_API', 'https://api.github.com'),
@@ -35,8 +36,8 @@ return [
         'check_every_hours' => 12,
     ],
 
-    // Provenienza delle visite (statistiche): database GeoLite2 di MaxMind scaricati con un account gratuito.
-    // Account ID e License Key di solito si inseriscono dall'admin (Statistiche); qui hanno la precedenza.
+    // Origin of the visits (statistics): MaxMind GeoLite2 databases downloaded with a free account.
+    // Account ID and License Key are usually entered in the admin (Statistics page); these values take precedence.
     'geoip' => [
         'account_id' => env('RESUME_GEOIP_ACCOUNT_ID'),
         'license_key' => env('RESUME_GEOIP_LICENSE_KEY'),
@@ -44,13 +45,13 @@ return [
     ],
 
     'themes' => [
-        // Tema attivo. Ogni tema eredita dal tema "base" le view e le stringhe che non ridefinisce.
+        // Active theme. Every theme inherits the views and strings it does not redefine from the "base" theme.
         'active' => env('RESUME_THEME', 'base'),
 
-        // Tema di riferimento da cui ereditano tutti gli altri.
+        // Reference theme that all the others inherit from.
         'base' => 'base',
 
-        // Cartella dei temi (sorgenti, view, lingue). Gli asset compilati stanno in public/themes/{tema}.
+        // Themes folder (sources, views, languages). The compiled assets are in public/themes/{theme}.
         'path' => base_path('themes'),
     ],
 

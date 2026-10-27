@@ -8,7 +8,7 @@ use Illuminate\Support\Facades\Vite;
 use Throwable;
 
 /**
- * Risolve il tema attivo e la sua catena di ereditarietà (tema attivo → tema base).
+ * Resolves the active theme and its inheritance chain (active theme → base theme).
  */
 final class ThemeManager
 {
@@ -25,7 +25,7 @@ final class ThemeManager
     ) {}
 
     /**
-     * Tema attivo; se manca (o mancano i suoi asset compilati) si usa il tema base, così il sito non si rompe.
+     * Active theme; if it is missing (or its compiled assets are), the base theme is used so the site does not break.
      */
     public function active(): Theme
     {
@@ -46,7 +46,7 @@ final class ThemeManager
     }
 
     /**
-     * Webroot che contiene gli asset compilati dei temi (themes/{tema}).
+     * Webroot that contains the compiled theme assets (themes/{theme}).
      */
     public function publicPath(): string
     {
@@ -69,7 +69,7 @@ final class ThemeManager
     }
 
     /**
-     * Dimentica i temi letti (dopo un'installazione o una rimozione).
+     * Forgets the themes already read (after an install or a removal).
      */
     public function forget(): void
     {
@@ -84,7 +84,7 @@ final class ThemeManager
     }
 
     /**
-     * Temi installati: nome => titolo.
+     * Installed themes: name => title.
      *
      * @return array<string, string>
      */
@@ -105,7 +105,7 @@ final class ThemeManager
     }
 
     /**
-     * Temi dal più specifico al più generico: [attivo, ..., base].
+     * Themes from the most specific to the most generic: [active, ..., base].
      *
      * @return list<Theme>
      */
@@ -132,7 +132,7 @@ final class ThemeManager
     }
 
     /**
-     * Cartelle delle view in ordine di priorità.
+     * View folders in order of priority.
      *
      * @return list<string>
      */
@@ -145,7 +145,7 @@ final class ThemeManager
     }
 
     /**
-     * Icone del tema attivo, con fallback su quelle dei temi da cui eredita.
+     * Icons of the active theme, falling back to those of the themes it inherits from.
      *
      * @return array<string, string>
      */
@@ -166,7 +166,7 @@ final class ThemeManager
     }
 
     /**
-     * URL dello sprite SVG delle icone (il primo tema della catena che ne dichiara uno), se compilato.
+     * URL of the SVG icon sprite (the first theme in the chain that declares one), if compiled.
      */
     public function spriteUrl(): ?string
     {
@@ -181,7 +181,7 @@ final class ThemeManager
                 try {
                     $this->spriteUrl = Vite::asset($theme->sprite, $theme->buildDirectory());
                 } catch (Throwable) {
-                    // Asset non compilati (npm run build): si usano le classi del font di icone
+                    // Assets not compiled (npm run build): the icon font classes are used
                 }
 
                 break;

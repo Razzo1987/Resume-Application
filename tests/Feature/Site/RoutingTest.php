@@ -30,7 +30,7 @@ it('normalizes language codes, trailing slashes and short codes', function (stri
 ]);
 
 it('removes trailing and double slashes', function () {
-    // Il client di test toglie lo slash finale dagli URL: si prova il middleware direttamente
+    // The test client strips the trailing slash from URLs: the middleware is tested directly
     $response = NormalizeSitePath::redirect(Request::create('http://localhost/it-IT/progetti/?a=1'));
 
     expect($response?->getStatusCode())->toBe(301)
@@ -68,7 +68,7 @@ it('opens project and experience pages', function () {
 });
 
 it('has no page for items without details, hidden items or unknown slugs', function () {
-    // progetto senza testo di dettaglio né immagine
+    // project without detail text or image
     $this->get('/it-IT/progetti/app-per-i-biglietti')->assertNotFound();
 
     Project::query()->where('slug->it-IT', 'portale-prenotazioni')->update(['is_visible' => false]);
@@ -95,7 +95,7 @@ it('keeps old addresses working when a slug changes', function () {
 
     $this->get('/it-IT/progetti/catalogo-dati')->assertOk();
 
-    // Un secondo cambio non crea catene di redirect
+    // A second change does not create redirect chains
     $project->setTranslation('slug', 'it-IT', 'catalogo');
     $project->save();
 
@@ -158,7 +158,7 @@ it('gives existing pages an address in a newly activated language', function () 
 
     $project = Project::query()->where('slug->it-IT', 'portale-prenotazioni')->sole();
 
-    // contenuto non ancora tradotto in tedesco: lo slug nasce dal titolo nella lingua di default
+    // content not yet translated into German: the slug comes from the title in the default language
     expect($project->t('slug', 'de-DE', false))->toBe('portale-prenotazioni')
         ->and(Redirect::query()->count())->toBe(0);
 
@@ -169,6 +169,6 @@ it('gives existing pages an address in a newly activated language', function () 
 });
 
 it('has no static files that would hide the generated ones', function (string $file) {
-    // Apache serve i file esistenti prima di passare a index.php
+    // Apache serves existing files before falling back to index.php
     expect(public_path($file))->not->toBeFile();
 })->with(['favicon.ico', 'robots.txt', 'sitemap.xml']);

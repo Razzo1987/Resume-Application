@@ -1,4 +1,4 @@
-// Sezioni del CV e pagine di dettaglio.
+// CV sections and detail pages.
 
 .cv-section {
     padding-block: 1.75rem;
@@ -137,7 +137,7 @@ details.more {
     }
 }
 
-// Profilo e contatti
+// Profile and contacts
 .contact-list {
     display: flex;
     flex-wrap: wrap;
@@ -163,7 +163,7 @@ details.more {
     color: $muted;
 }
 
-// Numeri chiave
+// Key figures
 .highlights {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(10rem, 1fr));
@@ -202,7 +202,7 @@ details.more {
     color: $muted;
 }
 
-// Linea del tempo (esperienze, volontariato, formazione)
+// Timeline (experience, volunteering, education)
 .timeline {
     position: relative;
     padding: 0;
@@ -280,7 +280,7 @@ details.more {
     color: #3e4753;
 }
 
-// Competenze
+// Skills
 .skills {
     display: grid;
     gap: .4rem;
@@ -319,7 +319,7 @@ details.more {
     }
 }
 
-// Progetti
+// Projects
 .projects {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(17rem, 1fr));
@@ -389,7 +389,7 @@ details.more {
     }
 }
 
-// Certificazioni
+// Certifications
 .badges {
     display: flex;
     flex-wrap: wrap;
@@ -399,8 +399,8 @@ details.more {
     margin: 0 0 1.25rem;
     list-style: none;
 
-    // Ogni badge sta in una fascia alta 6rem: i quadrati e i tondi occupano tutta l'altezza,
-    // quelli rettangolari (es. banner larghi) arrivano fino a 12rem di larghezza, centrati in verticale
+    // Each badge sits in a 6rem tall band: square and round ones take the full height,
+    // rectangular ones (e.g. wide banners) go up to 12rem wide, vertically centered
     li {
         display: flex;
         align-items: center;
@@ -467,7 +467,7 @@ details.more {
     }
 }
 
-// Lingue
+// Languages
 .language-skills {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(15rem, 1fr));
@@ -541,7 +541,7 @@ details.more {
     }
 }
 
-// Pubblicazioni
+// Publications
 .publication {
     padding: .85rem 0;
     border-bottom: 1px solid $border-color;
@@ -561,7 +561,7 @@ details.more {
     color: #3e4753;
 }
 
-// Interessi
+// Interests
 .interests {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(14rem, 1fr));
@@ -597,7 +597,7 @@ details.more {
     color: $muted;
 }
 
-// Pagine di dettaglio
+// Detail pages
 .breadcrumbs ol {
     display: flex;
     flex-wrap: wrap;
@@ -713,8 +713,8 @@ details.more {
     }
 }
 
-// La copertina mantiene la proporzione delle immagini di condivisione (1200 x 630): titolo e grafica disegnati
-// sopra restano interi anche nell'anteprima. Immagini con altre proporzioni vengono ritagliate al centro.
+// The cover keeps the aspect ratio of the sharing images (1200 x 630): title and graphics drawn on top
+// stay whole in the preview too. Images with other aspect ratios are cropped around the center.
 .article-card-image {
     width: 100%;
     height: auto;

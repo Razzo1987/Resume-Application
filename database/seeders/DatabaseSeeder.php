@@ -5,8 +5,8 @@ namespace Database\Seeders;
 use Illuminate\Database\Seeder;
 
 /**
- * Dati di base di ogni installazione (lingue, categorie di competenze, sezioni del CV, numeri chiave).
- * I dati dimostrativi sono a parte: php artisan db:seed --class=DemoSeeder
+ * Base data of every installation (languages, skill categories, CV sections, key figures).
+ * The demo data is separate: php artisan db:seed --class=DemoSeeder
  */
 class DatabaseSeeder extends Seeder
 {

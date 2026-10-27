@@ -10,7 +10,7 @@ use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
 
 /**
- * Finché l'applicazione non è installata (manca il .env), ogni pagina porta all'installer.
+ * Until the application is installed (the .env is missing), every page leads to the installer.
  */
 class RedirectToInstaller
 {
@@ -26,8 +26,8 @@ class RedirectToInstaller
     }
 
     /**
-     * Prima installazione: il pacchetto non contiene .htaccess (lo scrive l'installer), quindi gli indirizzi
-     * "belli" funzionano solo se c'è già una regola verso index.php (es. sviluppo). Altrimenti /index.php/install.
+     * First installation: the package does not contain .htaccess (the installer writes it), so "pretty" URLs
+     * work only if there is already a rule pointing to index.php (e.g. development). Otherwise /index.php/install.
      */
     private function hasRewrite(): bool
     {

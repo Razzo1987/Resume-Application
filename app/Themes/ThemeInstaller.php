@@ -13,14 +13,14 @@ use JsonException;
 use ZipArchive;
 
 /**
- * Installa, aggiorna e rimuove i temi aggiuntivi (es. temi PRO) da un pacchetto zip creato con
+ * Installs, updates and removes additional themes (e.g. PRO themes) from a zip package created with
  * scripts/build-theme.sh:
  *
- *   {nome}/theme.json, icons.php, views/, lang/   → cartella dei temi (core/themes/{nome})
- *   {nome}/dist/                                  → webroot/themes/{nome} (asset compilati)
+ *   {name}/theme.json, icons.php, views/, lang/   → themes folder (core/themes/{name})
+ *   {name}/dist/                                  → webroot/themes/{name} (compiled assets)
  *
- * Il contenuto viene controllato prima di scrivere qualsiasi file: solo i tipi di file attesi,
- * nessun percorso fuori dalla cartella, nessun file PHP tra gli asset pubblici.
+ * The content is checked before any file is written: only the expected file types,
+ * no path outside the folder, no PHP file among the public assets.
  */
 class ThemeInstaller
 {
@@ -28,12 +28,12 @@ class ThemeInstaller
 
     private const int MAX_BYTES = 50 * 1024 * 1024;
 
-    /** File del tema ammessi (relativi alla cartella del tema) */
+    /** Allowed theme files (relative to the theme folder) */
     private const string THEME_FILES = '#^(theme\.json|icons\.php|README\.md|LICENSE(\.txt|\.md)?'
         .'|views/([a-z0-9_-]+/)*[a-z0-9_.-]+\.blade\.php'
         .'|lang/[A-Za-z0-9_-]+/[a-z0-9_-]+\.php|lang/[A-Za-z0-9_-]+\.json)$#';
 
-    /** Asset pubblici ammessi */
+    /** Allowed public assets */
     private const string DIST_FILES = '#^dist/([A-Za-z0-9_.@-]+/)*[A-Za-z0-9_.@-]+\.(css|js|mjs|map|json|svg|woff2?|ttf|otf|png|jpe?g|webp|avif|gif|ico|txt)$#';
 
     public function __construct(
@@ -43,7 +43,7 @@ class ThemeInstaller
     ) {}
 
     /**
-     * Legge e controlla il pacchetto senza installarlo.
+     * Reads and checks the package without installing it.
      */
     public function inspect(string $zipPath): Theme
     {
@@ -62,7 +62,7 @@ class ThemeInstaller
         $publicDir = $this->themes->publicPath().DIRECTORY_SEPARATOR.'themes'.DIRECTORY_SEPARATOR.$name;
         $previous = $this->themes->isInstalled($name) ? $this->themes->get($name)->version : null;
 
-        // 1) Estrazione in cartelle temporanee accanto a quelle definitive (stesso disco: rename atomico)
+        // 1) Extraction into temporary folders next to the final ones (same disk: atomic rename)
         $stage = Str::lower(Str::random(8));
         $newTheme = "{$themeDir}.new-{$stage}";
         $newPublic = "{$publicDir}.new-{$stage}";
@@ -90,7 +90,7 @@ class ThemeInstaller
             $zip->close();
         }
 
-        // 2) Sostituzione: prima gli asset, poi view e configurazione
+        // 2) Replacement: first the assets, then views and configuration
         $this->swap($newPublic, $publicDir);
         $this->swap($newTheme, $themeDir);
 
@@ -100,7 +100,7 @@ class ThemeInstaller
     }
 
     /**
-     * Rimuove un tema che non è in uso (il tema base non si rimuove mai).
+     * Removes a theme that is not in use (the base theme is never removed).
      */
     public function remove(string $name): void
     {
@@ -146,7 +146,7 @@ class ThemeInstaller
                 $names[$index] = $stat['name'];
             }
 
-            // Cartella principale facoltativa ("mio-tema/theme.json" oppure "theme.json")
+            // Optional top-level folder ("mio-tema/theme.json" or "theme.json")
             $prefix = in_array('theme.json', $names, true) ? '' : (string) Str::before((string) collect($names)->first(fn (string $name): bool => str_ends_with($name, '/theme.json') && substr_count($name, '/') === 1), 'theme.json');
 
             if (! in_array($prefix.'theme.json', $names, true)) {
@@ -172,7 +172,7 @@ class ThemeInstaller
 
             foreach ($names as $index => $name) {
                 if (str_ends_with($name, '/')) {
-                    continue; // cartelle
+                    continue; // folders
                 }
 
                 $relative = str_starts_with($name, $prefix) ? substr($name, strlen($prefix)) : null;
@@ -244,7 +244,7 @@ class ThemeInstaller
     }
 
     /**
-     * Mette la nuova cartella al posto di quella esistente (la vecchia viene eliminata).
+     * Puts the new folder in place of the existing one (the old one is deleted).
      */
     private function swap(string $new, string $target): void
     {
@@ -277,7 +277,7 @@ class ThemeInstaller
     {
         $this->themes->forget();
 
-        // icons.php e le lingue del tema sono file PHP: OPcache potrebbe tenere la versione precedente
+        // icons.php and the theme language files are PHP files: OPcache could keep the previous version
         if ($themeDir !== null && function_exists('opcache_invalidate')) {
             foreach (File::allFiles($themeDir) as $file) {
                 if ($file->getExtension() === 'php') {

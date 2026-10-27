@@ -23,8 +23,8 @@ use Illuminate\Testing\TestResponse;
 use Livewire\Livewire;
 
 /*
-| Statistiche delle visite senza cookie: raccolta (bot, anteprime e IP admin esclusi, IP accorciato), provenienza
-| dai database GeoLite (finti, in tests/Fixtures/geoip), totali giornalieri, pagina dell'admin, download dei database.
+| Cookieless visit statistics: collection (bots, previews and admin IPs excluded, shortened IP), origin
+| from the GeoLite databases (fake, in tests/Fixtures/geoip), daily totals, admin page, database download.
 */
 
 const CHROME = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0.0.0 Safari/537.36';
@@ -148,7 +148,7 @@ it('sums the visits by day, page and dimension, and keeps the totals after delet
         ->and(array_sum(StatsQuery::forPeriod('7', 'cv')->timeline()['views']))->toBe(2)
         ->and(StatsQuery::forPeriod('7', StatsQuery::DOWNLOAD)->totals()['downloads'])->toBe(1);
 
-    // Dopo il periodo di conservazione le visite si cancellano, i totali restano
+    // After the retention period the visits are deleted, the totals stay
     app(Settings::class)->set('stats.retention_months', 1);
     $this->travel(40)->days();
     app(Aggregator::class)->run();
@@ -206,10 +206,10 @@ it('never exports the statistics with the content', function () {
     expect(app(Backup::class)->tables())->not->toContain('stat_visits')->not->toContain('stat_daily')->not->toContain('stat_admin_ips');
 });
 
-// --- Database GeoLite ---------------------------------------------------------------------------------
+// --- GeoLite databases ----------------------------------------------------------------------------------
 
 /**
- * Archivio come quelli di MaxMind: GeoLite2-City_20261020/GeoLite2-City.mmdb più i file di licenza.
+ * Archive like the MaxMind ones: GeoLite2-City_20261020/GeoLite2-City.mmdb plus the license files.
  */
 function geoliteArchive(string $edition): string
 {

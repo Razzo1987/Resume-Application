@@ -22,8 +22,8 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\Storage;
 
 /*
-| La v1 ha una riga per lingua (id dispari = it-IT, pari = en-GB). Il database della v1 qui è SQLite
-| in memoria con le stesse tabelle; i file (immagini, PDF, lingue) stanno in una cartella temporanea.
+| v1 has one row per language (odd id = it-IT, even = en-GB). Here the v1 database is an in-memory SQLite
+| database with the same tables; the files (images, PDFs, languages) are in a temporary folder.
 */
 
 beforeEach(function () {
@@ -104,7 +104,7 @@ beforeEach(function () {
     $legacy->table('experience_skill')->insert([
         ['id_experience' => 1, 'id_skill' => 3, 'language' => 'it-IT'],
         ['id_experience' => 2, 'id_skill' => 4, 'language' => 'en-GB'],
-        ['id_experience' => 1, 'id_skill' => 2, 'language' => 'it-IT'], // riga italiana verso la skill inglese
+        ['id_experience' => 1, 'id_skill' => 2, 'language' => 'it-IT'], // Italian row pointing to the English skill
     ]);
 
     $legacy->table('projects')->insert([
@@ -127,7 +127,7 @@ beforeEach(function () {
         ['id' => 4, 'language' => 'en-GB', 'date' => '2018-09-22', 'title' => 'Exam Y', 'type' => 'Training Path', 'institution' => 'Ente', 'images' => null, 'link' => 'https://verify.example/y'],
     ]);
 
-    // File della v1
+    // v1 files
     $this->files = sys_get_temp_dir().'/v1-'.bin2hex(random_bytes(4));
     File::ensureDirectoryExists("{$this->files}/img/avatars");
     File::ensureDirectoryExists("{$this->files}/attachment");
@@ -185,7 +185,7 @@ it('imports experiences in pairs of languages, with organisations, skills and vo
         ->and($acme->t('location', 'it-IT'))->toBe('Milano')
         ->and($acme->organization->website)->toBe('https://acme.example')
         ->and($acme->organization->logo)->toStartWith('logos/')
-        // la riga italiana che puntava alla skill inglese è ricondotta alla stessa competenza
+        // the Italian row that pointed to the English skill is mapped to the same skill
         ->and($acme->skills->map(fn ($skill) => $skill->t('name', 'en-GB'))->sort()->values()->all())->toBe(['SQL', 'Teamwork'])
         ->and($volunteering->t('role', 'it-IT'))->toBe('Volontario')
         ->and($volunteering->organization->type)->toBe(OrganizationType::Association)

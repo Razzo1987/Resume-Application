@@ -1,4 +1,4 @@
-{{-- Periodo e durata: $start, $end, $withDuration (default true) --}}
+{{-- Period and duration: $start, $end, $withDuration (default true) --}}
 <span class="meta-item">
     <x-theme-icon name="calendar" />
     {{ $dates->period($start, $end) }}

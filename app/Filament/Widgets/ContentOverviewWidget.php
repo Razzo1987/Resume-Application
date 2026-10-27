@@ -19,7 +19,7 @@ use Filament\Widgets\StatsOverviewWidget;
 use Filament\Widgets\StatsOverviewWidget\Stat;
 
 /**
- * Dashboard, gruppo Contenuti: esperienze, progetti con pagina dedicata, articoli, sezioni del CV nascoste perché vuote.
+ * Dashboard, Content group: experiences, projects with a dedicated page, articles, CV sections hidden because empty.
  */
 class ContentOverviewWidget extends StatsOverviewWidget
 {

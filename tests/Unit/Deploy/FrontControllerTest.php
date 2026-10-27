@@ -1,10 +1,10 @@
 <?php
 
 /*
- * public/index.php deve trovare il codice dell'app in tre disposizioni:
- *  - pacchetto di rilascio: webroot/core
- *  - sviluppo (layout Laravel): progetto/public → progetto
- *  - core fuori dalla webroot indicato da core-path.php
+ * public/index.php must find the app code in three layouts:
+ *  - release package: webroot/core
+ *  - development (Laravel layout): project/public → project
+ *  - core outside the webroot, set in core-path.php
  */
 
 function fakeCore(string $dir): void

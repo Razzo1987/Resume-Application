@@ -10,8 +10,8 @@ use Illuminate\Support\Facades\Schema;
 use Throwable;
 
 /**
- * Lingue attive e lingua di default del sito (dalla tabella languages).
- * Prima dell'installazione ripiega su APP_LOCALE / APP_FALLBACK_LOCALE.
+ * Active languages and default language of the site (from the languages table).
+ * Before installation it falls back to APP_LOCALE / APP_FALLBACK_LOCALE.
  */
 class Locales
 {
@@ -27,7 +27,7 @@ class Locales
     }
 
     /**
-     * Codici delle lingue attive, la lingua di default per prima.
+     * Codes of the active languages, the default language first.
      *
      * @return list<string>
      */
@@ -44,7 +44,7 @@ class Locales
     }
 
     /**
-     * Lingue attive (modelli), la lingua di default per prima.
+     * Active languages (models), the default language first.
      *
      * @return Collection<int, Language>
      */
@@ -57,7 +57,7 @@ class Locales
     }
 
     /**
-     * Lingua attiva con questo codice, senza distinguere maiuscole e minuscole ("it-it" → it-IT).
+     * Active language with this code, case-insensitive ("it-it" → it-IT).
      */
     public function match(string $code): ?Language
     {

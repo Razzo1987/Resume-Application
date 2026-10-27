@@ -14,8 +14,8 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 
 /**
- * Utente amministratore. Non esiste registrazione pubblica: gli utenti si creano
- * dall'installer o con "php artisan make:filament-user".
+ * Administrator user. There is no public registration: users are created
+ * from the installer or with "php artisan make:filament-user".
  *
  * @property string $email
  * @property string|null $locale
@@ -77,7 +77,7 @@ class User extends Authenticatable implements FilamentUser, HasAppAuthentication
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
-            // Segreto TOTP e codici di recupero cifrati nel database (APP_KEY)
+            // TOTP secret and recovery codes encrypted in the database (APP_KEY)
             'app_authentication_secret' => 'encrypted',
             'app_authentication_recovery_codes' => 'encrypted:array',
         ];

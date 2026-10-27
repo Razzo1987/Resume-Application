@@ -40,7 +40,7 @@ class ProjectsTable
     }
 
     /**
-     * Relazioni caricate in anticipo e ordinamento predefinito dell'elenco.
+     * Eager-loaded relations and default sort order of the list.
      *
      * @param  Builder<Project>  $query
      * @return Builder<Project>

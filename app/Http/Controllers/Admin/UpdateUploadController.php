@@ -11,9 +11,9 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\File;
 
 /**
- * Caricamento a blocchi del pacchetto di aggiornamento (pagina Sistema): il browser manda lo zip a pezzi da 1 MB,
- * così il limite di caricamento dell'hosting (upload_max_filesize, spesso 2 MB) non conta.
- * Ogni blocco è il corpo grezzo della richiesta; si riprende dal blocco indicato dal server.
+ * Chunked upload of the update package (System page): the browser sends the zip in 1 MB pieces,
+ * so the hosting's upload limit (upload_max_filesize, often 2 MB) does not matter.
+ * Each chunk is the raw request body; the upload resumes from the chunk indicated by the server.
  */
 class UpdateUploadController extends Controller
 {
@@ -63,7 +63,7 @@ class UpdateUploadController extends Controller
     }
 
     /**
-     * Caricamenti interrotti da più di un giorno.
+     * Uploads interrupted more than a day ago.
      */
     private function cleanup(UpdateStorage $storage): void
     {

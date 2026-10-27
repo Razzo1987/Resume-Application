@@ -10,8 +10,8 @@ use Illuminate\Support\Facades\Artisan;
 use Throwable;
 
 /**
- * Completamento di un aggiornamento dopo aver estratto il nuovo pacchetto:
- * migrazioni, cache, blocco .htaccess, versione installata.
+ * Completion of an update after the new package has been extracted:
+ * migrations, caches, .htaccess block, installed version.
  */
 class Updater
 {
@@ -25,7 +25,7 @@ class Updater
     ) {}
 
     /**
-     * Versione dei file (VERSION del pacchetto).
+     * Version of the files (the package's VERSION).
      */
     public function codeVersion(): string
     {
@@ -35,7 +35,7 @@ class Updater
     }
 
     /**
-     * Versione per cui è stato completato l'ultimo aggiornamento (o l'installazione).
+     * Version for which the last update (or the installation) was completed.
      */
     public function installedVersion(): ?string
     {
@@ -50,7 +50,7 @@ class Updater
     }
 
     /**
-     * @return list<string> esito dei passaggi
+     * @return list<string> outcome of the steps
      */
     public function complete(): array
     {

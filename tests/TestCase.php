@@ -9,8 +9,8 @@ use Symfony\Component\HttpFoundation\Response;
 abstract class TestCase extends BaseTestCase
 {
     /**
-     * In produzione ogni richiesta parte da zero; nei test più richieste condividono l'applicazione.
-     * Si azzerano quindi i servizi "scoped" (stato della singola richiesta) prima di ognuna.
+     * In production every request starts from scratch; in tests several requests share the application.
+     * So the "scoped" services (state of a single request) are reset before each one.
      *
      * @param  string  $method
      * @param  string  $uri

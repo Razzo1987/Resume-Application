@@ -10,8 +10,8 @@ use App\Models\Project;
 use App\Support\Languages\Locales;
 
 /**
- * Crea gli slug mancanti (es. dopo l'attivazione di una nuova lingua), così ogni contenuto
- * con una pagina dedicata ha subito il suo indirizzo anche nella nuova lingua.
+ * Creates the missing slugs (e.g. after a new language is activated), so every content item
+ * with its own page immediately has its URL in the new language too.
  */
 final class SlugRefresher
 {
@@ -22,7 +22,7 @@ final class SlugRefresher
 
     public function refresh(): int
     {
-        // Elenco delle lingue attive aggiornato (la lingua potrebbe essere stata appena salvata)
+        // Fresh list of active languages (the language may have just been saved)
         $this->locales->flush();
         $updated = 0;
 
@@ -31,7 +31,7 @@ final class SlugRefresher
                 $record->fillMissingSlugs();
 
                 if ($record->isDirty('slug')) {
-                    // Senza eventi: non sono cambi di indirizzo (niente redirect) e la cache è già stata svuotata
+                    // Without events: these are not URL changes (no redirects) and the cache has already been cleared
                     $record->saveQuietly();
                     $updated++;
                 }

@@ -43,28 +43,28 @@ class AdminPanelProvider extends PanelProvider
         return $panel
             ->default()
             ->id('admin')
-            // Percorso configurabile (RESUME_ADMIN_PATH), "admin" di default
+            // Configurable path (RESUME_ADMIN_PATH), "admin" by default
             ->path((string) config('resume.admin_path'))
             ->brandName(fn (): string => (string) config('app.name'))
             ->login()
             ->profile(EditProfile::class)
             ->passwordReset()
-            // Autenticazione a due fattori con app (Google Authenticator, 1Password, ...), con codici di recupero
+            // Two-factor authentication with an app (Google Authenticator, 1Password, ...), with recovery codes
             ->multiFactorAuthentication([
                 AppAuthentication::make()->recoverable(),
             ])
             ->colors([
                 'primary' => Color::Slate,
             ])
-            // Avatar generato in locale: il provider di default usa ui-avatars.com
+            // Avatar generated locally: the default provider uses ui-avatars.com
             ->defaultAvatarProvider(InitialsAvatarProvider::class)
-            // Nessun font da CDN: Filament usa il proprio font locale (LocalFontProvider) se non se ne imposta un altro
+            // No CDN fonts: Filament uses its own local font (LocalFontProvider) unless another one is set
             ->discoverResources(in: app_path('Filament/Resources'), for: 'App\Filament\Resources')
             ->discoverPages(in: app_path('Filament/Pages'), for: 'App\Filament\Pages')
             ->pages([
                 Dashboard::class,
             ])
-            // Dashboard: avvisi, poi un gruppo per tipo (Sistema, Lingue, Contenuti, CV, Statistiche)
+            // Dashboard: alerts, then one group per type (System, Languages, Content, CV, Statistics)
             ->widgets([
                 AccountWidget::class,
                 SystemAlertsWidget::class,
@@ -80,11 +80,11 @@ class AdminPanelProvider extends PanelProvider
                 NavigationGroup::make(fn (): string => __('admin.nav.site')),
             ])
             ->sidebarCollapsibleOnDesktop()
-            // Caricamento a blocchi del pacchetto di aggiornamento (pagina Sistema)
+            // Chunked upload of the update package (System page)
             ->authenticatedRoutes(function (): void {
                 Route::post('system/update-upload', UpdateUploadController::class)->name('update-upload');
             })
-            // "Vai al sito" nella barra in alto, prima del menu utente
+            // "Go to site" in the top bar, before the user menu
             ->renderHook(PanelsRenderHook::USER_MENU_BEFORE, fn (): View => view('filament.site-link', ['url' => SiteActions::homeUrl()]))
             ->middleware([
                 EncryptCookies::class,

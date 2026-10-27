@@ -167,21 +167,21 @@ it('has a single blog menu item, driven by the latest articles section', functio
 
     $html = (string) $this->get('/it-IT')->getContent();
 
-    // Una sola voce, verso la pagina del blog (non l'ancora della sezione nel CV)
+    // A single item, pointing to the blog page (not to the section anchor in the CV)
     expect(substr_count($html, '>Blog</a></li>'))->toBe(1)
         ->and($html)->toContain('<li><a href="http://localhost/it-IT/blog">Blog</a></li>')
         ->and($html)->not->toContain('href="#latest_articles"');
 
-    // La posizione segue l'ordine delle sezioni
+    // The position follows the section order
     $section->update(['sort_order' => 0]);
     $html = (string) $this->get('/it-IT')->getContent();
     expect(strpos($html, '>Blog</a></li>'))->toBeLessThan(strpos($html, '>Profilo</a></li>'));
 
-    // Un titolo personalizzato vale anche per la voce del menu
+    // A custom title also applies to the menu item
     $section->update(['title' => ['it-IT' => 'Articoli']]);
     $this->get('/it-IT')->assertSee('<li><a href="http://localhost/it-IT/blog">Articoli</a></li>', escape: false);
 
-    // Fuori dal menu: nessuna voce, ma la pagina del blog resta raggiungibile
+    // Out of the menu: no item, but the blog page stays reachable
     $section->update(['in_menu' => false]);
     $this->get('/it-IT')->assertDontSee('<li><a href="http://localhost/it-IT/blog">', escape: false);
     $this->get('/it-IT/blog')->assertOk();

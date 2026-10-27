@@ -11,9 +11,9 @@ use Illuminate\Support\Facades\Cache;
 use Throwable;
 
 /**
- * Cache HTML delle pagine pubbliche (file in storage/framework/cache/pages).
- * Si svuota a ogni modifica dei contenuti; scade comunque dopo alcune ore
- * perché alcuni valori dipendono dalla data (durate, anni di esperienza).
+ * HTML cache of the public pages (files in storage/framework/cache/pages).
+ * It is cleared on every content change; it expires after a few hours anyway
+ * because some values depend on the date (durations, years of experience).
  */
 final class PageCache
 {
@@ -50,7 +50,7 @@ final class PageCache
             try {
                 $this->store()->put($key, ['content' => $content, 'type' => $type, 'etag' => $etag, 'time' => time()], $this->ttl());
             } catch (Throwable) {
-                // Cache non scrivibile: la pagina si genera comunque a ogni richiesta
+                // Cache not writable: the page is still generated on every request
             }
         }
 
@@ -58,8 +58,8 @@ final class PageCache
     }
 
     /**
-     * Chiave di una pagina. Include la versione degli asset del tema e dell'applicazione:
-     * dopo un aggiornamento (nuovi file CSS/JS con un altro hash) le pagine vecchie non vengono più servite.
+     * Key of a page. It includes the asset version of the theme and of the application:
+     * after an update (new CSS/JS files with a different hash) the old pages are no longer served.
      */
     public function key(string $url): string
     {
@@ -84,7 +84,7 @@ final class PageCache
     }
 
     /**
-     * Secondi di validità: al massimo TTL, ma mai oltre la prossima pubblicazione programmata di un articolo.
+     * Seconds of validity: at most TTL, but never past the next scheduled publication of an article.
      */
     public function ttl(): int
     {
@@ -106,7 +106,7 @@ final class PageCache
         try {
             $this->store()->clear();
         } catch (Throwable) {
-            // niente da svuotare
+            // nothing to clear
         }
     }
 

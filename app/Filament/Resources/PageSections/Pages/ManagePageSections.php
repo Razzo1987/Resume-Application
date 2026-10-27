@@ -12,7 +12,7 @@ class ManagePageSections extends ManageRecords
 
     public function mount(): void
     {
-        // Le sezioni nuove introdotte dagli aggiornamenti compaiono da sole
+        // New sections introduced by updates show up on their own
         PageSection::ensureDefaults();
 
         parent::mount();

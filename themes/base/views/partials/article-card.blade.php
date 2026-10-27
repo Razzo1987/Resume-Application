@@ -1,4 +1,4 @@
-{{-- Anteprima di un articolo (elenco del blog, ultimi articoli nel CV): $article, $headingLevel (default h3) --}}
+{{-- Article preview (blog list, latest articles in the CV): $article, $headingLevel (default h3) --}}
 @php
     $title = $article->t('title');
     $path = $urls->articlePath($article, $layout->locale);

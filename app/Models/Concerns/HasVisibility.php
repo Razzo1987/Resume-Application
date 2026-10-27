@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 
 /**
- * Colonna is_visible: gli elementi nascosti restano in admin ma non compaiono sul sito.
+ * is_visible column: hidden items stay in the admin but do not appear on the site.
  *
  * @phpstan-require-extends Model
  */

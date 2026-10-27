@@ -9,7 +9,7 @@ parameters:
         - config/
         - routes/
         - themes/
-        # Script di aggiornamento che gira prima di Laravel: analizzato anche lui, e le sue funzioni
-        # (usate da App\Support\Update\PackageInspector) diventano note a PHPStan
+        # Update script that runs before Laravel: it is analyzed too, and its functions
+        # (used by App\Support\Update\PackageInspector) become known to PHPStan
         - resources/update/updater.php
     tmpDir: storage/framework/phpstan

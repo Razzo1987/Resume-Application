@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Support\Translatable;
 
 /**
- * Modello con campi tradotti (implementato tramite il trait HasTranslations).
+ * Model with translated fields (implemented through the HasTranslations trait).
  */
 interface Translatable
 {
@@ -17,7 +17,7 @@ interface Translatable
     public function t(string $field, ?string $locale = null, bool $fallback = true): ?string;
 
     /**
-     * Campi compilati in almeno una lingua ma non in quella indicata.
+     * Fields filled in at least one language but not in the given one.
      *
      * @return list<string>
      */

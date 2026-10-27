@@ -9,8 +9,8 @@ use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
 
 /**
- * Un solo indirizzo per pagina: niente slash finale né doppi slash ("/it-IT/" → "/it-IT").
- * Il blocco .htaccess fa lo stesso su Apache; qui vale anche con altri server.
+ * One URL per page: no trailing slash and no double slashes ("/it-IT/" → "/it-IT").
+ * The .htaccess block does the same on Apache; this also works with other servers.
  */
 class NormalizeSitePath
 {
@@ -20,7 +20,7 @@ class NormalizeSitePath
     }
 
     /**
-     * Redirect verso l'indirizzo normalizzato, se quello richiesto non lo è.
+     * Redirect to the normalized URL, if the requested one is not.
      */
     public static function redirect(Request $request): ?Response
     {

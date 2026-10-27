@@ -1,4 +1,4 @@
-{{-- Qualifiche sotto nome e foto: $layout->headlines --}}
+{{-- Qualifications below name and photo: $layout->headlines --}}
 @if ($layout->headlines)
     <ul class="profile-headlines">
         @foreach ($layout->headlines as $headline)

@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-// Lingua dell'admin scelta da ciascun amministratore nel profilo (null = quella di RESUME_ADMIN_LOCALE)
+// Admin language chosen by each administrator in the profile (null = the one from RESUME_ADMIN_LOCALE)
 return new class extends Migration
 {
     public function up(): void

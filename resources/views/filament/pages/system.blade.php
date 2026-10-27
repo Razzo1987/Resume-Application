@@ -200,7 +200,7 @@
     </x-filament::section>
 
     <script>
-        // Download da GitHub a blocchi (ogni blocco è una richiesta breve), poi controlli e installazione
+        // Chunked download from GitHub (each chunk is a short request), then checks and installation
         window.resumeUpdateDownload = () => ({
             busy: false, received: 0, total: 0, error: null,
             async download() {
@@ -220,7 +220,7 @@
             },
         });
 
-        // Caricamento a blocchi da 1 MB: il limite di caricamento dell'hosting non conta
+        // Upload in 1 MB chunks: the hosting's upload limit does not matter
         window.resumeUpdateUpload = (url, token) => ({
             busy: false, sent: 0, size: 0, error: null,
             async upload() {

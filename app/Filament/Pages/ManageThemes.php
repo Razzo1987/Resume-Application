@@ -18,7 +18,7 @@ use Filament\Support\Icons\Heroicon;
 use Illuminate\Support\Facades\Storage;
 
 /**
- * Temi: elenco dei temi installati, attivazione, installazione o aggiornamento da zip, rimozione.
+ * Themes: list of the installed themes, activation, installation or update from a zip, removal.
  */
 class ManageThemes extends Page
 {

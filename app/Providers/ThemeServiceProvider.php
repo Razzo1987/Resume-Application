@@ -17,7 +17,7 @@ class ThemeServiceProvider extends ServiceProvider
     {
         $this->app->singleton(ThemeManager::class, fn (): ThemeManager => new ThemeManager(
             themesPath: (string) config('resume.themes.path'),
-            // Tema scelto in admin (impostazioni), altrimenti quello di configurazione
+            // Theme chosen in the admin (settings), otherwise the configured one
             activeName: (string) ($this->app->make(Settings::class)->get('site.theme') ?: config('resume.themes.active')),
             baseName: (string) config('resume.themes.base'),
         ));
@@ -25,17 +25,17 @@ class ThemeServiceProvider extends ServiceProvider
 
     public function boot(ThemeManager $themes): void
     {
-        // view('theme::cv') cerca prima nel tema attivo, poi nei temi da cui eredita.
+        // view('theme::cv') looks in the active theme first, then in the themes it inherits from.
         View::addNamespace('theme', $themes->viewPaths());
 
-        // Stringhe proprie del tema attivo: __('theme::file.chiave').
+        // The active theme's own strings: __('theme::file.key').
         Lang::addNamespace('theme', $themes->active()->langPath());
 
         View::composer('theme::*', function (\Illuminate\View\View $view) use ($themes): void {
             $view->with('theme', $themes->active());
         });
 
-        // Dati comuni delle pagine pubbliche (menu, lingue, contatti, footer) e strumenti per i contenuti
+        // Shared data for the public pages (menu, languages, contacts, footer) and content tools
         View::composer('theme::*', SiteViewComposer::class);
     }
 }

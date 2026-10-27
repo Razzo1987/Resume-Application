@@ -8,9 +8,9 @@ use App\Themes\ThemeManager;
 use Illuminate\View\Component;
 
 /**
- * Icona semantica: <x-theme-icon name="briefcase" />.
- * Il nome è indipendente dal set di icone; ogni tema lo traduce nel proprio (icons.php).
- * Con lo sprite SVG del tema compilato si usa <svg><use>, altrimenti le classi del font di icone.
+ * Semantic icon: <x-theme-icon name="briefcase" />.
+ * The name does not depend on the icon set; each theme maps it to its own (icons.php).
+ * With the theme's compiled SVG sprite <svg><use> is used, otherwise the icon font classes.
  */
 class ThemeIcon extends Component
 {

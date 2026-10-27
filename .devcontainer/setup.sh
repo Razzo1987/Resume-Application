@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
-# Prima creazione del Codespace: dipendenze, asset, .env, database con il CV di prova e un amministratore demo.
+# First creation of the Codespace: dependencies, assets, .env, database with the sample CV and a demo administrator.
 set -euo pipefail
 
-set_env() { # set_env CHIAVE valore
+set_env() { # set_env KEY value
     if grep -q "^$1=" .env; then sed -i "s#^$1=.*#$1=$2#" .env; else echo "$1=$2" >> .env; fi
 }
 
@@ -19,7 +19,7 @@ set_env DB_USERNAME resume
 set_env DB_PASSWORD resume
 grep -q '^APP_KEY=base64' .env || php artisan key:generate --force
 
-echo "Attendo il database..."
+echo "Waiting for the database..."
 for _ in $(seq 1 90); do
     php -r 'try { new PDO("mysql:host=db;dbname=resume_app", "resume", "resume"); } catch (Throwable) { exit(1); }' && break
     sleep 2
@@ -27,7 +27,7 @@ done
 
 php artisan migrate:fresh --seed --force
 php artisan db:seed --class=DemoSeeder --force
-php artisan db:seed --class=DemoStatsSeeder --force   # visite finte per vedere la pagina Statistiche
-# Versione registrata come dopo l'installer (altrimenti l'admin chiede di completare l'aggiornamento)
+php artisan db:seed --class=DemoStatsSeeder --force   # fake visits to see the Statistics page
+# Version recorded as after the installer (otherwise the admin asks to complete the update)
 php artisan tinker --execute='app(App\Support\System\Updater::class)->complete();' >/dev/null
 php artisan make:filament-user --name="Demo" --email=demo@example.com --password=demo-password

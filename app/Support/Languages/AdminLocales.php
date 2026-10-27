@@ -8,13 +8,13 @@ use App\Models\User;
 use Locale;
 
 /**
- * Lingue dell'interfaccia admin: quelle con un file lang/{codice}/admin.php (oggi it ed en). Ogni amministratore
- * sceglie la sua nel profilo; senza scelta (e nella pagina di accesso) vale RESUME_ADMIN_LOCALE.
+ * Admin interface languages: those with a lang/{code}/admin.php file (currently it and en). Each administrator
+ * picks their own in the profile; without a choice (and on the login page) RESUME_ADMIN_LOCALE applies.
  */
 final class AdminLocales
 {
     /**
-     * @return array<string, string> codice => nome nella sua lingua
+     * @return array<string, string> code => name in its own language
      */
     public function available(): array
     {
@@ -42,7 +42,7 @@ final class AdminLocales
 
     public function for(?User $user): string
     {
-        // getAttributes(): niente eccezione se il modello è stato caricato senza questa colonna
+        // getAttributes(): no exception if the model was loaded without this column
         $chosen = $user?->getAttributes()['locale'] ?? null;
 
         return is_string($chosen) && array_key_exists($chosen, $this->available()) ? $chosen : $this->default();

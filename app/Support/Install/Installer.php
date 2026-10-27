@@ -23,10 +23,10 @@ use Illuminate\Support\Str;
 use Throwable;
 
 /**
- * Prima installazione dal browser.
+ * First installation from the browser.
  *
- * Ordine: protezione di core/ → database (connessione, tabelle, dati di base, amministratore) → .htaccess → .env.
- * Il .env si scrive per ultimo: finché manca l'installer resta disponibile e si può ripetere.
+ * Order: core/ protection → database (connection, tables, base data, administrator) → .htaccess → .env.
+ * The .env is written last: as long as it is missing, the installer stays available and can be run again.
  */
 class Installer
 {
@@ -42,13 +42,13 @@ class Installer
      * @param  array{url: string, owner: string, email: string, password: string, admin_path: string, admin_locale: string,
      *     default_language: string, languages: list<string>, db_host: string, db_port: int, db_database: string,
      *     db_username: string, db_password: string, force_https: bool, strip_www: bool, demo: bool}  $data
-     * @return bool true se il database conteneva già un'installazione (contenuti conservati)
+     * @return bool true if the database already contained an installation (content kept)
      */
     public function install(array $data): bool
     {
         $url = rtrim($data['url'], '/');
 
-        // 1) Il codice non deve essere raggiungibile dal browser (server senza supporto .htaccess?)
+        // 1) The code must not be reachable from the browser (server without .htaccess support?)
         if ($this->probe->check($url) === CoreProbe::EXPOSED) {
             throw new InstallException((string) __('install.errors.core_exposed'));
         }
@@ -56,7 +56,7 @@ class Installer
         // 2) Database
         $this->useDatabase($data);
 
-        // Database già usato (installazione precedente o tentativo interrotto): i contenuti restano
+        // Database already in use (previous installation or interrupted attempt): the content is kept
         $existing = Schema::hasTable('users') && DB::table('users')->exists();
 
         $languages = array_values(array_unique([$data['default_language'], ...$data['languages']]));
@@ -90,8 +90,8 @@ class Installer
                 Profile::current()->update(['full_name' => $data['owner']]);
             }
 
-            // Amministratore: nuovo, oppure quello con la stessa email (nuova password; la 2FA va riattivata
-            // perché i segreti erano cifrati con la chiave precedente)
+            // Administrator: a new one, or the one with the same email (new password; 2FA must be enabled again
+            // because the secrets were encrypted with the previous key)
             $user = User::query()->firstOrNew(['email' => $data['email']]);
             $user->forceFill([
                 'name' => $data['owner'],
@@ -107,14 +107,14 @@ class Installer
             throw new InstallException(__('install.errors.database_setup', ['message' => Str::limit($exception->getMessage(), 300)]), previous: $exception);
         }
 
-        // 3) File e cartelle nella webroot
+        // 3) Files and folders in the web root
         File::ensureDirectoryExists(public_path('uploads'));
 
         if ($this->probe->isReleaseLayout()) {
             $this->htaccess->write($data['force_https'], $data['strip_www']);
         }
 
-        // 4) .env per ultimo: da qui l'applicazione è installata
+        // 4) .env last: from here on the application is installed
         $this->env->write($this->state->envPath(), $this->envValues($data, $url, $fallback));
 
         return $existing;
@@ -127,7 +127,7 @@ class Installer
     {
         $current = config('database.connections.mysql');
 
-        // Stessa connessione già configurata (es. ripetizione dell'installazione): si riusa
+        // Same connection already configured (e.g. the installation is run again): reuse it
         if (config('database.default') === 'mysql' && is_array($current)
             && [$current['host'] ?? null, (int) ($current['port'] ?? 0), $current['database'] ?? null, $current['username'] ?? null, $current['password'] ?? null]
                 === [$data['db_host'], $data['db_port'], $data['db_database'], $data['db_username'], $data['db_password']]) {

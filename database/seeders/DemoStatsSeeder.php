@@ -11,14 +11,14 @@ use App\Support\Stats\StatsQuery;
 use Illuminate\Database\Seeder;
 
 /**
- * Statistiche finte per il CV dimostrativo (Codespaces, screenshot): tre mesi di visite da diversi Paesi, sempre
- * le stesse a ogni esecuzione. Accende le statistiche (e quindi la pagina Privacy). Da usare dopo DemoSeeder:
+ * Fake statistics for the demo CV (Codespaces, screenshots): three months of visits from several countries, the
+ * same on every run. Turns on the statistics (and so the Privacy page). To be used after DemoSeeder:
  *
  *   php artisan db:seed --class=DemoStatsSeeder
  */
 class DemoStatsSeeder extends Seeder
 {
-    /** Paese, regione, città, latitudine, longitudine, rete, peso */
+    /** Country, region, city, latitude, longitude, network, weight */
     private const array PLACES = [
         ['IT', 'Piedmont', 'Turin', 45.0703, 7.6869, 'Telecom Italia', 24],
         ['IT', 'Lombardy', 'Milan', 45.4643, 9.1895, 'Fastweb', 18],
@@ -38,7 +38,7 @@ class DemoStatsSeeder extends Seeder
         ['AU', 'New South Wales', 'Sydney', -33.8688, 151.2093, 'Telstra', 1],
     ];
 
-    /** Dispositivo, sistema, browser, versione, peso */
+    /** Device, operating system, browser, version, weight */
     private const array CLIENTS = [
         ['desktop', 'Windows', 'Chrome', '130', 28],
         ['desktop', 'Mac', 'Safari', '18', 12],
@@ -49,7 +49,7 @@ class DemoStatsSeeder extends Seeder
         ['tablet', 'iOS', 'Mobile Safari', '18', 3],
     ];
 
-    /** Sito di provenienza, peso (null = accesso diretto) */
+    /** Referring site, weight (null = direct access) */
     private const array SOURCES = [[null, 40], ['linkedin.com', 18], ['google.com', 20], ['github.com', 8], ['bing.com', 4], ['x.com', 3], ['duckduckgo.com', 3]];
 
     public function run(): void
@@ -111,7 +111,7 @@ class DemoStatsSeeder extends Seeder
     }
 
     /**
-     * Elemento a caso, in proporzione al peso (ultimo campo dopo $fields valori).
+     * Random item, proportional to its weight (the last field, after $fields values).
      *
      * @param  list<list<mixed>>  $items
      * @return list<mixed>

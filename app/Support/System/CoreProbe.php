@@ -8,8 +8,8 @@ use Illuminate\Support\Facades\Http;
 use Throwable;
 
 /**
- * Verifica dall'esterno che la cartella core/ non sia raggiungibile dal browser:
- * chiede al sito stesso core/VERSION e si aspetta 403 o 404.
+ * Checks from the outside that the core/ folder cannot be reached from the browser:
+ * requests core/VERSION from the site itself and expects 403 or 404.
  */
 class CoreProbe
 {
@@ -23,7 +23,7 @@ class CoreProbe
 
     public function check(?string $baseUrl = null): string
     {
-        // Layout di sviluppo: il codice è fuori dalla webroot
+        // Development layout: the code is outside the web root
         if (! $this->isReleaseLayout()) {
             return self::NOT_APPLICABLE;
         }
@@ -44,7 +44,7 @@ class CoreProbe
     }
 
     /**
-     * Pacchetto di rilascio: il core sta in una cartella "core" dentro la webroot.
+     * Release package: the core lives in a "core" folder inside the web root.
      */
     public function isReleaseLayout(): bool
     {

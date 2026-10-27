@@ -39,9 +39,8 @@ use Symfony\Component\HttpFoundation\BinaryFileResponse;
 use Throwable;
 
 /**
- * Sistema: versione, aggiornamenti (controllo su GitHub, download o caricamento del pacchetto, installazione),
- * completamento degli aggiornamenti, manutenzione, cache, .htaccess, protezione di core/, file orfani,
- * esportazione e importazione dei contenuti.
+ * System: version, updates (check on GitHub, package download or upload, installation), completion of updates,
+ * maintenance, cache, .htaccess, protection of core/, orphan files, content export and import.
  */
 class ManageSystem extends Page
 {
@@ -57,7 +56,7 @@ class ManageSystem extends Page
     public array $log = [];
 
     /**
-     * Ritorno dalla pagina di estrazione (?update=finish): si completa subito l'aggiornamento.
+     * Return from the extraction page (?update=finish): the update is completed right away.
      */
     public function mount(): void
     {
@@ -192,7 +191,7 @@ class ManageSystem extends Page
     }
 
     /**
-     * Scarica il blocco successivo del pacchetto della nuova versione (chiamato a ripetizione dalla pagina).
+     * Downloads the next chunk of the new version's package (called repeatedly by the page).
      *
      * @return array{received?: int, total?: int, done?: bool, file?: ?string, error?: string}
      */
@@ -265,7 +264,7 @@ class ManageSystem extends Page
     }
 
     /**
-     * Controlli sul pacchetto e, se va tutto bene, avvio dell'aggiornamento.
+     * Checks the package and, if everything is fine, starts the update.
      */
     public function installAction(): Action
     {
@@ -313,8 +312,8 @@ class ManageSystem extends Page
     }
 
     /**
-     * Completa l'aggiornamento (migrazioni, cache, .htaccess, versione) e, se l'ha avviato l'admin, rimette la
-     * manutenzione com'era e cancella il pacchetto.
+     * Completes the update (migrations, cache, .htaccess, version) and, if the admin started it, restores the
+     * maintenance mode to how it was and deletes the package.
      */
     private function finishUpdate(): void
     {

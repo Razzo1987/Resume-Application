@@ -13,7 +13,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Carbon;
 
 /**
- * Pubblicazione o intervento (articolo, paper, tesi, talk, webinar, ...).
+ * Publication or presentation (article, paper, thesis, talk, webinar, ...).
  *
  * @property int $id
  * @property PublicationType $type

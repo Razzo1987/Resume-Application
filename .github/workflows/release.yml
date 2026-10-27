@@ -19,11 +19,11 @@ jobs:
       - uses: actions/setup-node@v5
         with:
           node-version: 22
-      - name: Versione del tag = file VERSION
+      - name: Tag version = VERSION file
         run: test "v$(cat VERSION)" = "${GITHUB_REF_NAME}"
       - run: bash scripts/build-release.sh dist
-      # Note della release: la voce della versione nel CHANGELOG (le mostra anche l'admin quando avvisa dell'aggiornamento)
-      - name: Note dal CHANGELOG
+      # Release notes: the version entry in the CHANGELOG (the admin also shows them when it announces the update)
+      - name: Notes from the CHANGELOG
         run: |
           awk -v version="$(cat VERSION)" '
             index($0, "## [" version "]") == 1 { found = 1; next }

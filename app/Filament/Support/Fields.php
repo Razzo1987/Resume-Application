@@ -16,16 +16,13 @@ use Filament\Schemas\Components\Utilities\Get;
 use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
 
 /**
- * Campi ricorrenti nei form admin.
+ * Fields that recur in the admin forms.
  */
 class Fields
 {
     /**
-     * Immagine pubblica (disco uploads), ridimensionata e convertita in WebP.
-     */
-    /**
-     * Testo lungo (pagine di dettaglio, articoli): titoli, elenchi, citazioni, tabelle e immagini.
-     * Le immagini inserite finiscono in public/uploads/{cartella}, servite direttamente dal web server.
+     * Long text (detail pages, articles): headings, lists, quotes, tables and images.
+     * Inserted images end up in public/uploads/{directory}, served directly by the web server.
      */
     public static function richText(string $name, string $attachmentsDirectory): RichEditor
     {
@@ -45,7 +42,7 @@ class Fields
     }
 
     /**
-     * Testo breve (sintesi, descrizioni): grassetto, corsivo, link ed elenchi.
+     * Short text (summaries, descriptions): bold, italic, links and lists.
      */
     public static function richSummary(string $name): RichEditor
     {
@@ -53,6 +50,9 @@ class Fields
             ->toolbarButtons([['bold', 'italic', 'link'], ['bulletList', 'orderedList'], ['undo', 'redo']]);
     }
 
+    /**
+     * Public image (uploads disk), resized and converted to WebP.
+     */
     public static function image(string $name, string $directory, int $maxSize = 1600, string $format = 'webp'): FileUpload
     {
         return FileUpload::make($name)
@@ -74,7 +74,7 @@ class Fields
     }
 
     /**
-     * PDF pubblico (disco uploads), es. attestato di una certificazione.
+     * Public PDF (uploads disk), e.g. the certificate of a certification.
      */
     public static function publicPdf(string $name, string $directory): FileUpload
     {
@@ -90,7 +90,7 @@ class Fields
     }
 
     /**
-     * Periodo: inizio obbligatorio (o no), fine vuota = "in corso".
+     * Period: start required (or not), empty end = "ongoing".
      */
     public static function period(bool $startRequired = true): Grid
     {
@@ -120,7 +120,7 @@ class Fields
     }
 
     /**
-     * Icona semantica scelta dall'elenco del tema attivo.
+     * Semantic icon chosen from the active theme's list.
      */
     public static function icon(string $name = 'icon'): Select
     {

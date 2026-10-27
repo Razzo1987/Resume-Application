@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Enums;
 
 /**
- * Etichette degli enum per l'admin: lang/{it,en}/admin.php → enums.{gruppo}.{valore}.
+ * Enum labels for the admin: lang/{it,en}/admin.php → enums.{group}.{value}.
  *
  * @phpstan-require-implements \BackedEnum
  */

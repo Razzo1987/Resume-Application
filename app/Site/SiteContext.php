@@ -10,7 +10,7 @@ use Carbon\Carbon;
 use Illuminate\Translation\Translator;
 
 /**
- * Stato della richiesta pubblica: la lingua in cui si sta mostrando il sito.
+ * State of the public request: the language the site is being shown in.
  */
 final class SiteContext
 {
@@ -22,7 +22,7 @@ final class SiteContext
     ) {}
 
     /**
-     * Imposta la lingua della richiesta: lingua dell'app, di Carbon e testi personalizzati dall'admin.
+     * Sets the language of the request: app language, Carbon language and texts customized in the admin.
      */
     public function enter(Language $language): void
     {
@@ -40,7 +40,7 @@ final class SiteContext
         }
 
         if ($overrides !== []) {
-            // Prima si carica site.php, altrimenti addLines segnerebbe il gruppo come già caricato
+            // Load site.php first, otherwise addLines would mark the group as already loaded
             $this->translator->load('*', 'site', $language->code);
             $this->translator->addLines($overrides, $language->code);
         }

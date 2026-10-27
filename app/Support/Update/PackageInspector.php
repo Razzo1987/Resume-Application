@@ -12,18 +12,18 @@ use Throwable;
 use ZipArchive;
 
 /**
- * Controlli su un pacchetto prima di aggiornare: che sia davvero Resume App, più recente, compatibile con
- * questo server e con i temi installati, e che i file si possano scrivere. Le regole sui nomi dei file e sulle
- * cartelle protette sono quelle dello script di estrazione (resources/update/updater.php).
+ * Checks on a package before updating: that it really is Resume App, newer, compatible with this server and with
+ * the installed themes, and that the files can be written. The rules on file names and protected folders are the
+ * ones of the extraction script (resources/update/updater.php).
  */
 class PackageInspector
 {
-    /** File che ogni pacchetto deve contenere */
+    /** Files that every package must contain */
     public const array REQUIRED = ['index.php', 'core/VERSION', 'core/manifest.json', 'core/artisan', 'core/bootstrap/app.php', 'core/vendor/autoload.php'];
 
     /**
-     * @param  string|null  $core  cartella dell'app (di default base_path(); serve ai test)
-     * @param  string|null  $webroot  webroot (di default public_path())
+     * @param  string|null  $core  the app folder (base_path() by default; used by the tests)
+     * @param  string|null  $webroot  web root (public_path() by default)
      */
     public function __construct(
         private readonly Updater $updater,
@@ -45,7 +45,7 @@ class PackageInspector
     }
 
     /**
-     * Installato da pacchetto (core/manifest.json): una copia di sviluppo non si aggiorna da qui.
+     * Installed from a package (core/manifest.json): a development copy is not updated from here.
      */
     public function isPackagedInstall(): bool
     {
@@ -161,7 +161,7 @@ class PackageInspector
 
         $free = @disk_free_space($this->core());
 
-        // I file vengono sostituiti uno alla volta: basta lo spazio del pacchetto estratto, con un margine
+        // Files are replaced one at a time: the space of the extracted package is enough, with a margin
         if ($free !== false && $free < $size * 1.2) {
             $problems[] = __('admin.updates.problems.disk', ['required' => Number::fileSize((int) ($size * 1.2), 1), 'free' => Number::fileSize((int) $free, 1)]);
         }
@@ -170,7 +170,7 @@ class PackageInspector
     }
 
     /**
-     * I temi installati devono dichiararsi compatibili con la nuova versione.
+     * The installed themes must declare themselves compatible with the new version.
      *
      * @return list<string>
      */
@@ -190,7 +190,7 @@ class PackageInspector
     }
 
     /**
-     * Le cartelle che riceveranno file (o la prima cartella esistente sopra quelle nuove) devono essere scrivibili.
+     * The folders that will receive files (or the first existing folder above the new ones) must be writable.
      *
      * @param  list<string>  $names
      * @return list<string>

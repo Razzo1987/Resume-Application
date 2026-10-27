@@ -47,7 +47,7 @@ use Illuminate\Support\ServiceProvider;
 class AppServiceProvider extends ServiceProvider
 {
     /**
-     * Modelli il cui salvataggio cambia le pagine pubbliche (svuota la cache HTML).
+     * Models whose saving changes the public pages (clears the HTML cache).
      *
      * @var list<class-string<Model>>
      */
@@ -73,7 +73,7 @@ class AppServiceProvider extends ServiceProvider
             return $cron;
         });
 
-        // Stato della singola richiesta pubblica
+        // State of the single public request
         $this->app->scoped(SiteContext::class);
         $this->app->scoped(CvData::class);
         $this->app->scoped(CvFiles::class);
@@ -86,10 +86,10 @@ class AppServiceProvider extends ServiceProvider
 
     public function boot(): void
     {
-        // In sviluppo: errori espliciti per lazy loading e attributi inesistenti
+        // In development: explicit errors for lazy loading and missing attributes
         Model::shouldBeStrict(! $this->app->isProduction());
 
-        // In produzione tutti gli indirizzi generati (canonical, sitemap, link) usano il dominio di APP_URL
+        // In production all generated addresses (canonical, sitemap, links) use the APP_URL domain
         if ($this->app->isProduction() && filled(config('app.url')) && $this->app->make(InstallState::class)->isInstalled()) {
             URL::forceRootUrl((string) config('app.url'));
 
@@ -102,10 +102,10 @@ class AppServiceProvider extends ServiceProvider
             Event::listen(["eloquent.saved: {$model}", "eloquent.deleted: {$model}"], fn () => $this->app->make(PageCache::class)->flush());
         }
 
-        // Il riordino delle tabelle admin aggiorna l'ordine con una query unica (senza eventi dei modelli)
+        // Reordering admin tables updates the order with a single query (without model events)
         Table::configureUsing(fn (Table $table): Table => $table->afterReordering(fn () => $this->app->make(PageCache::class)->flush()));
 
-        // Indirizzi cambiati → redirect 301 dal vecchio al nuovo
+        // Changed addresses → 301 redirect from the old one to the new one
         Event::listen(['eloquent.updated: '.Project::class, 'eloquent.updated: '.Experience::class, 'eloquent.updated: '.Article::class], function (Model $model): void {
             $this->app->make(UrlChangeRedirects::class)->slugsChanged($model);
         });
@@ -114,7 +114,7 @@ class AppServiceProvider extends ServiceProvider
             $this->app->make(UrlChangeRedirects::class)->segmentsChanged($language);
         });
 
-        // Lingua appena attivata: slug per tutte le pagine dedicate
+        // Newly activated language: slugs for all the dedicated pages
         Event::listen('eloquent.saved: '.Language::class, function (Language $language): void {
             if ($language->is_active && ($language->wasRecentlyCreated || $language->wasChanged('is_active'))) {
                 $this->app->make(SlugRefresher::class)->refresh();

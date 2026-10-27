@@ -24,8 +24,8 @@ use Illuminate\Support\Str;
 use Livewire\Attributes\Url;
 
 /**
- * Traduzioni: per ogni lingua attiva, i contenuti con campi da tradurre e il link per modificarli.
- * Si apre anche dai riquadri "Traduzioni" della dashboard.
+ * Translations: for each active language, the content with fields to translate and the link to edit it.
+ * Also opened from the "Traduzioni" boxes of the dashboard.
  */
 class Translations extends Page
 {
@@ -60,7 +60,7 @@ class Translations extends Page
         $locales = app(Locales::class)->active();
 
         if (! in_array($this->locale, $locales, true)) {
-            // Prima lingua con qualcosa da tradurre, altrimenti la principale
+            // First language with something to translate, otherwise the main one
             $counts = app(TranslationReport::class)->missingByLocale();
             $this->locale = array_key_first(array_filter($counts)) ?? app(Locales::class)->default();
         }

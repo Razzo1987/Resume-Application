@@ -10,8 +10,8 @@ use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
 
 /**
- * Statistiche delle visite: la registrazione avviene dopo aver mandato la risposta (terminate), anche per le
- * pagine servite dalla cache HTML, quindi non rallenta il sito. Niente cookie: vedi App\Support\Stats\Tracker.
+ * Visit statistics: the recording happens after the response is sent (terminate), also for the pages
+ * served from the HTML cache, so it does not slow down the site. No cookies: see App\Support\Stats\Tracker.
  */
 class TrackVisit
 {

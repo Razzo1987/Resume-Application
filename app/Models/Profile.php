@@ -10,7 +10,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Carbon;
 
 /**
- * Profilo della persona (una sola riga).
+ * Profile of the person (a single row).
  *
  * @property int $id
  * @property string $full_name
@@ -42,7 +42,7 @@ class Profile extends Model implements Translatable
     }
 
     /**
-     * Il profilo del sito (creato vuoto se non esiste ancora).
+     * The site profile (created empty if it does not exist yet).
      */
     public static function current(): self
     {
@@ -50,7 +50,7 @@ class Profile extends Model implements Translatable
     }
 
     /**
-     * Qualifiche nella lingua indicata, una per riga.
+     * Headlines in the given language, one per line.
      *
      * @return list<string>
      */
@@ -62,7 +62,7 @@ class Profile extends Model implements Translatable
     }
 
     /**
-     * Inizio della carriera: data indicata nel profilo, altrimenti la prima esperienza di lavoro.
+     * Career start: the date set in the profile, otherwise the first work experience.
      */
     public function careerStart(): ?Carbon
     {

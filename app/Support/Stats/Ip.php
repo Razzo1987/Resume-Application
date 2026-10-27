@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace App\Support\Stats;
 
 /**
- * Indirizzi IP accorciati: IPv4 senza l'ultimo numero (93.44.12.x), IPv6 ai primi 48 bit (2a01:4f8:c0c::).
- * Bastano per la provenienza approssimativa, non per riconoscere una persona.
+ * Truncated IP addresses: IPv4 without the last number (93.44.12.x), IPv6 to the first 48 bits (2a01:4f8:c0c::).
+ * Enough for an approximate origin, not to identify a person.
  */
 final class Ip
 {

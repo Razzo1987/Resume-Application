@@ -1,4 +1,4 @@
-{{-- Elenco cronologico di esperienze (lavoro o volontariato): $experiences --}}
+{{-- Chronological list of experiences (work or volunteering): $experiences --}}
 <ol class="timeline">
     @foreach ($experiences as $experience)
         @php

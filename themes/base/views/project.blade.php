@@ -1,4 +1,4 @@
-{{-- Pagina dedicata di un progetto: $project --}}
+{{-- Dedicated page of a project: $project --}}
 @extends('theme::layouts.site')
 
 @section('content')

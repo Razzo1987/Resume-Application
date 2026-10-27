@@ -12,7 +12,7 @@ use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
 
 /**
- * Sito pubblico in manutenzione: 503 con la pagina del tema (l'admin resta raggiungibile).
+ * Public site in maintenance: 503 with the theme's page (the admin stays reachable).
  */
 class SiteMaintenance
 {

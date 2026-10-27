@@ -10,8 +10,8 @@ use Illuminate\Console\Command;
 /**
  * Resume App scheduled jobs. Usually started by "schedule:run" (the hosting cron job); it can also be run by hand.
  *
- *   php core/artisan resume:cron              lavori da fare adesso
- *   php core/artisan resume:cron --job=geoip  un solo lavoro, anche se non è ancora il momento
+ *   php core/artisan resume:cron              jobs that are due now
+ *   php core/artisan resume:cron --job=geoip  a single job, even if it is not due yet
  */
 class RunCron extends Command
 {

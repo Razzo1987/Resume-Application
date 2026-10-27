@@ -10,12 +10,12 @@ use RecursiveIteratorIterator;
 use SplFileInfo;
 
 /**
- * File rimasti da versioni precedenti: presenti nelle cartelle gestite dal pacchetto ma non nel suo manifest.
- * Funziona solo con il pacchetto di rilascio (core/manifest.json). Non tocca mai dati, .env, caricamenti e temi PRO.
+ * Files left over from previous versions: present in the folders managed by the package but not in its manifest.
+ * Works only with the release package (core/manifest.json). Never touches data, .env, uploads or PRO themes.
  */
 class OrphanFiles
 {
-    /** Cartelle che appartengono al pacchetto, relative alla webroot */
+    /** Folders that belong to the package, relative to the web root */
     public const array MANAGED = [
         'core/app', 'core/bootstrap/app.php', 'core/bootstrap/providers.php', 'core/config', 'core/database',
         'core/lang', 'core/resources', 'core/routes', 'core/stubs', 'core/themes/base', 'core/vendor',
@@ -23,7 +23,7 @@ class OrphanFiles
     ];
 
     /**
-     * @param  string|null  $core  cartella core/ del pacchetto (di default quella dell'app)
+     * @param  string|null  $core  the package's core/ folder (the app's by default)
      */
     public function __construct(private ?string $core = null) {}
 
@@ -38,7 +38,7 @@ class OrphanFiles
     }
 
     /**
-     * @return list<string> percorsi relativi alla webroot
+     * @return list<string> paths relative to the web root
      */
     public function find(): array
     {
@@ -89,7 +89,7 @@ class OrphanFiles
         $deleted = 0;
 
         foreach ($paths as $path) {
-            // Si cancella solo ciò che risulta davvero orfano in questo momento
+            // Only delete what is actually orphaned at this moment
             if (isset($orphans[$path]) && @unlink($this->root().'/'.$path)) {
                 $deleted++;
                 $this->removeEmptyParents($path);
@@ -100,7 +100,7 @@ class OrphanFiles
     }
 
     /**
-     * Toglie le cartelle rimaste vuote dopo la cancellazione, senza mai risalire oltre la cartella gestita.
+     * Removes the folders left empty after the deletion, never going above the managed folder.
      */
     private function removeEmptyParents(string $path): void
     {
@@ -124,7 +124,7 @@ class OrphanFiles
     }
 
     /**
-     * Radice del pacchetto: la cartella che contiene core/ (cioè la webroot).
+     * Package root: the folder that contains core/ (that is, the web root).
      */
     private function root(): string
     {

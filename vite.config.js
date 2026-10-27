@@ -2,12 +2,12 @@ import { readFileSync } from 'node:fs';
 import { defineConfig } from 'vite';
 import laravel from 'laravel-vite-plugin';
 
-// Asset di un tema, compilati in public/themes/{tema} (manifest incluso).
-// Tema "base" di default; un altro tema (copiato in themes/{tema}) con THEME=nome, es. scripts/build-theme.sh.
+// Assets of a theme, compiled into public/themes/{theme} (manifest included).
+// "base" theme by default; another theme (copied to themes/{theme}) with THEME=name, e.g. scripts/build-theme.sh.
 const theme = process.env.THEME ?? 'base';
 
 if (!/^[a-z0-9][a-z0-9-]*$/.test(theme)) {
-    throw new Error(`Nome di tema non valido: ${theme}`);
+    throw new Error(`Invalid theme name: ${theme}`);
 }
 
 const manifest = JSON.parse(readFileSync(`themes/${theme}/theme.json`, 'utf8'));
@@ -21,13 +21,13 @@ export default defineConfig({
         }),
     ],
     build: {
-        // Lo sprite delle icone deve restare un file (usato con <svg><use href="...#nome">), mai inline
+        // The icon sprite must stay a file (used with <svg><use href="...#name">), never inlined
         assetsInlineLimit: 0,
     },
     css: {
         preprocessorOptions: {
             scss: {
-                // Bootstrap 5.3 usa ancora @import: silenziamo gli avvisi di deprecazione di Dart Sass
+                // Bootstrap 5.3 still uses @import: silence the Dart Sass deprecation warnings
                 silenceDeprecations: ['import', 'global-builtin', 'color-functions', 'if-function'],
                 quietDeps: true,
             },

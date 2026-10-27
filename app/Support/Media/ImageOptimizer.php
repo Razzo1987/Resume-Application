@@ -10,15 +10,15 @@ use Illuminate\Support\Str;
 use RuntimeException;
 
 /**
- * Ridimensiona le immagini caricate e le salva in WebP (più leggere, supportate da tutti i browser).
- * Le GIF animate e i file non ridimensionabili vengono salvati così come sono.
+ * Resizes uploaded images and saves them as WebP (lighter, supported by all browsers).
+ * Animated GIFs and files that cannot be resized are saved as they are.
  */
 class ImageOptimizer
 {
     public const int QUALITY = 82;
 
     /**
-     * Salva l'immagine sul disco indicato e restituisce il percorso relativo.
+     * Saves the image on the given disk and returns the relative path.
      */
     public function store(string $sourcePath, string $originalName, string $disk, string $directory, int $maxSize = 1600, string $format = 'webp'): string
     {
@@ -41,11 +41,11 @@ class ImageOptimizer
         ob_start();
 
         if ($format === 'png') {
-            // PNG (es. icona del sito: i browser la accettano ovunque), trasparenza conservata
+            // PNG (e.g. the site icon: browsers accept it everywhere), transparency preserved
             imagepng($image, null, 9);
             $extension = 'png';
         } elseif ($format === 'jpeg') {
-            // JPEG (es. immagine per i social, dove WebP non è sempre supportato): trasparenza su bianco
+            // JPEG (e.g. the social sharing image, where WebP is not always supported): transparency on white
             imagejpeg($this->flatten($image), null, 85);
             $extension = 'jpg';
         } else {
@@ -69,7 +69,7 @@ class ImageOptimizer
             return null;
         }
 
-        // GIF animate: lasciate intatte
+        // Animated GIFs: left untouched
         if ($info[2] === IMAGETYPE_GIF && $this->isAnimatedGif($path)) {
             return null;
         }

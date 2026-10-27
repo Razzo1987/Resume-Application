@@ -7,7 +7,7 @@ namespace App\Enums;
 use Filament\Support\Contracts\HasLabel;
 
 /**
- * Livelli del Quadro comune europeo di riferimento per le lingue (QCER / CEFR).
+ * Common European Framework of Reference for Languages levels (QCER / CEFR).
  */
 enum CefrLevel: string implements HasLabel
 {
@@ -24,7 +24,7 @@ enum CefrLevel: string implements HasLabel
     }
 
     /**
-     * Posizione nella scala (1–6), per le barre di livello.
+     * Position on the scale (1–6), for the level bars.
      */
     public function rank(): int
     {

@@ -15,16 +15,16 @@ use Throwable;
 use ZipArchive;
 
 /**
- * Aggiornamenti col cron, secondo l'impostazione scelta in Sistema:
- *  - off: solo il controllo delle nuove versioni (avviso in dashboard);
- *  - download: il pacchetto viene scaricato sul server e l'amministratore lo installa con un clic;
- *  - patch: le versioni di correzione (stessa x.y, es. 2.1.0 → 2.1.1) si installano da sole; quelle che aggiungono
- *    funzioni (2.2.0) restano da installare a mano, perché possono cambiare contenuti o temi.
+ * Updates via the cron, according to the setting chosen in System:
+ *  - off: only the check for new versions (notice on the dashboard);
+ *  - download: the package is downloaded to the server and the administrator installs it with one click;
+ *  - patch: patch versions (same x.y, e.g. 2.1.0 → 2.1.1) install themselves; those that add features (2.2.0)
+ *    still have to be installed by hand, because they can change content or themes.
  *
- * L'installazione automatica fa gli stessi passi dell'admin (controlli, copia dei contenuti, manutenzione,
- * estrazione con resources/update/updater.php), ma l'estrazione gira nel processo del cron. Il completamento
- * (migrazioni, cache, fine della manutenzione) parte in un processo nuovo, con il codice nuovo: subito se l'hosting
- * lo permette, altrimenti al passaggio successivo del cron. Esito in dashboard e per email agli amministratori.
+ * The automatic installation takes the same steps as the admin (checks, content backup, maintenance, extraction
+ * with resources/update/updater.php), but the extraction runs in the cron process. The completion (migrations,
+ * cache, end of maintenance) starts in a new process, with the new code: right away if the hosting allows it,
+ * otherwise on the next cron run. Result on the dashboard and by email to the administrators.
  */
 class AutoUpdate
 {
@@ -36,7 +36,7 @@ class AutoUpdate
 
     public const string SETTING = 'updates.auto';
 
-    /** Tentativi di installazione automatica della stessa versione prima di lasciarla all'amministratore. */
+    /** Automatic installation attempts for the same version before leaving it to the administrator. */
     public const int MAX_ATTEMPTS = 3;
 
     public function __construct(
@@ -58,7 +58,7 @@ class AutoUpdate
     }
 
     /**
-     * Lavoro "updates" del cron. Dall'admin (senza cron) solo il controllo su GitHub.
+     * The cron's "updates" job. From the admin (without cron) only the GitHub check.
      */
     public function run(bool $fromCron): ?string
     {
@@ -68,12 +68,12 @@ class AutoUpdate
 
         $run = $this->runner->current();
 
-        // Estrazione automatica interrotta (tempo massimo, errore): riprende da dove era arrivata
+        // Interrupted automatic extraction (time limit, error): resume from where it stopped
         if ($this->storage->isExtracting()) {
             return $fromCron && ($run['mode'] ?? null) === 'auto' ? $this->extract() : 'extracting';
         }
 
-        // File nuovi già al loro posto: si completa (questo processo è partito dopo l'estrazione, col codice nuovo)
+        // New files already in place: finish the update (this process started after the extraction, with the new code)
         if ($this->runner->isExtracted() && ($run['mode'] ?? null) === 'auto') {
             return $this->finish();
         }
@@ -99,7 +99,7 @@ class AutoUpdate
     }
 
     /**
-     * Versione di correzione: stessa x.y di quella installata, z più alta.
+     * Patch version: same x.y as the installed one, higher z.
      */
     public function isPatch(string $version): bool
     {
@@ -112,7 +112,7 @@ class AutoUpdate
     }
 
     /**
-     * Ultimo evento degli aggiornamenti automatici (per la dashboard).
+     * Last event of the automatic updates (for the dashboard).
      *
      * @return array{type: string, version: string, at: Carbon, message: ?string, url: ?string}|null
      */
@@ -139,7 +139,7 @@ class AutoUpdate
     }
 
     /**
-     * Scarica tutto il pacchetto (dal cron non ci sono limiti di tempo per richiesta).
+     * Downloads the whole package (from the cron there is no per-request time limit).
      */
     private function download(Release $release): string
     {
@@ -190,8 +190,8 @@ class AutoUpdate
     }
 
     /**
-     * Estrae tutti i file rimasti. Da qui in poi questo processo non carica più classi dell'app (stanno cambiando
-     * sotto di lui): scrive solo file e, alla fine, avvia il completamento in un processo nuovo.
+     * Extracts all remaining files. From here on this process no longer loads app classes (they are changing
+     * underneath it): it only writes files and, at the end, starts the completion in a new process.
      */
     private function extract(): string
     {
@@ -203,7 +203,7 @@ class AutoUpdate
         $artisan = $core.'/artisan';
         $eventFile = $this->eventFile();
         $progress = $this->runner->progressUrl();
-        // Preparato prima: dopo l'inizio dell'estrazione niente classi dell'app, nemmeno per l'email
+        // Prepared beforehand: once the extraction has started, no app classes, not even for the email
         $failedSubject = $this->subject('failed', $version);
         $failedBody = $this->body('failed', $version, null, $progress);
         $recipients = $this->recipients();
@@ -217,8 +217,8 @@ class AutoUpdate
                 $result = resume_updater_step($state, $webroot, $core, 30.0, 1_000_000);
             } while (! $result['done']);
         } catch (Throwable $exception) {
-            // Solo PHP puro: il sito resta in "aggiornamento" e il cron riprova; l'amministratore ha il link per
-            // continuare dal browser
+            // Plain PHP only: the site stays in "updating" state and the cron retries; the administrator has the link
+            // to continue from the browser
             @file_put_contents($eventFile, json_encode(['last' => [
                 'type' => 'failed', 'version' => $version, 'at' => date(DATE_ATOM), 'message' => $exception->getMessage(), 'url' => $progress,
             ]], JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE));
@@ -229,7 +229,7 @@ class AutoUpdate
             throw new CronStop('extraction failed: '.$exception->getMessage(), ok: false);
         }
 
-        // Completamento con il codice nuovo, in un processo separato; se exec() non c'è, al prossimo giro del cron
+        // Completion with the new code, in a separate process; if exec() is not available, on the next cron run
         if (function_exists('exec')) {
             @exec(escapeshellarg(PHP_BINARY).' '.escapeshellarg($artisan).' resume:update --finish > /dev/null 2>&1 &');
         }
@@ -238,7 +238,7 @@ class AutoUpdate
     }
 
     /**
-     * Completa un aggiornamento automatico (migrazioni, cache, manutenzione com'era) e avvisa.
+     * Completes an automatic update (migrations, cache, maintenance back as it was) and sends notices.
      */
     public function finish(): string
     {
@@ -259,7 +259,7 @@ class AutoUpdate
     }
 
     /**
-     * I requisiti del pacchetto valgono anche per il PHP del sito, che può essere diverso da quello del cron.
+     * The package requirements also apply to the site's PHP, which can differ from the cron's.
      *
      * @return list<string>
      */
@@ -306,7 +306,7 @@ class AutoUpdate
     }
 
     /**
-     * Evento per la dashboard ed email agli amministratori.
+     * Event for the dashboard and email to the administrators.
      */
     private function notify(string $type, string $version, ?string $message = null): void
     {
@@ -353,7 +353,7 @@ class AutoUpdate
     }
 
     /**
-     * Email a tutti gli amministratori; se l'hosting non spedisce, resta l'avviso in dashboard.
+     * Email to all administrators; if the hosting does not send mail, the dashboard notice remains.
      */
     private function mail(string $subject, string $body): void
     {
@@ -362,7 +362,7 @@ class AutoUpdate
                 Mail::raw($body, fn ($message) => $message->to($email)->subject($subject));
             }
         } catch (Throwable) {
-            // nessuna email: l'esito resta in dashboard e in Sistema
+            // no email: the result stays on the dashboard and in System
         }
     }
 }

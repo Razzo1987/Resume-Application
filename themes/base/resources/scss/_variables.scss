@@ -1,9 +1,9 @@
-// Variabili del tema base (prima di Bootstrap: sovrascrivono i suoi default).
-// Font di sistema: nessun webfont da scaricare, nessuna richiesta esterna.
+// Base theme variables (before Bootstrap: they override its defaults).
+// System fonts: no webfont to download, no external request.
 
 $font-family-sans-serif: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", "Noto Sans", "Liberation Sans", Arial, sans-serif;
 
-// Colori (contrasto verificato AA sul bianco e sulla barra laterale)
+// Colors (AA contrast checked on white and on the sidebar)
 $primary: #1d4f86;
 $secondary: #5b6573;
 $body-color: #1f2933;
@@ -13,7 +13,7 @@ $link-color: $primary;
 $link-decoration: underline;
 $link-underline-offset: .2em;
 
-// Colori propri del tema
+// Theme-specific colors
 $sidebar-bg: #16324f;
 $sidebar-color: #ffffff;
 $sidebar-muted: rgba(255, 255, 255, .8);

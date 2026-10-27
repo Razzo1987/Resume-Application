@@ -21,26 +21,26 @@ use Throwable;
  */
 class Cron
 {
-    /** Il cron è considerato attivo se è passato da meno di questi minuti. */
+    /** The cron is considered active if it last ran less than this many minutes ago. */
     public const int ACTIVE_MINUTES = 120;
 
-    /** Senza cron, ogni quanto l'admin può far partire i lavori leggeri. */
+    /** Without cron, how often the admin can start the light jobs. */
     public const int FALLBACK_MINUTES = 60;
 
     /** @var array<string, array{every: int, light: bool, run: Closure(bool): ?string}> */
     private array $jobs = [];
 
     /**
-     * @param  string|null  $storage  cartella storage dell'app (di default quella di Laravel; serve ai test)
+     * @param  string|null  $storage  the app's storage folder (Laravel's by default; used by the tests)
      */
     public function __construct(private readonly ?string $storage = null) {}
 
     /**
-     * Registra un lavoro (dai service provider).
+     * Registers a job (from the service providers).
      *
-     * @param  int  $every  minuti tra un'esecuzione e l'altra
-     * @param  bool  $light  breve: può partire anche dall'admin quando il cron non c'è
-     * @param  Closure(bool): ?string  $run  riceve true dal cron (niente limiti di tempo); restituisce una nota o null
+     * @param  int  $every  minutes between one run and the next
+     * @param  bool  $light  short: it can also start from the admin when there is no cron
+     * @param  Closure(bool): ?string  $run  receives true from the cron (no time limits); returns a note or null
      */
     public function register(string $name, int $every, bool $light, Closure $run): void
     {
@@ -56,10 +56,10 @@ class Cron
     }
 
     /**
-     * Esegue i lavori da fare. Dal cron tutti, dall'admin solo i leggeri. Un solo giro alla volta (lock).
+     * Runs the due jobs: all of them from the cron, only the light ones from the admin. One run at a time (lock).
      *
-     * @param  string|null  $only  un solo lavoro, anche se non è ancora il momento
-     * @return array<string, string> lavoro → esito ("ok", nota o "error: …")
+     * @param  string|null  $only  a single job, even if it is not due yet
+     * @return array<string, string> job → result ("ok", a note or "error: …")
      */
     public function run(bool $fromCron, ?string $only = null): array
     {
@@ -104,8 +104,8 @@ class Cron
     }
 
     /**
-     * PHP del sito (versione ed estensioni), annotato dalle pagine dell'admin al massimo una volta al giorno:
-     * l'installazione automatica lo confronta con i requisiti del pacchetto, perché il cron può usare un altro PHP.
+     * The site's PHP (version and extensions), recorded by the admin pages at most once a day: the automatic
+     * installation compares it with the package requirements, because the cron can use a different PHP.
      */
     public function rememberWebRuntime(): void
     {
@@ -138,9 +138,9 @@ class Cron
     }
 
     /**
-     * Senza cron attivo, fa partire i lavori leggeri dopo aver risposto all'admin (al massimo una volta l'ora).
+     * Without an active cron, starts the light jobs after responding to the admin (at most once an hour).
      *
-     * @return bool true se il giro è stato programmato
+     * @return bool true if the run was scheduled
      */
     public function runFromAdminIfNeeded(): bool
     {
@@ -168,7 +168,7 @@ class Cron
     }
 
     /**
-     * Il cron dell'hosting è passato di recente?
+     * Has the hosting cron run recently?
      */
     public function isActive(): bool
     {
@@ -185,7 +185,7 @@ class Cron
     }
 
     /**
-     * Versione di PHP usata dal cron (può essere diversa da quella del sito).
+     * PHP version used by the cron (it can differ from the site's).
      */
     public function cronPhpVersion(): ?string
     {
@@ -195,7 +195,7 @@ class Cron
     }
 
     /**
-     * Esito dell'ultima esecuzione di ogni lavoro.
+     * Result of the last run of each job.
      *
      * @return array<string, array{at: ?Carbon, ok: bool, message: ?string, every: int, light: bool}>
      */
@@ -220,7 +220,7 @@ class Cron
     }
 
     /**
-     * Annota l'esito di un lavoro finito altrove (es. "resume:update --finish" avviato dopo l'estrazione).
+     * Records the result of a job finished elsewhere (e.g. "resume:update --finish" started after the extraction).
      */
     public function recordResult(string $name, bool $ok, ?string $message): void
     {
@@ -231,7 +231,7 @@ class Cron
         });
     }
 
-    /** Esiti dei lavori (in inglese nel registro) → testo per l'admin */
+    /** Job results (in English in the log) → text for the admin */
     private const array RESULTS = [
         '/^off$/' => 'off',
         '/^up to date$/' => 'up_to_date',
@@ -253,7 +253,7 @@ class Cron
     ];
 
     /**
-     * Esito di un lavoro scritto per l'admin (gli errori restano come sono).
+     * A job's result worded for the admin (errors stay as they are).
      */
     public static function describe(?string $message): string
     {
@@ -330,7 +330,7 @@ class Cron
             $message = $run($fromCron);
             $ok = true;
         } catch (CronStop $signal) {
-            // File dell'app appena sostituiti: si registra l'esito e si chiude il giro
+            // App files just replaced: record the result and end the run
             $message = $signal->getMessage();
             $ok = $signal->ok;
             $stop = true;

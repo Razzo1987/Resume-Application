@@ -22,8 +22,8 @@ use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Model;
 
 /**
- * Layout della pagina CV: sezioni attive, ordine (drag & drop), titoli e voci di menu.
- * Le sezioni sono predefinite: non si creano né si eliminano.
+ * Layout of the CV page: active sections, order (drag & drop), titles and menu items.
+ * The sections are predefined: they are not created or deleted.
  */
 class PageSectionResource extends Resource
 {

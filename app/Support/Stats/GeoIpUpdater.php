@@ -15,21 +15,21 @@ use RuntimeException;
 use Throwable;
 
 /**
- * Download e aggiornamento dei database GeoLite2 (City e ASN), come fa geoipupdate:
- *  - controllo con una richiesta HEAD e la data Last-Modified (non conta nei limiti di download di MaxMind);
- *  - download a blocchi da 8 MB (dall'admin ogni blocco è una richiesta breve; dal cron tutto di fila),
- *    autenticato con Account ID e License Key (HTTP Basic), seguendo il rimando di MaxMind allo storage dei file;
- *  - estrazione del .mmdb dal .tar.gz, verifica che si apra e sostituzione del vecchio file solo alla fine.
+ * Download and update of the GeoLite2 databases (City and ASN), the way geoipupdate does it:
+ *  - check with a HEAD request and the Last-Modified date (it does not count toward MaxMind's download limits);
+ *  - download in 8 MB chunks (from the admin each chunk is a short request; from the cron all in one go),
+ *    authenticated with Account ID and License Key (HTTP Basic), following MaxMind's redirect to the file storage;
+ *  - extraction of the .mmdb from the .tar.gz, check that it opens, and replacement of the old file only at the end.
  *
- * Documentazione: https://dev.maxmind.com/geoip/updating-databases/
- * Le condizioni d'uso di GeoLite chiedono di tenere i database aggiornati: il cron controlla ogni giorno.
+ * Documentation: https://dev.maxmind.com/geoip/updating-databases/
+ * The GeoLite terms of use ask to keep the databases up to date: the cron checks every day.
  */
 class GeoIpUpdater
 {
     public const int CHUNK = 8 * 1024 * 1024;
 
     /**
-     * @param  int  $chunk  byte per richiesta (più piccolo nei test)
+     * @param  int  $chunk  bytes per request (smaller in the tests)
      */
     public function __construct(
         private readonly GeoIp $geoIp,
@@ -37,7 +37,7 @@ class GeoIpUpdater
     ) {}
 
     /**
-     * Stato di ogni database: installato, data della versione installata e di quella disponibile.
+     * Status of each database: installed, date of the installed version and of the available one.
      *
      * @return array<string, array{installed: bool, installed_at: ?Carbon, remote_at: ?Carbon, checked_at: ?Carbon, update: bool, size: int}>
      */
@@ -71,7 +71,7 @@ class GeoIpUpdater
     }
 
     /**
-     * Chiede a MaxMind la data dell'ultima versione di ogni database (richieste HEAD).
+     * Asks MaxMind for the date of the latest version of each database (HEAD requests).
      *
      * @return array<string, array{installed: bool, installed_at: ?Carbon, remote_at: ?Carbon, checked_at: ?Carbon, update: bool, size: int}>
      */
@@ -97,7 +97,7 @@ class GeoIpUpdater
     }
 
     /**
-     * Scarica il blocco successivo di un database; a download finito lo installa.
+     * Downloads the next chunk of a database; once the download is complete, installs it.
      *
      * @return array{received: int, total: int, done: bool}
      */
@@ -156,7 +156,7 @@ class GeoIpUpdater
     }
 
     /**
-     * Dal cron: controlla e scarica tutto ciò che è da aggiornare.
+     * From the cron: checks and downloads everything that needs updating.
      */
     public function updateAll(): string
     {
@@ -185,7 +185,7 @@ class GeoIpUpdater
     }
 
     /**
-     * Estrae il .mmdb dall'archivio, controlla che si apra e sostituisce quello installato.
+     * Extracts the .mmdb from the archive, checks that it opens and replaces the installed one.
      */
     public function install(string $edition, string $archive): void
     {
@@ -230,7 +230,7 @@ class GeoIpUpdater
     }
 
     /**
-     * Copia il primo file .mmdb di un .tar.gz (lettura a blocchi, senza estensioni particolari).
+     * Copies the first .mmdb file out of a .tar.gz (reading in chunks, without special extensions).
      */
     private function extract(string $archive, string $target): bool
     {
@@ -258,7 +258,7 @@ class GeoIpUpdater
                 $type = $header[156];
                 $padding = (512 - $size % 512) % 512;
 
-                if ($type === 'L') { // nome lungo GNU: il nome vero è nel blocco dati
+                if ($type === 'L') { // GNU long name: the real name is in the data block
                     $longName = rtrim((string) gzread($gz, $size + $padding), "\0");
 
                     continue;

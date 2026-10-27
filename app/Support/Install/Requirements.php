@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Support\Install;
 
 /**
- * Requisiti del server: versione di PHP, estensioni e cartelle scrivibili.
+ * Server requirements: PHP version, extensions and writable folders.
  */
 class Requirements
 {

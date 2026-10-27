@@ -11,7 +11,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 /**
- * Categoria di competenze (es. Competenze, Soft skill, Strumenti).
+ * Skill category (e.g. Expertise, Soft skills, Tools).
  *
  * @property int $id
  * @property string $key

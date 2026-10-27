@@ -25,7 +25,7 @@ class CertificationsTable
                 ImageColumn::make('badge')
                     ->label(__('admin.fields.badge'))
                     ->disk('uploads')
-                    // Stessa "scatola" per tutti: quadrati e rettangolari restano proporzionati e allineati
+                    // Same "box" for all: square and rectangular badges keep their proportions and stay aligned
                     ->imageWidth(80)
                     ->imageHeight(40)
                     ->extraImgAttributes(['style' => 'object-fit: contain; object-position: left center;'])
@@ -45,7 +45,7 @@ class CertificationsTable
     }
 
     /**
-     * Relazioni caricate in anticipo e ordinamento predefinito dell'elenco.
+     * Eager-loaded relations and default sort order of the list.
      *
      * @param  Builder<Certification>  $query
      * @return Builder<Certification>

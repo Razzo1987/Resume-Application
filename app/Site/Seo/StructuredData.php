@@ -23,8 +23,8 @@ use App\Support\Languages\Locales;
 use App\Support\Settings\Settings;
 
 /**
- * Dati strutturati Schema.org (JSON-LD).
- * Email, telefono e data di nascita sono esclusi a meno che l'admin non li attivi (D7).
+ * Schema.org structured data (JSON-LD).
+ * Email, phone and birth date are excluded unless the admin enables them (D7).
  */
 final class StructuredData
 {
@@ -49,7 +49,7 @@ final class StructuredData
     }
 
     /**
-     * Indirizzo della radice del sito, con lo slash finale ("https://example.com/").
+     * Address of the site root, with the trailing slash ("https://example.com/").
      */
     private function root(): string
     {
@@ -57,7 +57,7 @@ final class StructuredData
     }
 
     /**
-     * Pagina CV: ProfilePage con la persona completa e le pubblicazioni.
+     * CV page: ProfilePage with the full person and the publications.
      *
      * @return array<string, mixed>
      */
@@ -84,7 +84,7 @@ final class StructuredData
     }
 
     /**
-     * Pagina di dettaglio (progetto, esperienza): WebPage con le briciole di pane.
+     * Detail page (project, experience): WebPage with the breadcrumbs.
      *
      * @return array<string, mixed>
      */
@@ -113,7 +113,7 @@ final class StructuredData
     }
 
     /**
-     * Elenco del blog.
+     * Blog listing.
      *
      * @param  iterable<Article>  $articles
      * @return array<string, mixed>
@@ -154,7 +154,7 @@ final class StructuredData
     }
 
     /**
-     * Articolo del blog: BlogPosting con autore, date e immagine.
+     * Blog article: BlogPosting with author, dates and image.
      *
      * @return array<string, mixed>
      */
@@ -190,7 +190,7 @@ final class StructuredData
     }
 
     /**
-     * Nodo Person essenziale per le pagine diverse dal CV (quello completo è nella pagina CV).
+     * Minimal Person node for pages other than the CV (the full one is on the CV page).
      *
      * @return array<string, mixed>
      */
@@ -253,7 +253,7 @@ final class StructuredData
                 ->filter()->values()->all(),
         ];
 
-        // Dati personali: solo se l'admin li ha attivati esplicitamente
+        // Personal data: only if the admin has explicitly enabled it
         if ($this->settings->bool('jsonld.include_email') && filled($profile->email)) {
             $person['email'] = $profile->email;
         }
@@ -360,7 +360,7 @@ final class StructuredData
     }
 
     /**
-     * Toglie i valori vuoti (null, "", []).
+     * Removes empty values (null, "", []).
      *
      * @param  array<string, mixed>  $data
      * @return array<string, mixed>

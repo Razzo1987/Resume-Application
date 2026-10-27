@@ -9,8 +9,8 @@ use GdImage;
 use Illuminate\Support\Facades\Storage;
 
 /**
- * Icona del sito (favicon): dall'immagine caricata in admin (PNG quadrato) si ricavano, la prima volta
- * che servono, le versioni 32×32 (scheda del browser) e 180×180 (schermata Home di iPhone/iPad).
+ * Site icon (favicon): from the image uploaded in the admin (square PNG), the 32×32 (browser tab) and
+ * 180×180 (iPhone/iPad Home Screen) versions are generated the first time they are needed.
  */
 final class SiteIcon
 {
@@ -23,7 +23,7 @@ final class SiteIcon
     ) {}
 
     /**
-     * @return array<int, string>|null dimensione => URL
+     * @return array<int, string>|null size => URL
      */
     public function urls(): ?array
     {
@@ -67,7 +67,7 @@ final class SiteIcon
         imagesavealpha($icon, true);
         imagefill($icon, 0, 0, (int) imagecolorallocatealpha($icon, 0, 0, 0, 127));
 
-        // Ritaglio centrale quadrato, poi ridimensionamento
+        // Square center crop, then resize
         $side = min(imagesx($image), imagesy($image));
         imagecopyresampled($icon, $image, 0, 0, intdiv(imagesx($image) - $side, 2), intdiv(imagesy($image) - $side, 2), $size, $size, $side, $side);
 

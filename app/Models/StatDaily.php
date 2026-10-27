@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Carbon;
 
 /**
- * Totale di un giorno per pagina e dimensione (es. day, "project:3", "os", "Android", 12). Vedi App\Support\Stats\Aggregator.
+ * Total of a day per page and dimension (e.g. day, "project:3", "os", "Android", 12). See App\Support\Stats\Aggregator.
  *
  * @property int $id
  * @property Carbon $day

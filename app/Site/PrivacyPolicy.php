@@ -12,13 +12,13 @@ use App\Support\Stats\GeoIp;
 use Illuminate\Support\HtmlString;
 
 /**
- * Informativa privacy: pagina "/{lingua}/privacy" con il link nel footer.
+ * Privacy policy: "/{locale}/privacy" page with the link in the footer.
  *
- * Si attiva dalle impostazioni ed è sempre attiva con le statistiche delle visite. Il testo si scrive per lingua
- * nell'admin; vuoto, vale il testo modello del pacchetto di lingua (lang/{lingua}/site.php, chiavi privacy.*).
- * Nel testo {name} diventa il nome del profilo ed {email} l'indirizzo (codificato come nel resto del sito).
- * Con le statistiche attive in fondo si aggiunge da sé la parte sulle statistiche, sempre coerente con le
- * impostazioni (mesi di conservazione, geolocalizzazione).
+ * It is enabled from the settings and is always enabled with visit statistics. The text is written per language
+ * in the admin; when empty, the template text of the language pack applies (lang/{locale}/site.php, privacy.* keys).
+ * In the text {name} becomes the profile name and {email} the address (encoded as in the rest of the site).
+ * With statistics enabled, the part about statistics is added automatically at the end, always consistent with
+ * the settings (retention months, geolocation).
  */
 final class PrivacyPolicy
 {
@@ -40,7 +40,7 @@ final class PrivacyPolicy
     }
 
     /**
-     * Testo modello di una lingua, con {name} ed {email} da sostituire (lo si può copiare nell'editor dell'admin).
+     * Template text of a language, with {name} and {email} to replace (it can be copied into the admin editor).
      */
     public function template(string $locale): string
     {
@@ -55,7 +55,7 @@ final class PrivacyPolicy
     }
 
     /**
-     * Parte sulle statistiche, generata dalle impostazioni.
+     * The part about statistics, generated from the settings.
      */
     public function statsSection(string $locale): string
     {
@@ -78,11 +78,11 @@ final class PrivacyPolicy
     }
 
     /**
-     * Testo da mostrare nel sito: sanificato, con nome ed email al loro posto e, se servono, le statistiche.
+     * Text to show on the site: sanitized, with the name and email in place and, if needed, the statistics.
      */
     public function render(string $locale, Profile $profile): HtmlString
     {
-        // Niente ripiego sulla lingua principale: una lingua senza testo proprio usa il modello nella sua lingua
+        // No fallback to the main language: a language without its own text uses the template in its language
         $texts = $this->settings->get('privacy.text', []);
         $custom = is_array($texts) && is_string($texts[$locale] ?? null) ? $texts[$locale] : null;
         $html = (string) $this->richText->render($this->richText->hasText($custom) ? $custom : $this->template($locale));
@@ -98,7 +98,7 @@ final class PrivacyPolicy
     }
 
     /**
-     * Email come nel resto del sito: codificata nell'HTML e ricomposta dallo script del tema.
+     * Email as in the rest of the site: encoded in the HTML and put back together by the theme script.
      */
     private function email(string $locale, Profile $profile): string
     {

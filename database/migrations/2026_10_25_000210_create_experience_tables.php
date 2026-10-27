@@ -32,9 +32,9 @@ return new class extends Migration
             $table->json('role')->comment('(T)');
             $table->json('location')->nullable()->comment('(T)');
             $table->date('start_date');
-            $table->date('end_date')->nullable()->comment('Vuota = in corso');
-            $table->json('summary')->nullable()->comment('(T) HTML breve, mostrato nel CV');
-            $table->json('details')->nullable()->comment('(T) HTML, pagina di dettaglio');
+            $table->date('end_date')->nullable()->comment('Empty = ongoing');
+            $table->json('summary')->nullable()->comment('(T) short HTML, shown in the CV');
+            $table->json('details')->nullable()->comment('(T) HTML, detail page');
             $table->json('slug')->nullable()->comment('(T)');
             $table->json('seo_title')->nullable()->comment('(T)');
             $table->json('seo_description')->nullable()->comment('(T)');
@@ -52,8 +52,8 @@ return new class extends Migration
             $table->json('sector')->nullable()->comment('(T)');
             $table->date('start_date');
             $table->date('end_date')->nullable();
-            $table->json('summary')->nullable()->comment('(T) HTML breve');
-            $table->json('details')->nullable()->comment('(T) HTML, pagina di dettaglio');
+            $table->json('summary')->nullable()->comment('(T) short HTML');
+            $table->json('details')->nullable()->comment('(T) HTML, detail page');
             $table->string('image')->nullable();
             $table->json('image_alt')->nullable()->comment('(T)');
             $table->json('slug')->nullable()->comment('(T)');

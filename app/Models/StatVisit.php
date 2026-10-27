@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Carbon;
 
 /**
- * Una pagina vista (o un CV scaricato), senza cookie e con l'IP accorciato. Vedi App\Support\Stats\Tracker.
+ * One page view (or one CV download), without cookies and with the IP truncated. See App\Support\Stats\Tracker.
  *
  * @property int $id
  * @property Carbon $visited_at

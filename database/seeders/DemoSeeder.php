@@ -33,8 +33,8 @@ use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Storage;
 
 /**
- * CV dimostrativo di "John Doe", sviluppatore web (profilo inventato e generico), in italiano e inglese,
- * per provare il progetto subito dopo l'installazione: tutte le sezioni, un progetto con pagina dedicata, un articolo.
+ * Demo CV of "John Doe", web developer (made-up, generic profile), in Italian and English,
+ * to try the project right after the installation: all sections, a project with a dedicated page, an article.
  */
 class DemoSeeder extends Seeder
 {
@@ -136,7 +136,7 @@ class DemoSeeder extends Seeder
             $project->skills()->attach([$web->id, $php->id]);
         }
 
-        // Un progetto con il testo di dettaglio: ha una pagina dedicata
+        // One project with the detail text: it has a dedicated page
         Project::query()->orderBy('id')->firstOrFail()->update([
             'details' => [
                 'it-IT' => '<h2>Contesto</h2><p>Prenotazioni online per una rete di 40 stazioni di noleggio bici, con pagamento e biglietto sul telefono.</p><h2>Risultati</h2><ul><li>300.000 prenotazioni nel primo anno</li><li>Tempo medio per prenotare sceso da 5 a 2 minuti</li><li>Conforme alle WCAG 2.1 livello AA</li></ul>',
@@ -173,7 +173,7 @@ class DemoSeeder extends Seeder
             'title' => ['it-IT' => 'Certificazione di inglese', 'en-GB' => 'English certificate'],
             'type' => CertificationType::Exam,
             'issued_on' => '2019-06-01',
-            'badge' => self::sampleBadge(480, 120), // i badge non sono sempre quadrati
+            'badge' => self::sampleBadge(480, 120), // badges are not always square
         ]);
 
         LanguageSkill::query()->create(['language_code' => 'it', 'is_native' => true, 'sort_order' => 10]);
@@ -221,7 +221,7 @@ class DemoSeeder extends Seeder
             'published_at' => now()->subDay(),
         ]);
 
-        // Un CV PDF di esempio per lingua, come se fosse stato caricato dall'admin
+        // A sample PDF CV per language, as if it had been uploaded from the admin
         foreach (Language::query()->whereIn('code', ['it-IT', 'en-GB'])->get() as $language) {
             $path = CvDocument::DIRECTORY.'/'.CvDocument::storageName($language->code);
 
@@ -241,7 +241,7 @@ class DemoSeeder extends Seeder
     }
 
     /**
-     * Foto profilo di esempio: una sagoma disegnata con GD, salvata come il resto delle immagini (WebP).
+     * Sample profile photo: a silhouette drawn with GD, saved like the rest of the images (WebP).
      */
     public static function samplePhoto(): ?string
     {
@@ -272,10 +272,7 @@ class DemoSeeder extends Seeder
     }
 
     /**
-     * Copertina di esempio per l'articolo: barre e linee disegnate con GD.
-     */
-    /**
-     * Badge di esempio (forma piena con un bordo), quadrato o rettangolare.
+     * Sample badge (filled shape with a border), square or rectangular.
      */
     public static function sampleBadge(int $width, int $height): ?string
     {
@@ -303,6 +300,9 @@ class DemoSeeder extends Seeder
         }
     }
 
+    /**
+     * Sample cover for the article: bars and lines drawn with GD.
+     */
     public static function sampleCover(): ?string
     {
         if (! function_exists('imagecreatetruecolor')) {
@@ -337,7 +337,7 @@ class DemoSeeder extends Seeder
     }
 
     /**
-     * PDF minimo valido di una pagina A4 con una riga di testo (solo ASCII).
+     * Minimal valid PDF of one A4 page with one line of text (ASCII only).
      */
     public static function samplePdf(string $text): string
     {

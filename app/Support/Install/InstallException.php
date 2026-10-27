@@ -7,6 +7,6 @@ namespace App\Support\Install;
 use RuntimeException;
 
 /**
- * Errore dell'installazione con un messaggio da mostrare all'utente.
+ * Installation error with a message to show to the user.
  */
 class InstallException extends RuntimeException {}

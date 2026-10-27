@@ -10,7 +10,7 @@ use Illuminate\Support\Carbon;
 use Livewire\Attributes\Reactive;
 
 /**
- * Visualizzazioni e download del CV per giorno (pagina Statistiche e dashboard).
+ * Views and CV downloads per day (Statistics page and dashboard).
  */
 class StatsTimelineChart extends ChartWidget
 {
@@ -52,7 +52,7 @@ class StatsTimelineChart extends ChartWidget
             'fill' => true,
             'tension' => 0.25,
             'pointRadius' => $long ? 0 : 2,
-            // disegnata per prima: il riempimento non deve coprire la linea dei download
+            // drawn first: the fill must not cover the downloads line
             'order' => 2,
         ]];
 

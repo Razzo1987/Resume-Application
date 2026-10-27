@@ -9,16 +9,16 @@ use App\Support\Settings\Settings;
 use Illuminate\Support\Facades\Cache;
 
 /**
- * IP degli amministratori: chi usa l'admin da un indirizzo è l'amministratore, quindi le visite al sito da lì
- * non si contano, per stats.admin_ip_days giorni dall'ultimo accesso all'admin (default 14). Con un IP condiviso
- * (ufficio, rete mobile) l'esclusione toccherebbe anche altre persone: per questo scade da sola.
+ * Administrator IPs: whoever uses the admin from an address is the administrator, so site visits from there are
+ * not counted, for stats.admin_ip_days days after the last admin access (default 14). With a shared IP (office,
+ * mobile network) the exclusion would also affect other people: that is why it expires on its own.
  */
 class AdminIps
 {
     public function __construct(private readonly Settings $settings) {}
 
     /**
-     * Annota l'IP di una pagina dell'admin (al massimo una scrittura ogni 10 minuti per indirizzo).
+     * Records the IP of an admin page (at most one write every 10 minutes per address).
      */
     public function touch(?string $ip): void
     {
@@ -47,7 +47,7 @@ class AdminIps
     }
 
     /**
-     * Toglie gli indirizzi scaduti.
+     * Removes the expired addresses.
      */
     public function prune(): int
     {

@@ -9,8 +9,8 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Str;
 
 /**
- * Genera lo slug per ogni lingua attiva quando è vuoto (es. dal titolo), unico per lingua.
- * Il modello deve usare HasTranslations, avere un campo tradotto "slug" e definire slugSource().
+ * Generates the slug for each active language when it is empty (e.g. from the title), unique per language.
+ * The model must use HasTranslations, have a translated "slug" field and define slugSource().
  *
  * @phpstan-require-extends Model
  */

@@ -1,6 +1,6 @@
 <?php
 
-// Dietro un proxy (Cloudflare, Codespaces) l'indirizzo pubblico arriva negli header X-Forwarded-*
+// Behind a proxy (Cloudflare, Codespaces) the public address arrives in the X-Forwarded-* headers
 
 $forwarded = [
     'HTTP_X_FORWARDED_HOST' => 'cv.example.org',

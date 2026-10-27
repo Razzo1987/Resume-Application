@@ -12,9 +12,9 @@ use App\Support\Languages\LanguagePacks;
 use Illuminate\Database\Eloquent\Model;
 
 /**
- * Quando cambia un indirizzo pubblico, quello vecchio continua a funzionare con un 301:
- * - slug di un progetto o di un'esperienza modificato in admin;
- * - segmento URL di una lingua modificato (vale per tutti gli indirizzi sotto di esso).
+ * When a public address changes, the old one keeps working with a 301:
+ * - slug of a project or an experience changed in the admin;
+ * - URL segment of a language changed (applies to all the addresses below it).
  */
 final class UrlChangeRedirects
 {

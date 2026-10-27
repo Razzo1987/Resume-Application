@@ -18,12 +18,12 @@ use Filament\Support\Icons\Heroicon;
 use Illuminate\Database\Eloquent\Model;
 
 /**
- * Azioni dell'admin che portano al sito pubblico.
+ * Admin actions that lead to the public site.
  */
 class SiteActions
 {
     /**
-     * "Apri nel sito": la pagina dedicata nella lingua di default, se esiste (pubblicata, con dettaglio...).
+     * "Apri nel sito": the dedicated page in the default language, if it exists (published, with details...).
      */
     public static function viewOnSite(): Action
     {
@@ -37,7 +37,7 @@ class SiteActions
     }
 
     /**
-     * Sposta un'esperienza tra lavoro e volontariato (le due sezioni hanno elenchi separati in admin).
+     * Moves an experience between work and volunteering (the two sections have separate lists in the admin).
      */
     public static function moveExperience(): Action
     {
@@ -58,8 +58,8 @@ class SiteActions
     }
 
     /**
-     * Home del sito per il pulsante "Vai al sito" della barra in alto: nella lingua dell'admin se è attiva sul sito
-     * ("it" → it-IT), altrimenti nella lingua di default.
+     * Site home for the "Vai al sito" button in the top bar: in the admin language if it is active on the site
+     * ("it" → it-IT), otherwise in the default language.
      */
     public static function homeUrl(): string
     {
@@ -89,7 +89,7 @@ class SiteActions
     }
 
     /**
-     * Un articolo può non essere scritto nella lingua di default: si apre nella prima lingua in cui esiste.
+     * An article may not be written in the default language: it opens in the first language it exists in.
      */
     private static function firstArticlePath(Article $article, SiteUrls $urls): ?string
     {

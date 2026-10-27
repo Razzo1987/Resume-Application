@@ -10,8 +10,8 @@ use App\Support\Update\UpdateStorage;
 use Illuminate\Support\Facades\Cache;
 
 /**
- * Stato del sistema per l'admin: protezione di core/ (verificata al massimo una volta al giorno),
- * manutenzione, aggiornamento da completare, nuova versione disponibile.
+ * System status for the admin: protection of core/ (checked at most once a day),
+ * maintenance, update to complete, new version available.
  */
 class SystemStatus
 {
@@ -36,7 +36,7 @@ class SystemStatus
     }
 
     /**
-     * Avvisi da mostrare nella dashboard: chiave → livello (danger, warning).
+     * Alerts to show on the dashboard: key → level (danger, warning).
      *
      * @return array<string, string>
      */

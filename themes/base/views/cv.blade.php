@@ -1,4 +1,4 @@
-{{-- Pagina CV: le sezioni attive nell'ordine scelto in admin. Un tema può ridefinire ogni sezione. --}}
+{{-- CV page: the enabled sections in the order chosen in the admin. A theme can redefine every section. --}}
 @extends('theme::layouts.site')
 
 @section('content')

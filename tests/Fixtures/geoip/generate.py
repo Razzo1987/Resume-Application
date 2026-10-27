@@ -1,4 +1,4 @@
-"""Database GeoLite2 finti per i test (City e ASN), con pochi indirizzi di esempio.
+"""Fake GeoLite2 databases for the tests (City and ASN), with a few sample addresses.
 
     pip install mmdb-writer netaddr
     python3 tests/Fixtures/geoip/generate.py

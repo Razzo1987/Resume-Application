@@ -7,7 +7,7 @@ namespace App\Support\Install;
 use RuntimeException;
 
 /**
- * Scrive il file .env dell'installazione (permessi 0600 dove il sistema lo consente).
+ * Writes the installation's .env file (0600 permissions where the system allows it).
  */
 class EnvWriter
 {
@@ -19,7 +19,7 @@ class EnvWriter
         $lines = ['# Resume App — configurazione generata dall\'installer il '.date('Y-m-d H:i')];
 
         foreach ($values as $key => $value) {
-            // Chiavi fatte di soli spazi: righe vuote per separare i gruppi
+            // Keys made only of spaces: blank lines that separate the groups
             $lines[] = trim((string) $key) === '' ? '' : $key.'='.self::format($value);
         }
 
@@ -44,7 +44,7 @@ class EnvWriter
 
         $value = (string) $value;
 
-        // Valori semplici senza virgolette; il resto tra virgolette con \ e " protetti (anche $ per l'interpolazione)
+        // Simple values without quotes; everything else in quotes with \ and " escaped (also $, for interpolation)
         if ($value !== '' && preg_match('/^[A-Za-z0-9_.:\/@+=-]+$/', $value) === 1) {
             return $value;
         }

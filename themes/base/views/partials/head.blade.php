@@ -49,5 +49,5 @@
 @foreach ($page->jsonLd as $data)
 <script type="application/ld+json">{!! json_encode($data, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_HEX_TAG | JSON_HEX_AMP) !!}</script>
 @endforeach
-{{-- Punto di estensione per i temi (es. preload dei font): theme::partials.head-extra --}}
+{{-- Extension point for themes (e.g. font preload): theme::partials.head-extra --}}
 @includeIf('theme::partials.head-extra')

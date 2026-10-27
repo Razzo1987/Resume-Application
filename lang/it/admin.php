@@ -1,8 +1,8 @@
 <?php
 
 /*
- * Resume App — interfaccia del pannello admin (italiano).
- * Le stringhe del sito pubblico stanno nei language pack: lang/{codice}/site.php.
+ * Resume App — admin panel interface (Italian).
+ * Public site strings live in the language packs: lang/{code}/site.php.
  */
 
 return [

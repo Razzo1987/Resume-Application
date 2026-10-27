@@ -13,8 +13,8 @@ use App\Site\SiteUrls;
 use Illuminate\View\View;
 
 /**
- * Variabili disponibili in tutte le view dei temi che ricevono una $page:
- * $layout (menu, lingue, contatti, footer) e gli strumenti per i contenuti
+ * Variables available in all theme views that receive a $page:
+ * $layout (menu, languages, contacts, footer) and the content tools
  * ($richText, $dates, $images, $urls).
  */
 class SiteViewComposer

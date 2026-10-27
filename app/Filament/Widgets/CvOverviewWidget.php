@@ -13,7 +13,7 @@ use Filament\Widgets\StatsOverviewWidget;
 use Filament\Widgets\StatsOverviewWidget\Stat;
 
 /**
- * Dashboard, gruppo CV: il PDF scaricabile di ogni lingua attiva, con la data, e cosa succede se manca.
+ * Dashboard, CV group: the downloadable PDF of each active language, with its date, and what happens if it is missing.
  */
 class CvOverviewWidget extends StatsOverviewWidget
 {

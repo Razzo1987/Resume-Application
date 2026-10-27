@@ -9,7 +9,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 /**
- * Azienda, cliente, ateneo, ente certificatore o associazione. Il logo si carica una volta sola.
+ * Company, client, university, certifying body or association. The logo is uploaded only once.
  *
  * @property int $id
  * @property string $name

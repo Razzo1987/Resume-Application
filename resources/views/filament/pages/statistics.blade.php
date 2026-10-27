@@ -125,7 +125,7 @@
     </x-filament::section>
 
     <script>
-        // Download dei database GeoLite a blocchi (ogni blocco è una richiesta breve)
+        // Chunked download of the GeoLite databases (each chunk is a short request)
         window.resumeGeoipDownload = () => ({
             busy: false, edition: '', received: 0, total: 0, error: null, done: false,
             async run() {

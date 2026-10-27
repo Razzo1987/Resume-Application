@@ -16,7 +16,7 @@ use App\Support\Languages\Locales;
 use App\Support\Settings\Settings;
 
 /**
- * Costruisce i dati comuni del layout ($layout) una sola volta per pagina.
+ * Builds the shared layout data ($layout) only once per page.
  */
 final class LayoutFactory
 {
@@ -54,7 +54,7 @@ final class LayoutFactory
         $hasBlog = $this->blog->hasArticles($locale);
 
         $menu = $this->cv->menu()->map(fn (PageSection $section): array => $section->key === PageSectionKey::LatestArticles
-            // Il blog ha una pagina sua: la voce porta sempre lì, anche dal CV
+            // The blog has its own page: the item always links there, even from the CV
             ? [
                 'key' => 'blog',
                 'title' => $section->displayTitle($locale),
@@ -64,7 +64,7 @@ final class LayoutFactory
             : [
                 'key' => $section->key->value,
                 'title' => $section->displayTitle($locale),
-                // Nella pagina CV basta l'ancora; dalle altre pagine si torna al CV
+                // On the CV page the anchor is enough; from the other pages it goes back to the CV
                 'url' => $page->isCv ? '#'.$section->key->value : url($this->urls->sectionPath($locale, $section->key->value)),
                 'current' => $page->section === $section->key->value,
             ])->values()->all();

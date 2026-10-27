@@ -13,7 +13,7 @@ use Filament\Schemas\Schema;
 class OrganizationForm
 {
     /**
-     * Campi riusati anche per creare un'organizzazione al volo dai form di esperienze, progetti, ecc.
+     * Fields also reused to create an organization on the fly from the experience, project, etc. forms.
      *
      * @return array<Field>
      */

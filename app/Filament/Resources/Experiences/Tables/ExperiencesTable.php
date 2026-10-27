@@ -42,7 +42,7 @@ class ExperiencesTable
     }
 
     /**
-     * Relazioni caricate in anticipo e ordinamento predefinito dell'elenco.
+     * Eager-loaded relations and default sort order of the list.
      *
      * @param  Builder<Experience>  $query
      * @return Builder<Experience>

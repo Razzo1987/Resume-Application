@@ -1,11 +1,11 @@
 <?php
 
 /*
- * Rotte del sito pubblico.
- * Gruppo middleware "site": niente sessione, niente CSRF, niente cookie (vedi bootstrap/app.php).
+ * Public site routes.
+ * "site" middleware group: no session, no CSRF, no cookies (see bootstrap/app.php).
  *
- * Gli indirizzi dipendono dalle lingue e dai segmenti tradotti scelti in admin, quindi le rotte sono generiche
- * e i controller verificano che l'URL sia quello canonico (altrimenti 301).
+ * Addresses depend on the languages and on the translated segments chosen in the admin, so the routes are generic
+ * and the controllers check that the URL is the canonical one (otherwise 301).
  */
 
 use App\Http\Controllers\Site\BlogController;

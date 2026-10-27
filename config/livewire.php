@@ -1,7 +1,7 @@
 <?php
 
-// Solo ciò che cambia rispetto ai default di Livewire: caricamenti temporanei fino a 50 MB
-// (zip dei temi e dei contenuti). Resta comunque il limite di PHP (upload_max_filesize, post_max_size).
+// Only what differs from the Livewire defaults: temporary uploads up to 50 MB
+// (theme and content zips). The PHP limit still applies (upload_max_filesize, post_max_size).
 return [
     'temporary_file_upload' => [
         'disk' => env('LIVEWIRE_TEMPORARY_FILE_UPLOAD_DISK'),

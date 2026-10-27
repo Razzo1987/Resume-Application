@@ -13,7 +13,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Carbon;
 
 /**
- * Articolo del mini-blog. Pubblicato se lo stato è "published" e la data di pubblicazione è passata.
+ * Article of the mini-blog. Published if the status is "published" and the publication date has passed.
  *
  * @property int $id
  * @property string|null $cover_image
@@ -43,7 +43,7 @@ class Article extends Model implements Translatable
 
     protected static function booted(): void
     {
-        // "Pubblicato" senza data: si pubblica adesso
+        // "Published" without a date: it is published now
         static::saving(function (Article $article): void {
             if ($article->status === ArticleStatus::Published && $article->published_at === null) {
                 $article->published_at = now();
@@ -52,7 +52,7 @@ class Article extends Model implements Translatable
     }
 
     /**
-     * Articoli scritti in una lingua (titolo presente): nel blog di quella lingua compaiono solo questi.
+     * Articles written in a language (title present): only these appear in the blog of that language.
      *
      * @param  Builder<static>  $query
      * @return Builder<static>
@@ -68,7 +68,7 @@ class Article extends Model implements Translatable
     }
 
     /**
-     * Minuti di lettura stimati (200 parole al minuto).
+     * Estimated reading time in minutes (200 words per minute).
      */
     public function readingMinutes(?string $locale = null): int
     {
@@ -96,7 +96,8 @@ class Article extends Model implements Translatable
     }
 
     /**
-     * Lo slug nasce solo dal titolo scritto in quella lingua: un articolo non tradotto non ha indirizzo in quella lingua.
+     * The slug comes only from the title written in that language:
+     * an untranslated article has no URL in that language.
      */
     public function slugSource(string $locale): ?string
     {

@@ -12,7 +12,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 
 /**
- * Sezione della pagina CV: attiva/disattiva, ordine, titolo personalizzato, voce di menu.
+ * Section of the CV page: enabled/disabled, order, custom title, menu item.
  *
  * @property int $id
  * @property PageSectionKey $key
@@ -48,7 +48,7 @@ class PageSection extends Model implements Translatable
     }
 
     /**
-     * Titolo personalizzato o, se vuoto, quello del language pack.
+     * Custom title or, if empty, the one from the language pack.
      */
     public function displayTitle(?string $locale = null): string
     {
@@ -56,14 +56,14 @@ class PageSection extends Model implements Translatable
     }
 
     /**
-     * Crea le sezioni mancanti nell'ordine di default (idempotente).
+     * Creates the missing sections in the default order (idempotent).
      */
     public static function ensureDefaults(): void
     {
         foreach (PageSectionKey::cases() as $position => $key) {
             self::query()->firstOrCreate(['key' => $key], [
                 'is_enabled' => $key !== PageSectionKey::LatestArticles,
-                // Ultimi articoli: la voce "Blog" del menu c'è anche con la sezione spenta nel CV
+                // Latest articles: the "Blog" menu item is there even with the section turned off in the CV
                 'in_menu' => $key !== PageSectionKey::Highlights,
                 'sort_order' => ($position + 1) * 10,
             ]);

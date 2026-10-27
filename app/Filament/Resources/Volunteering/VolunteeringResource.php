@@ -11,7 +11,7 @@ use BackedEnum;
 use Filament\Support\Icons\Heroicon;
 
 /**
- * Volontariato: stesso modello e stessi campi delle esperienze di lavoro (kind = volunteering).
+ * Volunteering: same model and same fields as the work experiences (kind = volunteering).
  */
 class VolunteeringResource extends ExperienceResource
 {

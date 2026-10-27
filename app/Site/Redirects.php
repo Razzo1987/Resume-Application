@@ -9,23 +9,23 @@ use Illuminate\Support\Facades\Schema;
 use Throwable;
 
 /**
- * Redirect gestiti dall'admin e creati in automatico quando cambia uno slug o un segmento URL.
- * Un redirect vale per il percorso indicato e per tutti i percorsi sotto di esso
- * (/it-IT/progetti → /it-IT/lavori sposta anche /it-IT/progetti/slug).
+ * Redirects managed from the admin and created automatically when a slug or a URL segment changes.
+ * A redirect applies to the given path and to all the paths below it
+ * (/it-IT/progetti → /it-IT/lavori also moves /it-IT/progetti/slug).
  */
 final class Redirects
 {
     /**
-     * Destinazione per un percorso, oppure null.
+     * Target for a path, or null.
      *
-     * @return array{0: string, 1: int}|null [destinazione, codice HTTP]
+     * @return array{0: string, 1: int}|null [target, HTTP status code]
      */
     public function match(string $path): ?array
     {
-        // Si confronta il percorso decodificato (i redirect si scrivono "in chiaro", anche con spazi)
+        // The decoded path is compared (redirects are written "in plain text", spaces included)
         $path = Redirect::normalizePath(rawurldecode($path));
 
-        // Candidati: il percorso stesso e tutti i suoi "genitori" (/a/b/c, /a/b, /a)
+        // Candidates: the path itself and all its "parents" (/a/b/c, /a/b, /a)
         $segments = explode('/', trim($path, '/'));
         $candidates = [];
 
@@ -59,7 +59,7 @@ final class Redirects
 
         $target = $redirect->to_path;
 
-        // Redirect di un prefisso: si conserva il resto del percorso
+        // Redirect of a prefix: the rest of the path is kept
         if ($redirect->from_path !== $path && ! str_starts_with($target, 'http')) {
             $rest = substr($path, strlen($redirect->from_path));
             $target = rtrim($target, '/').implode('/', array_map('rawurlencode', explode('/', $rest)));
@@ -69,8 +69,8 @@ final class Redirects
     }
 
     /**
-     * Registra un redirect permanente evitando catene e cicli:
-     * i redirect che puntavano a $from ora puntano a $to; un vecchio redirect da $to viene rimosso.
+     * Records a permanent redirect, avoiding chains and loops:
+     * redirects that pointed to $from now point to $to; an old redirect from $to is removed.
      */
     public function remember(string $from, string $to): void
     {

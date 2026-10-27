@@ -10,22 +10,22 @@ use App\Support\Update\ReleaseChecker;
 use Filament\Widgets\Widget;
 
 /**
- * Avvisi in cima alla dashboard: cartella core raggiungibile, aggiornamento da completare, manutenzione attiva,
- * nuova versione disponibile.
+ * Alerts at the top of the dashboard: core folder reachable, update to complete, maintenance on,
+ * new version available.
  */
 class SystemAlertsWidget extends Widget
 {
     protected static ?int $sort = -10;
 
-    // Gli avvisi si vedono subito, senza caricamento differito
+    // Alerts are shown right away, without lazy loading
     protected static bool $isLazy = false;
 
     protected int|string|array $columnSpan = 'full';
 
     protected string $view = 'filament.widgets.system-alerts';
 
-    // Il controllo delle nuove versioni su GitHub è un lavoro programmato (App\Support\Cron\CronJobs): col cron
-    // dell'hosting, oppure dall'admin dopo aver risposto quando il cron non c'è.
+    // The check for new versions on GitHub is a scheduled job (App\Support\Cron\CronJobs): run by the hosting's
+    // cron or, when there is no cron, by the admin after the response is sent.
     public static function canView(): bool
     {
         return app(SystemStatus::class)->alerts() !== [];

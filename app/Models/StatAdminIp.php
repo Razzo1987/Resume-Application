@@ -8,7 +8,8 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Carbon;
 
 /**
- * IP da cui un amministratore ha usato l'admin: le visite al sito da lì non contano. Vedi App\Support\Stats\AdminIps.
+ * IP from which an administrator used the admin: visits to the site from there do not count.
+ * See App\Support\Stats\AdminIps.
  *
  * @property int $id
  * @property string $ip

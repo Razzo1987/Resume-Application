@@ -18,7 +18,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Carbon;
 
 /**
- * Esperienza di lavoro o di volontariato.
+ * Work or volunteering experience.
  *
  * @property int $id
  * @property ExperienceKind $kind
@@ -92,8 +92,8 @@ class Experience extends Model implements Translatable
     }
 
     /**
-     * Ha una pagina dedicata solo se c'è qualcosa in più del riassunto nel CV:
-     * un testo di dettaglio o dei progetti visibili (niente pagine "vuote" per i motori di ricerca).
+     * Has a dedicated page only if there is something more than the summary in the CV:
+     * a detail text or visible projects (no "empty" pages for search engines).
      */
     public function hasDetailPage(): bool
     {

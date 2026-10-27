@@ -11,7 +11,7 @@ use App\Site\SiteContext;
 use Illuminate\Contracts\View\View;
 
 /**
- * Pagina del CV: le sezioni attive nell'ordine scelto in admin.
+ * CV page: the active sections in the order chosen in the admin.
  */
 class CvController extends Controller
 {

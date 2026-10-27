@@ -1,7 +1,7 @@
 <?php
 
 /*
- * Rotte con sessione (gruppo "web").
- * Il sito pubblico NON va qui: sta in routes/site.php, senza sessione né cookie.
- * Il pannello admin registra le sue rotte tramite Filament (AdminPanelProvider).
+ * Routes with a session ("web" group).
+ * The public site does NOT go here: it lives in routes/site.php, without session or cookies.
+ * The admin panel registers its routes through Filament (AdminPanelProvider).
  */

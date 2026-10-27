@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 
 /**
- * Colonna sort_order: ordine manuale (drag & drop in admin).
+ * sort_order column: manual order (drag & drop in the admin).
  *
  * @phpstan-require-extends Model
  */

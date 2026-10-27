@@ -1,34 +1,34 @@
 #!/usr/bin/env bash
-# Crea il pacchetto completo di rilascio: releases/resume-app-<versione>.zip
+# Builds the full release package: releases/resume-app-<version>.zip
 #
-# Struttura dello zip (si estrae TUTTO nella webroot, es. public_html/):
-#   index.php, htaccess.dist, build/, themes/…   ← contenuto di public/
-#   core/                                        ← resto dell'app (protetto da core/.htaccess)
+# Zip layout (extract EVERYTHING into the web root, e.g. public_html/):
+#   index.php, htaccess.dist, build/, themes/…   ← content of public/
+#   core/                                        ← rest of the app (protected by core/.htaccess)
 #   core/VERSION, core/manifest.json
 #
-# Il pacchetto non contiene mai dati: .env, storage/ (solo struttura vuota), public/uploads, temi PRO.
-# Uso: scripts/build-release.sh [cartella-output]   (dalla radice del repo, con working tree pulito)
+# The package never contains data: .env, storage/ (empty structure only), public/uploads, PRO themes.
+# Usage: scripts/build-release.sh [output-folder]   (from the repo root, with a clean working tree)
 set -euo pipefail
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 OUT="${1:-$ROOT/../releases}"
-mkdir -p "$OUT" && OUT="$(cd "$OUT" && pwd)"   # percorso assoluto: lo zip si crea da un'altra cartella
+mkdir -p "$OUT" && OUT="$(cd "$OUT" && pwd)"   # absolute path: the zip is created from another folder
 VERSION="$(tr -d '[:space:]' < "$ROOT/VERSION")"
 NAME="resume-app-${VERSION}"
 WORK="$(mktemp -d)"
 trap 'rm -rf "$WORK"' EXIT
 
-echo "== Esportazione dei soli file versionati"
+echo "== Exporting the versioned files only"
 mkdir -p "$WORK/src"
 git -C "$ROOT" archive --format=tar HEAD | tar -x -C "$WORK/src"
 
-echo "== Dipendenze di produzione e asset"
+echo "== Production dependencies and assets"
 ( cd "$WORK/src"
   composer install --no-dev --prefer-dist --optimize-autoloader --classmap-authoritative --no-interaction --no-progress
-  # Se Composer ha dovuto clonare i pacchetti da git (dist non scaricabili), niente cartelle .git nel pacchetto
+  # If Composer had to clone the packages from git (dist not downloadable), no .git folders in the package
   find vendor -type d -name .git -prune -exec rm -rf {} +
-  # Pulizia di vendor: test, documentazione ed esempi dei pacchetti non servono in produzione
+  # vendor cleanup: the packages' tests, docs and examples are not needed in production
   find vendor -mindepth 3 -maxdepth 3 -type d \( -iname tests -o -iname test -o -iname test_files -o -iname legacy_tests -o -iname docs -o -iname doc -o -iname examples -o -name .github \) -prune -exec rm -rf {} +
-  # Strumenti di manutenzione dei pacchetti (es. il binario splitsh-lite di Laravel, 7 MB)
+  # Package maintenance tools (e.g. Laravel's splitsh-lite binary, 7 MB)
   rm -rf vendor/laravel/framework/bin
   find vendor -type f \( -iname '*.md' -o -name 'phpunit.xml*' -o -name 'phpstan.neon*' -o -name '.editorconfig' -o -name '.gitattributes' \) -delete
   npm ci --no-audit --no-fund
@@ -37,7 +37,7 @@ echo "== Dipendenze di produzione e asset"
          package.json package-lock.json vite.config.* playwright.config.* scripts
 )
 
-echo "== Composizione: public/ → radice, resto → core/"
+echo "== Layout: public/ → root, the rest → core/"
 PKG="$WORK/$NAME"
 mkdir -p "$PKG/core"
 shopt -s dotglob
@@ -45,19 +45,19 @@ mv "$WORK/src/public/"* "$PKG/"
 rmdir "$WORK/src/public"
 mv "$WORK/src/"* "$PKG/core/"
 shopt -u dotglob
-[ -f "$PKG/.htaccess" ] && rm "$PKG/.htaccess"        # .htaccess non si sovrascrive mai
+[ -f "$PKG/.htaccess" ] && rm "$PKG/.htaccess"        # .htaccess is never overwritten
 cp "$PKG/core/stubs/htaccess.dist" "$PKG/htaccess.dist"
 cp "$PKG/core/stubs/core.htaccess" "$PKG/core/.htaccess"
 rm -rf "$PKG/uploads" "$PKG/core/.env" "$PKG/core/.env.example.local"
-# storage: solo la struttura (le cartelle con il loro .gitignore), nessun dato
+# storage: structure only (the folders with their .gitignore), no data
 find "$PKG/core/storage" -type f ! -name .gitignore -delete
 
-echo "== Manifest (per rimuovere i file orfani negli aggiornamenti)"
+echo "== Manifest (to remove orphan files during updates)"
 echo "$VERSION" > "$PKG/core/VERSION"
 ( cd "$PKG" && find . -type f ! -path './core/manifest.json' -print0 | sort -z \
   | xargs -0 sha256sum | sed 's#  \./#  #' ) > "$WORK/sums.txt"
-# requires: versione minima di PHP (da composer.json) ed estensioni (come l'installer), controllate dall'admin
-# prima di aggiornare dal pannello
+# requires: minimum PHP version (from composer.json) and extensions (like the installer), checked by the admin
+# before updating from the panel
 EXTENSIONS="$(grep -o "EXTENSIONS = \[[^]]*\]" "$PKG/core/app/Support/Install/Requirements.php" | grep -o "'[a-z_]*'" | tr -d "'" | paste -sd, -)"
 python3 - "$WORK/sums.txt" "$PKG/core/manifest.json" "$VERSION" "$PKG/core/composer.json" "$EXTENSIONS" <<'PY'
 import json, re, sys
@@ -72,7 +72,7 @@ json.dump({"name": "resume-app", "version": ver, "requires": requires, "files": 
 PY
 
 echo "== Zip"
-rm -f "$OUT/$NAME.zip"   # zip aggiorna un archivio esistente: si riparte sempre da zero
+rm -f "$OUT/$NAME.zip"   # zip updates an existing archive: always start from scratch
 ( cd "$PKG" && zip -qr -X "$OUT/$NAME.zip" . )
 ( cd "$OUT" && sha256sum "$NAME.zip" > "$NAME.zip.sha256" )
-echo "Creato $OUT/$NAME.zip ($(du -h "$OUT/$NAME.zip" | cut -f1))"
+echo "Created $OUT/$NAME.zip ($(du -h "$OUT/$NAME.zip" | cut -f1))"

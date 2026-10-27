@@ -7,6 +7,6 @@ namespace App\Themes;
 use RuntimeException;
 
 /**
- * Errore di installazione o rimozione di un tema, con un messaggio da mostrare all'amministratore.
+ * Error while installing or removing a theme, with a message to show to the administrator.
  */
 class ThemeException extends RuntimeException {}
