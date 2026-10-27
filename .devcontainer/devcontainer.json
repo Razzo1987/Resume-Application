@@ -1,0 +1,19 @@
+{
+    "name": "Resume App",
+    "dockerComposeFile": "docker-compose.yml",
+    "service": "app",
+    "workspaceFolder": "/workspaces/${localWorkspaceFolderBasename}",
+    "features": {
+        "ghcr.io/devcontainers/features/node:1": { "version": "22" }
+    },
+    "forwardPorts": [8000],
+    "portsAttributes": {
+        "8000": { "label": "Resume App", "onAutoForward": "openPreview" }
+    },
+    "postCreateCommand": "bash .devcontainer/setup.sh",
+    "postStartCommand": "bash .devcontainer/start.sh",
+    "customizations": {
+        "codespaces": { "openFiles": [".devcontainer/README.md"] },
+        "vscode": { "extensions": ["bmewburn.vscode-intelephense-client", "onecentlabs.laravel-blade"] }
+    }
+}

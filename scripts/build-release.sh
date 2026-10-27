@@ -33,7 +33,7 @@ echo "== Dipendenze di produzione e asset"
   find vendor -type f \( -iname '*.md' -o -name 'phpunit.xml*' -o -name 'phpstan.neon*' -o -name '.editorconfig' -o -name '.gitattributes' \) -delete
   npm ci --no-audit --no-fund
   npm run build
-  rm -rf node_modules tests docs .github .editorconfig phpunit.xml phpstan.neon* pint.json \
+  rm -rf node_modules tests docs .github .devcontainer .editorconfig phpunit.xml phpstan.neon* pint.json \
          package.json package-lock.json vite.config.* playwright.config.* scripts
 )
 

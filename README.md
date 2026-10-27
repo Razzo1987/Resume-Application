@@ -2,6 +2,7 @@
 
 [![Latest release](https://img.shields.io/github/v/release/Razzo1987/Resume-Application?label=release)](https://github.com/Razzo1987/Resume-Application/releases/latest)
 [![CI](https://github.com/Razzo1987/Resume-Application/actions/workflows/ci.yml/badge.svg)](https://github.com/Razzo1987/Resume-Application/actions/workflows/ci.yml)
+[![CD](https://github.com/Razzo1987/Resume-Application/actions/workflows/release.yml/badge.svg)](https://github.com/Razzo1987/Resume-Application/actions/workflows/release.yml)
 [![PHP](https://img.shields.io/badge/php-8.4%20%7C%208.5-777BB4.svg?logo=php&logoColor=white)](https://php.net/)
 [![Laravel](https://img.shields.io/badge/laravel-13-FF2D20.svg?logo=laravel&logoColor=white)](https://laravel.com/)
 [![Filament](https://img.shields.io/badge/filament-5-FDAE4B.svg)](https://filamentphp.com/)
@@ -13,12 +14,21 @@
 > panel and keep it up to date with one click. The public site sets **no cookies** and loads **nothing from third
 > parties**: fonts, icons, scripts and styles are all self-hosted.
 
+<p align="center">
+  <img src="docs/screenshots/cv-desktop.webp" alt="CV page" width="68%">
+  <img src="docs/screenshots/cv-mobile.webp" alt="CV page on a phone" width="22%">
+</p>
+
+[![Open in GitHub Codespaces](https://github.com/codespaces/badge.svg)](https://codespaces.new/Razzo1987/Resume-Application?quickstart=1)
+
 Version 2 is a complete rewrite of Resume Application 1.x on **Laravel 13** and **Filament 5**. Content from version 1
 can be imported (see [docs/INSTALL.md](docs/INSTALL.md#from-version-1)).
 
 ## 📑 Table of Contents
 
 - [✨ Features](#-features)
+- [📸 Screenshots](#-screenshots)
+- [🧪 Try it in your browser](#-try-it-in-your-browser)
 - [🛠️ Technical Stack](#️-technical-stack)
 - [📋 Requirements](#-requirements)
 - [🚀 Installation](#-installation)
@@ -68,6 +78,25 @@ can be imported (see [docs/INSTALL.md](docs/INSTALL.md#from-version-1)).
 - **Updates from the admin**: new versions are announced from the GitHub releases; the package is downloaded
   straight to the server (or uploaded from your computer, with no upload-size limit), checked, installed in a few
   seconds and completed automatically. No FTP needed.
+
+## 📸 Screenshots
+
+| Admin panel | Project page |
+|---|---|
+| ![Editing an experience](docs/screenshots/admin-experience.webp) | ![Project page](docs/screenshots/project.webp) |
+
+More in **[docs/SCREENSHOTS.md](docs/SCREENSHOTS.md)**: CV, detail pages, blog, phone layout and the admin pages.
+
+## 🧪 Try it in your browser
+
+Click **Open in GitHub Codespaces** above (a free GitHub account is enough): in a couple of minutes you get your own
+copy running with the sample CV of "John Doe".
+
+- **Site**: *Ports* tab → port 8000 → open in the browser;
+- **Admin**: the same address followed by `/admin`, user `demo@example.com`, password `demo-password`.
+
+Everything stays inside your Codespace (delete it when you are done). The configuration is in
+[`.devcontainer`](.devcontainer).
 
 ## 🛠️ Technical Stack
 
@@ -155,7 +184,8 @@ php artisan make:filament-user             # first administrator
 php artisan serve                          # http://localhost:8000 - admin at /admin
 ```
 
-Quality checks (they run in GitHub Actions on every push):
+Quality checks (they run in GitHub Actions on every push; each run also keeps the Playwright report and the
+screenshots of [docs/SCREENSHOTS.md](docs/SCREENSHOTS.md) as downloadable artifacts):
 
 ```bash
 php artisan test                    # Pest (MySQL test database "resume_app_test")

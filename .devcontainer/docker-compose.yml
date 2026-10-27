@@ -1,0 +1,25 @@
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    volumes:
+      - ../..:/workspaces:cached
+    command: sleep infinity
+    depends_on:
+      - db
+
+  # Database del CV di prova (dati di "John Doe"), solo dentro il Codespace
+  db:
+    image: mysql:8.0
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: resume_app
+      MYSQL_USER: resume
+      MYSQL_PASSWORD: resume
+    volumes:
+      - mysql-data:/var/lib/mysql
+
+volumes:
+  mysql-data:
