@@ -149,13 +149,16 @@ switch, so things can be prepared and published later. Items with a public page 
   redirect. **Custom texts** replace single strings of the pack (the key is the one in `site.php`, e.g.
   `actions.download_cv`).
 - **Slugs** are generated from the title of each language and can be edited; changing one creates a redirect.
-- The *Translations* page and the "Missing translations" column of the lists show what is left to translate.
+- The *Translations* page and the "Missing translations" column of the lists show what is left to translate. In
+  *Profile* and *Settings* each language tab shows how many texts are still empty (their names on hover), and the
+  *Presentation* section of the profile lists them.
 
 ## Settings
 
 | Section | Options |
 |---|---|
 | **Appearance** | Active theme (changed from *Themes*), "Print" button, "Last updated on" date in the footer. |
+| **Time zone** | The time zone of the site, proposed from the country of the default language (e.g. `Europe/Rome` for it-IT). It sets when a day starts for the statistics and the dates of articles and "Last updated on", and the dates and times shown in the admin. |
 | **CV download** | Name of the downloaded file, with the placeholders `{name}` (full name), `{lang}` (IT, EN...) and `{locale}` (it-IT, en-GB...), e.g. `CV {name} - {lang}.pdf`; whether a language without its own CV offers the one of the default language. |
 | **Contact details on the page** | Show email, phone and birth date on the CV. Email and phone are encoded in the HTML and revealed by the page script, which keeps most spam bots away. |
 | **Structured data (JSON-LD)** | Include email, phone and birth date in the data read by search engines. Off by default: turn them on only if you want them to appear in search results. |

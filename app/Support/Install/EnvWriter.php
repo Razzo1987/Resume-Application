@@ -16,7 +16,7 @@ class EnvWriter
      */
     public function write(string $path, array $values): void
     {
-        $lines = ['# Resume App — configurazione generata dall\'installer il '.date('Y-m-d H:i')];
+        $lines = ['# Resume App - configuration written by the installer on '.date('Y-m-d H:i')];
 
         foreach ($values as $key => $value) {
             // Keys made only of spaces: blank lines that separate the groups
@@ -26,7 +26,7 @@ class EnvWriter
         $content = implode("\n", $lines)."\n";
 
         if (file_put_contents($path, $content, LOCK_EX) === false) {
-            throw new RuntimeException("Impossibile scrivere {$path}");
+            throw new RuntimeException((string) __('admin.messages.cannot_write', ['path' => $path]));
         }
 
         @chmod($path, 0600);

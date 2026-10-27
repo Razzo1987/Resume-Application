@@ -15,16 +15,16 @@ use Illuminate\Console\Command;
  */
 class RunCron extends Command
 {
-    protected $signature = 'resume:cron {--job= : esegue solo questo lavoro}';
+    protected $signature = 'resume:cron {--job= : runs only this job}';
 
-    protected $description = 'Esegue i lavori programmati (aggiornamenti, GeoLite, statistiche, pulizia)';
+    protected $description = 'Runs the scheduled jobs (updates, GeoLite, statistics, clean-up)';
 
     public function handle(Cron $cron): int
     {
         $job = $this->option('job');
 
         if (is_string($job) && $job !== '' && ! in_array($job, $cron->names(), true)) {
-            $this->error('Lavoro sconosciuto. Disponibili: '.implode(', ', $cron->names()));
+            $this->error('Unknown job. Available: '.implode(', ', $cron->names()));
 
             return self::FAILURE;
         }

@@ -89,7 +89,7 @@ it('has a site heading for every page section and a label for every automatic ke
     $file = lang_path("{$code}/site.php");
 
     if (! is_file($file)) {
-        $this->markTestSkipped("{$code}: site.php non ancora tradotto");
+        $this->markTestSkipped("{$code}: site.php not translated yet");
     }
 
     $strings = Arr::dot(['site' => require $file]);

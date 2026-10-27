@@ -48,7 +48,7 @@ class Htaccess
         $end = strpos($template, self::END);
 
         if ($start === false || $end === false) {
-            throw new RuntimeException('Modello htaccess.dist senza marcatori resume-app');
+            throw new RuntimeException('The htaccess.dist template has no resume-app markers');
         }
 
         $block = substr($template, $start, $end - $start + strlen(self::END));
@@ -74,7 +74,7 @@ class Htaccess
             : rtrim($block)."\n".($current !== '' ? "\n".ltrim($current) : '');
 
         if (file_put_contents($path, $content, LOCK_EX) === false) {
-            throw new RuntimeException("Impossibile scrivere {$path}");
+            throw new RuntimeException((string) __('admin.messages.cannot_write', ['path' => $path]));
         }
     }
 

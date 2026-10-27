@@ -18,21 +18,21 @@ use Throwable;
 class ImportV1 extends Command
 {
     protected $signature = 'resume:import-v1
-        {--files= : cartella public_html della v1 (img/, attachment/, resume/)}
-        {--sql= : dump .sql della v1 da caricare prima nel database "legacy"}
-        {--volunteering= : id v1 delle esperienze di volontariato, separati da virgola}
-        {--cv=* : CV corrente per lingua, es. --cv=it-IT=/percorso/cv.pdf}
-        {--fresh : elimina prima esperienze, progetti, formazione, certificazioni, competenze, organizzazioni e social}
-        {--force : non chiedere conferma}';
+        {--files= : public_html folder of v1 (img/, attachment/, resume/)}
+        {--sql= : v1 .sql dump to load first into the "legacy" database}
+        {--volunteering= : v1 ids of the volunteering experiences, comma separated}
+        {--cv=* : current CV per language, e.g. --cv=it-IT=/path/cv.pdf}
+        {--fresh : first delete experience, projects, education, certifications, skills, organizations and social links}
+        {--force : do not ask for confirmation}';
 
-    protected $description = 'Importa i contenuti della versione 1 (una riga per lingua) nella versione 2';
+    protected $description = 'Imports the content of version 1 (one row per language) into version 2';
 
     public function handle(V1Importer $importer): int
     {
         $files = (string) $this->option('files');
 
         if ($files === '' || ! is_dir($files)) {
-            $this->error('Indica con --files la cartella public_html della versione 1.');
+            $this->error('Give the public_html folder of version 1 with --files.');
 
             return self::FAILURE;
         }
@@ -42,17 +42,17 @@ class ImportV1 extends Command
         try {
             if ($sql = $this->option('sql')) {
                 $legacy->unprepared((string) file_get_contents((string) $sql));
-                $this->info("Dump caricato nel database \"{$legacy->getDatabaseName()}\".");
+                $this->info("Dump loaded into the \"{$legacy->getDatabaseName()}\" database.");
             }
 
             $legacy->table('profile')->count();
         } catch (Throwable $exception) {
-            $this->error('Database della v1 non raggiungibile: '.$exception->getMessage());
+            $this->error('The v1 database cannot be reached: '.$exception->getMessage());
 
             return self::FAILURE;
         }
 
-        if ($this->option('fresh') && ! $this->option('force') && ! $this->confirm('Eliminare i contenuti già presenti prima di importare?')) {
+        if ($this->option('fresh') && ! $this->option('force') && ! $this->confirm('Delete the existing content before importing?')) {
             return self::FAILURE;
         }
 

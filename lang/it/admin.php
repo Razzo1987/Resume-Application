@@ -677,6 +677,10 @@ return [
         'saved' => 'Salvato',
         'cv_now_current' => 'Ora è questa la versione scaricabile dal sito.',
         'default_language_changed' => 'Lingua di default cambiata in :language',
+        'cannot_write' => 'Impossibile scrivere :path',
+        'cannot_create' => 'Impossibile creare :path',
+        'zip_missing' => 'Estensione PHP zip non disponibile.',
+        'image_resize_failed' => 'Impossibile ridimensionare l\'immagine.',
     ],
 
     'translations' => [

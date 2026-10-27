@@ -102,7 +102,7 @@ class ImageOptimizer
         $resized = imagecreatetruecolor($newWidth, $newHeight);
 
         if ($resized === false) {
-            throw new RuntimeException('Impossibile ridimensionare l\'immagine.');
+            throw new RuntimeException((string) __('admin.messages.image_resize_failed'));
         }
 
         imagealphablending($resized, false);

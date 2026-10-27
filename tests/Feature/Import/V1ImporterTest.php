@@ -189,7 +189,7 @@ it('imports experiences in pairs of languages, with organisations, skills and vo
         ->and($acme->skills->map(fn ($skill) => $skill->t('name', 'en-GB'))->sort()->values()->all())->toBe(['SQL', 'Teamwork'])
         ->and($volunteering->t('role', 'it-IT'))->toBe('Volontario')
         ->and($volunteering->organization->type)->toBe(OrganizationType::Association)
-        ->and($output)->toContain('Esperienze: 3 (di cui 1 di volontariato)');
+        ->and($output)->toContain('Experience: 3 (1 of them volunteering)');
 });
 
 it('links each project to the experience of its dates and to its client', function () {
@@ -231,7 +231,7 @@ it('imports certifications with their PDF and badge, redirecting the old address
         ->and($y->type)->toBe(CertificationType::TrainingPath)
         ->and($y->verification_url)->toBe('https://verify.example/y')
         ->and($y->issued_on->toDateString())->toBe('2018-02-22')
-        ->and($output)->toContain('date diverse tra le lingue');
+        ->and($output)->toContain('dates differ between languages');
 
     $this->get('/attachment/Cert%20X%20(2020).pdf')->assertRedirect('/uploads/certificates/cert-x-2020.pdf')->assertStatus(301);
     $this->get('/attachment/attachment/Cert%20X%20(2020).pdf')->assertRedirect('/uploads/certificates/cert-x-2020.pdf');

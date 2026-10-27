@@ -60,7 +60,7 @@ class Language extends Model
             }
 
             if ($language->exists && ! $language->is_default && (bool) $language->getRawOriginal('is_default')) {
-                throw new LogicException('Scegli prima un\'altra lingua di default.');
+                throw new LogicException('Choose another default language first.');
             }
         });
 
@@ -79,7 +79,7 @@ class Language extends Model
         static::deleting(function (Language $language): void {
             // Check the stored value, not the one possibly changed in memory
             if ((bool) $language->getRawOriginal('is_default')) {
-                throw new LogicException('La lingua di default non si può eliminare.');
+                throw new LogicException('The default language cannot be deleted.');
             }
         });
 

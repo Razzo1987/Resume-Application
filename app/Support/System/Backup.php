@@ -29,7 +29,7 @@ class Backup
     public function create(): string
     {
         if (! class_exists(ZipArchive::class)) {
-            throw new RuntimeException('Estensione PHP zip non disponibile.');
+            throw new RuntimeException((string) __('admin.messages.zip_missing'));
         }
 
         $directory = $this->directory();
@@ -45,7 +45,7 @@ class Backup
         $zip = new ZipArchive;
 
         if ($zip->open($path, ZipArchive::CREATE | ZipArchive::OVERWRITE) !== true) {
-            throw new RuntimeException("Impossibile creare {$path}");
+            throw new RuntimeException((string) __('admin.messages.cannot_create', ['path' => $path]));
         }
 
         $data = ['created_at' => now()->toAtomString(), 'version' => trim((string) @file_get_contents(base_path('VERSION'))), 'tables' => []];

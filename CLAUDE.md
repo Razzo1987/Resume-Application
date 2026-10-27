@@ -19,6 +19,10 @@
 11. **Only the `base` theme is in this repository.** Other themes (commercial icons, private designs) live in their own
     repositories and are copied into `themes/` (git-ignored) by `scripts/build-theme.sh`. Never commit them, their
     compiled assets or icon sources here.
+12. **English in the code**: comments, docblocks, migration column comments, CI step names and script messages are in
+    English. User-facing texts live in the language files (`lang/`), never hard-coded.
+13. **Any hosting panel**: do not assume cPanel (or any other panel) in texts, docs or code; refer to "the hosting
+    control panel" and keep panel-specific details to the comparison table in `docs/INSTALL.md`.
 
 ## Before committing
 ```bash

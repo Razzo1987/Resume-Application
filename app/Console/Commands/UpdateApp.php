@@ -22,16 +22,16 @@ use Throwable;
 class UpdateApp extends Command
 {
     protected $signature = 'resume:update
-        {--check : controlla le nuove versioni su GitHub}
-        {--finish : completa un aggiornamento con i file già estratti}';
+        {--check : checks for new versions on GitHub}
+        {--finish : completes an update whose files are already extracted}';
 
-    protected $description = 'Controlla o completa un aggiornamento di Resume App';
+    protected $description = 'Checks for or completes a Resume App update';
 
     public function handle(ReleaseChecker $checker, UpdateRunner $runner, AutoUpdate $auto, Cron $cron): int
     {
         if ($this->option('finish')) {
             if (! $runner->isExtracted()) {
-                $this->info('Nessun aggiornamento da completare.');
+                $this->info('No update to complete.');
 
                 return self::SUCCESS;
             }
@@ -66,7 +66,7 @@ class UpdateApp extends Command
         }
 
         $available = $checker->available();
-        $this->line($available !== null ? 'Disponibile la versione '.$available->version : 'Nessuna versione più recente.');
+        $this->line($available !== null ? 'Version '.$available->version.' available' : 'No newer version.');
 
         return self::SUCCESS;
     }

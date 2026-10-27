@@ -48,7 +48,7 @@ it('keeps the same site strings in every language that has them', function (stri
     $file = lang_path("{$code}/site.php");
 
     if (! is_file($file)) {
-        $this->markTestSkipped("{$code}: site.php non ancora tradotto (fallback sulla lingua di default)");
+        $this->markTestSkipped("{$code}: site.php not translated yet (falls back to the default language)");
     }
 
     $reference = flattenKeys(require lang_path('it-IT/site.php'));

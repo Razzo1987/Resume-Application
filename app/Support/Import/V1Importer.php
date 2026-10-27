@@ -96,7 +96,7 @@ class V1Importer
             $model::query()->get()->each->delete();
         }
 
-        $this->note('Contenuti esistenti eliminati (--fresh)');
+        $this->note('Existing content deleted (--fresh)');
     }
 
     private function profile(ConnectionInterface $legacy): void
@@ -105,7 +105,7 @@ class V1Importer
         $main = $this->primary($rows);
 
         if ($main === null) {
-            $this->warn('Profilo: nessuna riga');
+            $this->warn('Profile: no rows');
 
             return;
         }
@@ -149,7 +149,7 @@ class V1Importer
             ]);
         }
 
-        $this->note("Profilo: {$profile->full_name}, {$position} profili social");
+        $this->note("Profile: {$profile->full_name}, {$position} social profiles");
     }
 
     /**
@@ -178,7 +178,7 @@ class V1Importer
             $map[$key] = $skill->id;
         }
 
-        $this->note('Competenze: '.count($map));
+        $this->note('Skills: '.count($map));
 
         return $map;
     }
@@ -232,7 +232,7 @@ class V1Importer
         }
 
         $volunteers = $experiences->where('kind', ExperienceKind::Volunteering)->count();
-        $this->note('Esperienze: '.$experiences->count()." (di cui {$volunteers} di volontariato), ".count($links).' con competenze');
+        $this->note('Experience: '.$experiences->count()." ({$volunteers} of them volunteering), ".count($links).' with skills');
 
         return $experiences;
     }
@@ -279,11 +279,11 @@ class V1Importer
             $linked += $experience !== null ? 1 : 0;
 
             if ($experience === null) {
-                $this->warn('Progetto "'.trim((string) $main->title).'": nessuna esperienza nelle sue date, da collegare a mano');
+                $this->warn('Project "'.trim((string) $main->title).'": no experience in its dates, to be linked by hand');
             }
         }
 
-        $this->note("Progetti: {$count} ({$linked} collegati a un'esperienza)");
+        $this->note("Projects: {$count} ({$linked} linked to an experience)");
     }
 
     private function educations(ConnectionInterface $legacy): void
@@ -317,7 +317,7 @@ class V1Importer
             ]);
         }
 
-        $this->note('Formazione: '.$groups->count());
+        $this->note('Education: '.$groups->count());
     }
 
     private function certifications(ConnectionInterface $legacy): void
@@ -336,7 +336,7 @@ class V1Importer
             $dates = $group->pluck('date')->filter()->unique();
 
             if ($dates->count() > 1) {
-                $this->warn("Certificazione \"{$title}\": date diverse tra le lingue ({$dates->implode(', ')}), usata {$main->date}");
+                $this->warn("Certification \"{$title}\": dates differ between languages ({$dates->implode(', ')}), {$main->date} used");
             }
 
             // Link: local PDF (attachment/…, also with the duplicated path) or verification page
@@ -367,7 +367,7 @@ class V1Importer
             $count++;
         }
 
-        $this->note("Certificazioni: {$count} ({$files} con PDF)");
+        $this->note("Certifications: {$count} ({$files} with PDF)");
     }
 
     /**
@@ -379,7 +379,7 @@ class V1Importer
             $language = Language::query()->where('code', $code)->first();
 
             if ($language === null || ! is_file($source)) {
-                $this->warn("CV {$code}: lingua o file non trovati ({$source})");
+                $this->warn("CV {$code}: language or file not found ({$source})");
 
                 continue;
             }
@@ -392,7 +392,7 @@ class V1Importer
                 'path' => $path,
                 'original_name' => basename($source),
                 'is_current' => true,
-                'note' => 'Importato dalla versione 1',
+                'note' => 'Imported from version 1',
             ]);
 
             $this->note("CV {$code}: ".basename($source));
@@ -401,7 +401,7 @@ class V1Importer
         // Languages without a CV offer the one of the default language, as v1 did
         if ($cvs !== [] && Language::query()->where('is_active', true)->count() > count($cvs)) {
             $this->settings->set('cv.fallback_to_default', true);
-            $this->note('Lingue senza CV: si scarica quello della lingua di default');
+            $this->note('Languages without a CV: the default language one is downloaded');
         }
 
         // Old CV URLs (resume/ folder) → download of the current CV
@@ -419,7 +419,7 @@ class V1Importer
         }
 
         if ($count > 0) {
-            $this->note("Redirect dei vecchi CV: {$count}");
+            $this->note("Redirects of the old CVs: {$count}");
         }
     }
 
@@ -441,7 +441,7 @@ class V1Importer
         }
 
         if (str_contains($place, ',')) {
-            $this->warn("Luogo \"{$place}\": indirizzo completo, da ridurre alla città in admin");
+            $this->warn("Place \"{$place}\": full address, to be cut down to the city in the admin");
         }
 
         return $place;
@@ -472,7 +472,7 @@ class V1Importer
 
         if ($texts !== [] && $this->settings->translated('footer.gdpr_text', $this->default) === null) {
             $this->settings->set('footer.gdpr_text', $texts);
-            $this->note('Testo del footer (copyright e consenso GDPR): '.implode(', ', array_keys($texts)));
+            $this->note('Footer text (copyright and GDPR consent): '.implode(', ', array_keys($texts)));
         }
     }
 
@@ -489,7 +489,7 @@ class V1Importer
         }
 
         $this->settings->set('site.icon', $this->images->store($this->files.'/'.$source, 'icon.png', 'uploads', 'site', 256, 'png'));
-        $this->note('Icona del sito: '.basename($source));
+        $this->note('Site icon: '.basename($source));
     }
 
     private function organization(string $name, ?string $logo, ?string $website, ?OrganizationType $type = null): ?Organization
@@ -535,7 +535,7 @@ class V1Importer
         $source = $this->files.'/'.ltrim(str_replace('\\/', '/', $relative), '/');
 
         if (! is_file($source)) {
-            $this->warn("Immagine mancante: {$relative}");
+            $this->warn("Missing image: {$relative}");
 
             return null;
         }
@@ -548,7 +548,7 @@ class V1Importer
         $source = $this->files.'/'.$relative;
 
         if (! is_file($source)) {
-            $this->warn("PDF mancante: {$relative}");
+            $this->warn("Missing PDF: {$relative}");
 
             return null;
         }
@@ -603,7 +603,7 @@ class V1Importer
                 continue;
             }
 
-            $this->warn("Coppia {$key}: righe della stessa lingua, importate separatamente");
+            $this->warn("Pair {$key}: rows of the same language, imported separately");
 
             foreach ($group as $row) {
                 $groups[-(int) $row->id] = collect([$row->language => $row]);

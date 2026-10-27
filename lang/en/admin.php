@@ -677,6 +677,10 @@ return [
         'saved' => 'Saved',
         'default_language_changed' => 'Default language changed to :language',
         'cv_now_current' => 'This is now the version downloaded from the website.',
+        'cannot_write' => 'Cannot write :path',
+        'cannot_create' => 'Cannot create :path',
+        'zip_missing' => 'The PHP zip extension is not available.',
+        'image_resize_failed' => 'The image could not be resized.',
     ],
 
     'translations' => [
