@@ -44,12 +44,13 @@ class StatisticsOverviewWidget extends StatsOverviewWidget
             ];
         }
 
-        rescue(fn () => app(Aggregator::class)->aggregate(today()), report: false);
+        $today = StatsQuery::today();
+        rescue(fn () => app(Aggregator::class)->aggregate($today), report: false);
 
-        $week = new StatsQuery(today()->subDays(6), today());
-        $previous = new StatsQuery(today()->subDays(13), today()->subDays(7));
+        $week = new StatsQuery($today->copy()->subDays(6), $today);
+        $previous = new StatsQuery($today->copy()->subDays(13), $today->copy()->subDays(7));
         $month = StatsQuery::forPeriod('30');
-        $timeline = (new StatsQuery(today()->subDays(13), today()))->timeline();
+        $timeline = (new StatsQuery($today->copy()->subDays(13), $today))->timeline();
         $totals = $week->totals();
         $before = $previous->totals();
         $topPage = array_key_first($month->pages(1));

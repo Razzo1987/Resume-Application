@@ -5,6 +5,7 @@ namespace App\Filament\Pages;
 use App\Filament\Support\Fields;
 use App\Filament\Support\Translatable;
 use App\Models\Profile;
+use App\Support\Languages\Locales;
 use BackedEnum;
 use Filament\Actions\Action;
 use Filament\Forms\Components\DatePicker;
@@ -89,6 +90,7 @@ class ManageProfile extends Page
                     ])
                     ->columnSpanFull(),
                 Section::make(__('admin.sections.presentation'))
+                    ->description(fn (): ?string => $this->missingSummary())
                     ->schema([
                         Translatable::tabs(fn (string $locale): array => [
                             TextInput::make("location.{$locale}")->label(__('admin.fields.location'))->helperText(__('admin.help.location'))->maxLength(255),
@@ -97,11 +99,30 @@ class ManageProfile extends Page
                                 ->label(__('admin.fields.bio'))
                                 ->toolbarButtons([['bold', 'italic', 'link'], ['h3', 'bulletList', 'orderedList'], ['undo', 'redo']]),
                             TextInput::make("photo_alt.{$locale}")->label(__('admin.fields.image_alt'))->maxLength(255),
-                        ]),
+                        ], missing: fn (string $locale): array => Profile::current()->missingTranslations($locale)),
                     ])
                     ->columnSpanFull(),
             ])
             ->statePath('data');
+    }
+
+    /**
+     * Texts written in a language but still empty in another one ("English: Presentazione, Località").
+     */
+    private function missingSummary(): ?string
+    {
+        $profile = Profile::current();
+        $parts = [];
+
+        foreach (app(Locales::class)->activeLanguages() as $language) {
+            $fields = $profile->missingTranslations($language->code);
+
+            if ($fields !== []) {
+                $parts[] = $language->name.': '.implode(', ', array_map(Translatable::fieldLabel(...), $fields));
+            }
+        }
+
+        return $parts !== [] ? __('admin.translations.missing_in', ['list' => implode(' · ', $parts)]) : null;
     }
 
     public function content(Schema $schema): Schema

@@ -94,7 +94,8 @@ class Tracker
 
         return StatVisit::query()->create([
             'visited_at' => now(),
-            'day' => now()->toDateString(),
+            // the day of the visit in the time zone of the site (a visit at 00:30 in Rome is not "yesterday")
+            'day' => now($this->settings->timezone())->toDateString(),
             'page' => $page['page'],
             'path' => Str::limit($request->getPathInfo(), 250, ''),
             'locale' => $page['locale'],

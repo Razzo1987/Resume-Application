@@ -6,6 +6,7 @@ namespace App\Filament\Widgets;
 
 use App\Filament\Pages\ManageSystem;
 use App\Support\Cron\Cron;
+use App\Support\Settings\Settings;
 use App\Support\System\Backup;
 use App\Support\System\Updater;
 use App\Support\Update\AutoUpdate;
@@ -36,7 +37,7 @@ class SystemOverviewWidget extends StatsOverviewWidget
         $cron = app(Cron::class);
         $auto = app(AutoUpdate::class);
         $event = $auto->lastEvent();
-        $backup = app(Backup::class)->lastCreatedAt();
+        $backup = app(Backup::class)->lastCreatedAt()?->setTimezone(app(Settings::class)->timezone());
         $system = ManageSystem::getUrl();
 
         return [

@@ -51,6 +51,7 @@ return [
         'presentation' => 'Presentazione',
         'appearance' => 'Aspetto',
         'cv_download' => 'Download del CV',
+        'timezone' => 'Fuso orario',
         'privacy' => 'Dati di contatto sulla pagina',
         'privacy_policy' => 'Informativa privacy',
         'structured_data' => 'Dati strutturati (JSON-LD)',
@@ -176,6 +177,7 @@ return [
         'print_enabled' => 'Pulsante "Stampa"',
         'show_last_updated' => 'Mostra "Aggiornato a…" nel footer',
         'cv_filename_pattern' => 'Nome del file scaricato',
+        'timezone' => 'Fuso orario del sito',
         'cv_fallback' => 'CV della lingua di default se manca',
         'show_email' => 'Mostra l\'e-mail',
         'show_phone' => 'Mostra il telefono',
@@ -230,6 +232,7 @@ return [
         'print_enabled' => 'Mostra il pulsante "Stampa". La versione di stampa pulita vale sempre, anche stampando dal browser.',
         'show_last_updated' => 'Data dell\'ultima modifica ai contenuti del CV.',
         'cv_filename_pattern' => 'Segnaposto: {name} = nome e cognome, {lang} = IT/EN…, {locale} = it-IT/en-GB…',
+        'timezone' => 'Giorni e orari delle statistiche, date e ore mostrate e inserite nell\'admin (es. la pubblicazione programmata di un articolo), date di pubblicazione nel sito. Di solito quello del luogo in cui vivi; i dati restano salvati in UTC, quindi si può cambiare quando vuoi.',
         'cv_fallback' => 'Se una lingua non ha un CV, il pulsante scarica quello della lingua di default.',
         'privacy' => 'Cosa mostrare nella pagina del CV.',
         'privacy_policy' => 'La pagina Privacy spiega ai visitatori quali dati tratta il sito. Il sito non usa cookie, quindi non serve un banner; un\'informativa è comunque utile, perché la pagina mostra la tua email e il server registra gli accessi.',
@@ -684,6 +687,8 @@ return [
         'items' => '{1} :count contenuto da completare|[2,*] :count contenuti da completare',
         'edit' => 'Modifica',
         'settings_texts' => 'Testi del sito (SEO e footer)',
+        'missing_fields' => 'Da tradurre: :fields',
+        'missing_in' => 'Testi da completare - :list',
     ],
 
     'dashboard' => [

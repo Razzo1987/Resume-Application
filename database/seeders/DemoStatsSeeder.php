@@ -7,6 +7,7 @@ use App\Models\Project;
 use App\Models\StatVisit;
 use App\Support\Settings\Settings;
 use App\Support\Stats\Aggregator;
+use App\Support\Stats\StatsQuery;
 use Illuminate\Database\Seeder;
 
 /**
@@ -67,9 +68,10 @@ class DemoStatsSeeder extends Seeder
 
         $pages = array_filter($pages);
         $rows = [];
+        $today = StatsQuery::today();
 
         for ($day = 89; $day >= 0; $day--) {
-            $date = today()->subDays($day);
+            $date = $today->copy()->subDays($day);
             $weekend = $date->isWeekend();
             $count = mt_rand(10, 22) + intdiv(90 - $day, 8) - ($weekend ? 7 : 0);
 
@@ -79,7 +81,8 @@ class DemoStatsSeeder extends Seeder
                 [$referrer] = $this->pick(self::SOURCES, 1);
                 $page = (string) $this->pick(array_map(fn (string $key, int $weight): array => [$key, $weight], array_keys($pages), $pages), 1)[0];
                 $campaign = mt_rand(1, 14) === 1;
-                $at = $date->copy()->setTime(mt_rand(7, 22), mt_rand(0, 59), mt_rand(0, 59));
+                // local time of the visit, stored in UTC like the real ones
+                $at = $date->copy()->setTime(mt_rand(7, 22), mt_rand(0, 59), mt_rand(0, 59))->utc();
 
                 $rows[] = [
                     'visited_at' => $at, 'day' => $date->toDateString(), 'page' => $page, 'path' => '/',
@@ -101,7 +104,7 @@ class DemoStatsSeeder extends Seeder
         }
 
         for ($day = 89; $day >= 0; $day--) {
-            app(Aggregator::class)->aggregate(today()->subDays($day));
+            app(Aggregator::class)->aggregate($today->copy()->subDays($day));
         }
 
         app(Settings::class)->set('stats.enabled', true);

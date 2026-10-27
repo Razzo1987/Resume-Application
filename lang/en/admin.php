@@ -51,6 +51,7 @@ return [
         'presentation' => 'Presentation',
         'appearance' => 'Appearance',
         'cv_download' => 'CV download',
+        'timezone' => 'Time zone',
         'privacy' => 'Contact details on the page',
         'privacy_policy' => 'Privacy notice',
         'structured_data' => 'Structured data (JSON-LD)',
@@ -176,6 +177,7 @@ return [
         'print_enabled' => '"Print" button',
         'show_last_updated' => 'Show "Last updated" in the footer',
         'cv_filename_pattern' => 'Downloaded file name',
+        'timezone' => 'Time zone of the site',
         'cv_fallback' => 'Default-language CV when missing',
         'show_email' => 'Show email',
         'show_phone' => 'Show phone',
@@ -230,6 +232,7 @@ return [
         'print_enabled' => 'Shows the "Print" button. The clean print layout always applies, even when printing from the browser.',
         'show_last_updated' => 'Date of the latest change to the CV content.',
         'cv_filename_pattern' => 'Placeholders: {name} = full name, {lang} = IT/EN…, {locale} = it-IT/en-GB…',
+        'timezone' => 'Days and times of the statistics, dates and times shown and entered in the admin (e.g. the scheduled publication of an article), publication dates on the site. Usually the one where you live; data stays stored in UTC, so you can change it at any time.',
         'cv_fallback' => 'When a language has no CV, the button downloads the default-language one.',
         'privacy' => 'What to show on the CV page.',
         'privacy_policy' => 'The Privacy page tells visitors what data the site processes. The site uses no cookies, so no banner is needed; a notice is still useful, because the page shows your email and the server logs the requests.',
@@ -684,6 +687,8 @@ return [
         'items' => '{1} :count item to complete|[2,*] :count items to complete',
         'edit' => 'Edit',
         'settings_texts' => 'Site texts (SEO and footer)',
+        'missing_fields' => 'To translate: :fields',
+        'missing_in' => 'Texts to complete - :list',
     ],
 
     'dashboard' => [

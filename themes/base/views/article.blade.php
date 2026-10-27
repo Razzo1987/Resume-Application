@@ -16,10 +16,10 @@
             <h1 class="detail-title">{{ $title }}</h1>
             <p class="meta">
                 @if ($article->published_at)
-                    <span class="meta-item"><x-theme-icon name="calendar" /> <time datetime="{{ $article->published_at->toAtomString() }}">{{ __('site.blog.published_on', ['date' => $dates->day($article->published_at)]) }}</time></span>
+                    <span class="meta-item"><x-theme-icon name="calendar" /> <time datetime="{{ $article->published_at->toAtomString() }}">{{ __('site.blog.published_on', ['date' => $dates->localDay($article->published_at)]) }}</time></span>
                 @endif
                 @if ($updated)
-                    <span class="meta-item"><time datetime="{{ $updated->toAtomString() }}">{{ __('site.blog.updated_on', ['date' => $dates->day($updated)]) }}</time></span>
+                    <span class="meta-item"><time datetime="{{ $updated->toAtomString() }}">{{ __('site.blog.updated_on', ['date' => $dates->localDay($updated)]) }}</time></span>
                 @endif
                 <span class="meta-item"><x-theme-icon name="clock" /> {{ trans_choice('site.blog.reading_time', $article->readingMinutes(), ['count' => $article->readingMinutes()]) }}</span>
             </p>

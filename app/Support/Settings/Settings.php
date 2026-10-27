@@ -47,6 +47,15 @@ class Settings
         'stats.enabled' => false,                     // statistiche delle visite (senza cookie)
         'stats.retention_months' => 12,               // dopo quanti mesi si cancellano i dati delle singole visite
         'stats.admin_ip_days' => 14,                  // per quanti giorni l'IP usato nell'admin non conta nelle visite
+        'site.timezone' => null,                      // time zone of the site (null = guessed from the default language)
+    ];
+
+    /** Time zone guessed from the country of the default language, until one is chosen in Settings */
+    private const array COUNTRY_TIMEZONES = [
+        'IT' => 'Europe/Rome', 'GB' => 'Europe/London', 'IE' => 'Europe/Dublin', 'US' => 'America/New_York',
+        'DE' => 'Europe/Berlin', 'AT' => 'Europe/Vienna', 'CH' => 'Europe/Zurich', 'FR' => 'Europe/Paris',
+        'BE' => 'Europe/Brussels', 'ES' => 'Europe/Madrid', 'PT' => 'Europe/Lisbon', 'BR' => 'America/Sao_Paulo',
+        'NL' => 'Europe/Amsterdam',
     ];
 
     /** @var list<string> */
@@ -73,6 +82,23 @@ class Settings
     public function bool(string $key): bool
     {
         return (bool) $this->get($key, false);
+    }
+
+    /**
+     * Time zone of the site: days and times of the visit statistics, dates and times shown and entered in the admin,
+     * publication dates of the articles. Data stays stored in UTC.
+     */
+    public function timezone(): string
+    {
+        $configured = $this->get('site.timezone');
+
+        if (is_string($configured) && in_array($configured, timezone_identifiers_list(), true)) {
+            return $configured;
+        }
+
+        $country = strtoupper(substr($this->locales->default(), -2));
+
+        return self::COUNTRY_TIMEZONES[$country] ?? (string) config('app.timezone', 'UTC');
     }
 
     /**

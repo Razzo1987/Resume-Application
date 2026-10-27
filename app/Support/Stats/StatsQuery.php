@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Support\Stats;
 
 use App\Models\StatDaily;
+use App\Support\Settings\Settings;
 use Carbon\CarbonInterface;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Carbon;
@@ -29,13 +30,21 @@ class StatsQuery
      */
     public static function forPeriod(string $period, ?string $page = null): self
     {
-        $to = today();
+        $to = self::today();
         $from = match ($period) {
             'all' => Carbon::parse((string) (StatDaily::query()->min('day') ?? $to->toDateString())),
             default => $to->copy()->subDays(max(1, (int) $period) - 1),
         };
 
         return new self($from, $to, $page !== '' ? $page : null);
+    }
+
+    /**
+     * Today in the time zone of the site (the days of the statistics are local days).
+     */
+    public static function today(): Carbon
+    {
+        return Carbon::today(app(Settings::class)->timezone());
     }
 
     /**

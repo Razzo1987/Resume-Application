@@ -1,10 +1,12 @@
 <?php
 
 use App\Enums\PageSectionKey;
+use App\Filament\Pages\ManageProfile;
 use App\Filament\Pages\Translations;
 use App\Filament\Widgets\LanguagesOverviewWidget;
 use App\Models\Interest;
 use App\Models\PageSection;
+use App\Models\Profile;
 use App\Models\User;
 use App\Support\Content\TranslationReport;
 use App\Support\Settings\Settings;
@@ -57,4 +59,20 @@ it('links each dashboard translation box to its list', function () {
 
     // I widget della dashboard si caricano a parte (lazy): si verifica il componente
     Livewire::test(LanguagesOverviewWidget::class)->assertSeeHtml(Translations::getUrl(['locale' => 'en-GB']));
+});
+
+it('shows on the profile page which texts are still to translate', function () {
+    app()->setLocale('it');
+    $profile = Profile::current();
+    $profile->update(['bio' => ['it-IT' => '<p>Ciao</p>'], 'location' => ['it-IT' => 'Milano', 'en-GB' => 'Milan']]);
+
+    Livewire::test(ManageProfile::class)
+        ->assertSee('Testi da completare - English: Presentazione')
+        ->assertSee('Da tradurre: Presentazione');
+
+    $profile->update(['bio' => ['it-IT' => '<p>Ciao</p>', 'en-GB' => '<p>Hello</p>']]);
+
+    Livewire::test(ManageProfile::class)
+        ->assertDontSee('Testi da completare')
+        ->assertDontSee('Da tradurre:');
 });

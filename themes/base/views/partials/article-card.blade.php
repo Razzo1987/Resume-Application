@@ -12,7 +12,7 @@
     @endif
     <div class="article-card-body">
         <p class="meta">
-            <span class="meta-item"><x-theme-icon name="calendar" /> <time datetime="{{ $article->published_at?->toAtomString() }}">{{ $article->published_at ? $dates->day($article->published_at) : '' }}</time></span>
+            <span class="meta-item"><x-theme-icon name="calendar" /> <time datetime="{{ $article->published_at?->toAtomString() }}">{{ $article->published_at ? $dates->localDay($article->published_at) : '' }}</time></span>
             <span class="meta-item"><x-theme-icon name="clock" /> {{ trans_choice('site.blog.reading_time', $article->readingMinutes(), ['count' => $article->readingMinutes()]) }}</span>
         </p>
         <{{ $tag }} class="article-card-title"><a href="{{ url($path) }}">{{ $title }}</a></{{ $tag }}>

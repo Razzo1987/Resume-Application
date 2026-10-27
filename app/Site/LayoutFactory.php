@@ -98,8 +98,8 @@ final class LayoutFactory
                 ? ['href' => $this->cloak->encode('tel:'.$this->cloak->telephone((string) $profile->phone)), 'text' => $this->cloak->encode((string) $profile->phone)]
                 : null,
             printEnabled: $this->settings->bool('print.enabled'),
-            lastUpdated: $updated !== null ? $this->dates->day($updated) : null,
-            lastUpdatedMachine: $updated?->format('Y-m-d'),
+            lastUpdated: $updated !== null ? $this->dates->localDay($updated) : null,
+            lastUpdatedMachine: $updated?->copy()->setTimezone($this->settings->timezone())->format('Y-m-d'),
             gdprText: $this->settings->translated('footer.gdpr_text', $locale),
             blogUrl: $hasBlog ? url($this->urls->blogPath($locale)) : null,
             feedUrl: $hasBlog ? url($this->urls->feedPath($locale)) : null,

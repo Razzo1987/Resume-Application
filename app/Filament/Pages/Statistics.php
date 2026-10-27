@@ -73,7 +73,7 @@ class Statistics extends Page implements HasTable
     {
         // Totali di oggi aggiornati all'apertura (bastano poche query)
         if (app(Settings::class)->bool('stats.enabled')) {
-            rescue(fn () => app(Aggregator::class)->aggregate(today()), report: false);
+            rescue(fn () => app(Aggregator::class)->aggregate(StatsQuery::today()), report: false);
         }
     }
 

@@ -41,13 +41,14 @@ class Aggregator
     public function run(): string
     {
         $last = StatDaily::query()->max('day');
-        $from = $last !== null ? Carbon::parse((string) $last)->subDay() : (StatVisit::query()->min('day') !== null ? Carbon::parse((string) StatVisit::query()->min('day')) : today());
+        $today = StatsQuery::today();
+        $from = $last !== null ? Carbon::parse((string) $last)->subDay() : (StatVisit::query()->min('day') !== null ? Carbon::parse((string) StatVisit::query()->min('day')) : $today->copy());
         $days = 0;
 
         // Mai prima del periodo di conservazione: le visite più vecchie non ci sono più e i totali andrebbero persi
-        $oldest = today()->subMonths(max(1, (int) $this->settings->get('stats.retention_months', 12)));
+        $oldest = $today->copy()->subMonths(max(1, (int) $this->settings->get('stats.retention_months', 12)));
 
-        for ($day = $from->copy()->max($oldest); $day->lte(today()); $day->addDay()) {
+        for ($day = $from->copy()->max($oldest); $day->lte($today); $day->addDay()) {
             $this->aggregate($day);
             $days++;
         }
@@ -110,6 +111,6 @@ class Aggregator
     {
         $months = max(1, (int) $this->settings->get('stats.retention_months', 12));
 
-        return StatVisit::query()->where('day', '<', today()->subMonths($months)->toDateString())->delete();
+        return StatVisit::query()->where('day', '<', StatsQuery::today()->subMonths($months)->toDateString())->delete();
     }
 }

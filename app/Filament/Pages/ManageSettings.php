@@ -10,8 +10,11 @@ use App\Support\Languages\Locales;
 use App\Support\Settings\Settings;
 use App\Themes\ThemeManager;
 use BackedEnum;
+use DateTimeImmutable;
+use DateTimeZone;
 use Filament\Actions\Action;
 use Filament\Forms\Components\RichEditor;
+use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
@@ -62,7 +65,9 @@ class ManageSettings extends Page
     public function mount(Settings $settings): void
     {
         // Le chiavi puntate (es. "cv.filename_pattern") diventano campi annidati del form
-        $this->form->fill(Arr::undot($settings->all()));
+        $values = $settings->all();
+        $values['site.timezone'] ??= $settings->timezone(); // the guessed one until it is saved
+        $this->form->fill(Arr::undot($values));
     }
 
     public function form(Schema $schema): Schema
@@ -83,6 +88,17 @@ class ManageSettings extends Page
                             ->hint(__('admin.help.theme_on_themes_page')),
                         Toggle::make('print.enabled')->label(__('admin.fields.print_enabled'))->helperText(__('admin.help.print_enabled')),
                         Toggle::make('footer.show_last_updated')->label(__('admin.fields.show_last_updated'))->helperText(__('admin.help.show_last_updated')),
+                    ])
+                    ->columnSpanFull(),
+
+                Section::make(__('admin.sections.timezone'))
+                    ->description(__('admin.help.timezone'))
+                    ->schema([
+                        Select::make('site.timezone')
+                            ->label(__('admin.fields.timezone'))
+                            ->options(fn (): array => self::timezoneOptions())
+                            ->searchable()
+                            ->required(),
                     ])
                     ->columnSpanFull(),
 
@@ -135,7 +151,7 @@ class ManageSettings extends Page
                                         ->modalDescription(__('admin.help.use_template'))
                                         ->action(fn (Set $set) => $set("privacy.text.{$locale}", app(PrivacyPolicy::class)->template($locale))),
                                 ),
-                        ], 'privacy-texts'),
+                        ], 'privacy-texts', missing: fn (string $locale): array => array_values(array_intersect(app(Settings::class)->missingTranslations($locale), ['privacy.text']))),
                     ])
                     ->columnSpanFull(),
 
@@ -164,11 +180,29 @@ class ManageSettings extends Page
                             TextInput::make("seo.title.{$locale}")->label(__('admin.fields.seo_title'))->helperText(__('admin.help.default_seo_title'))->maxLength(70),
                             Textarea::make("seo.description.{$locale}")->label(__('admin.fields.seo_description'))->maxLength(170)->rows(2),
                             Textarea::make("footer.gdpr_text.{$locale}")->label(__('admin.fields.gdpr_text'))->helperText(__('admin.help.gdpr_text'))->rows(3),
-                        ], 'settings-texts'),
+                        ], 'settings-texts', missing: fn (string $locale): array => array_values(array_diff(app(Settings::class)->missingTranslations($locale), ['privacy.text']))),
                     ])
                     ->columnSpanFull(),
             ])
             ->statePath('data');
+    }
+
+    /**
+     * Time zones grouped by region ("Europe" => ["Europe/Rome" => "Rome (UTC+01:00)"]).
+     *
+     * @return array<string, array<string, string>>
+     */
+    private static function timezoneOptions(): array
+    {
+        $options = [];
+
+        foreach (timezone_identifiers_list() as $identifier) {
+            [$region, $city] = array_pad(explode('/', $identifier, 2), 2, $identifier);
+            $offset = (new DateTimeZone($identifier))->getOffset(new DateTimeImmutable('now', new DateTimeZone('UTC')));
+            $options[$region][$identifier] = str_replace('_', ' ', $city).' (UTC'.($offset < 0 ? '-' : '+').gmdate('H:i', abs($offset)).')';
+        }
+
+        return $options;
     }
 
     public function content(Schema $schema): Schema

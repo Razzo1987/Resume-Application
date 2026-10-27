@@ -5,6 +5,7 @@ namespace App\Filament\Pages;
 use App\Enums\ExperienceKind;
 use App\Filament\Resources\PageSections\PageSectionResource;
 use App\Filament\Resources\Volunteering\VolunteeringResource;
+use App\Filament\Support\Translatable as TranslatableFields;
 use App\Models\Experience;
 use App\Models\Highlight;
 use App\Models\LanguageSkill;
@@ -19,7 +20,6 @@ use Filament\Pages\Page;
 use Filament\Resources\Resource;
 use Filament\Support\Icons\Heroicon;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Support\Facades\Lang;
 use Illuminate\Support\Str;
 use Livewire\Attributes\Url;
 
@@ -174,6 +174,6 @@ class Translations extends Page
 
     private function fieldLabel(string $field): string
     {
-        return Lang::has("admin.fields.{$field}") ? (string) __("admin.fields.{$field}") : Str::headline($field);
+        return TranslatableFields::fieldLabel($field);
     }
 }

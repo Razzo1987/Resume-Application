@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Site\Formatting;
 
+use App\Support\Settings\Settings;
 use Carbon\CarbonInterface;
 use Illuminate\Support\Carbon;
 
@@ -20,6 +21,15 @@ final class Dates
     public function day(CarbonInterface $date): string
     {
         return $date->copy()->locale($this->carbonLocale())->isoFormat('LL');
+    }
+
+    /**
+     * Day of a moment (e.g. the publication of an article, stored in UTC) in the time zone of the site.
+     * Not for plain dates (start and end of an experience): they have no time and must not move.
+     */
+    public function localDay(CarbonInterface $moment): string
+    {
+        return $this->day($moment->copy()->setTimezone(app(Settings::class)->timezone()));
     }
 
     /**
