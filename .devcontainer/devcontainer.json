@@ -4,16 +4,34 @@
     "service": "app",
     "workspaceFolder": "/workspaces/${localWorkspaceFolderBasename}",
     "features": {
-        "ghcr.io/devcontainers/features/node:1": { "version": "22" }
+        "ghcr.io/devcontainers/features/node:1": {
+            "version": "22"
+        }
     },
-    "forwardPorts": [8000],
+    "forwardPorts": [
+        8000
+    ],
     "portsAttributes": {
-        "8000": { "label": "Resume App", "onAutoForward": "openPreview" }
+        "8000": {
+            "label": "Resume App",
+            "onAutoForward": "openBrowser"
+        }
     },
     "postCreateCommand": "bash .devcontainer/setup.sh",
-    "postStartCommand": "bash .devcontainer/start.sh",
     "customizations": {
-        "codespaces": { "openFiles": [".devcontainer/README.md"] },
-        "vscode": { "extensions": ["bmewburn.vscode-intelephense-client", "onecentlabs.laravel-blade"] }
+        "codespaces": {
+            "openFiles": [
+                ".devcontainer/README.md"
+            ]
+        },
+        "vscode": {
+            "extensions": [
+                "bmewburn.vscode-intelephense-client",
+                "onecentlabs.laravel-blade"
+            ]
+        }
+    },
+    "postAttachCommand": {
+        "server": "bash .devcontainer/start.sh"
     }
 }

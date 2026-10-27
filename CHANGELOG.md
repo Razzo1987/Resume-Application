@@ -10,7 +10,7 @@ All notable changes to this project are documented here. The format follows [Kee
 - CI: the end-to-end job publishes the HTML test report and fresh screenshots as workflow artifacts; CD badge for the release workflow in the README.
 
 ### Fixed
-- Codespaces: the container build failed because of the expired key of the Yarn apt repository included in the base image; the setup now waits for the database with PHP instead of the MySQL client.
+- Codespaces: the container build failed because of the expired key of the Yarn apt repository included in the base image; the setup now waits for the database with PHP instead of the MySQL client. The web server now runs in a terminal of its own (`postAttachCommand`): started in the background by `postStartCommand` it was stopped as soon as the command ended, so port 8000 did not answer.
 - CI: the installer tests use the database configured for the test run instead of fixed credentials.
 - PHPStan analyses the update script too (`resources/update/updater.php`), so its functions are always known: the analysis failed on GitHub depending on how files were split between the parallel workers.
 - GitHub Actions updated to `actions/checkout@v5` and `actions/setup-node@v5` (Node.js 24).
