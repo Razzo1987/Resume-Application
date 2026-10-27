@@ -516,11 +516,11 @@ return [
         'settings_help' => 'Nessun cookie e nessun banner: si registra solo ciò che il browser manda con ogni richiesta, con l\'IP accorciato (93.44.12.x). Con le statistiche attive la pagina Privacy è sempre visibile.',
         'fields' => [
             'enabled' => 'Statistiche delle visite',
-            'enabled_help' => 'Bot, anteprime e visite dagli IP degli amministratori non contano.',
+            'enabled_help' => 'Bot, anteprime e visite degli amministratori non contano: quelle dal browser collegato all\'admin e quelle dal loro IP.',
             'retention_months' => 'Conserva le singole visite per (mesi)',
             'retention_months_help' => 'Poi restano solo i totali giornalieri (pagine, provenienza, Paesi, dispositivi...). Il periodo compare nella pagina Privacy.',
             'admin_ip_days' => 'Escludi l\'IP dell\'admin per (giorni)',
-            'admin_ip_days_help' => 'Le visite dall\'indirizzo da cui usi l\'admin non contano, per questi giorni dall\'ultimo accesso. Con un IP condiviso (ufficio, rete mobile) verrebbero escluse anche altre persone: per questo l\'esclusione scade.',
+            'admin_ip_days_help' => 'Le visite dall\'indirizzo da cui usi l\'admin non contano, per questi giorni dall\'ultimo accesso. Con un IP condiviso (ufficio, rete mobile) verrebbero escluse anche altre persone: per questo l\'esclusione scade. Vale solo per gli indirizzi pubblici; dal browser collegato all\'admin le tue visite non contano comunque.',
         ],
         'period' => 'Periodo',
         'periods' => [
@@ -583,9 +583,14 @@ return [
             'car browser' => 'Auto',
             'wearable' => 'Indossabile',
         ],
+        'proxy' => [
+            'title' => 'Indirizzo dei visitatori non disponibile',
+            'private' => 'Il sito ti vede con l\'indirizzo :ip, privato o locale: succede in locale, in una rete interna o dietro un proxy che non passa l\'indirizzo dei visitatori (per esempio l\'inoltro delle porte di GitHub Codespaces). Le visite da indirizzi così si contano senza Paese, città e rete, e l\'indirizzo non viene escluso come IP dell\'admin: le tue visite non contano quando apri il sito dal browser con cui sei collegato all\'admin.',
+            'untrusted' => 'Le richieste arrivano attraverso un proxy (:ip) che il sito non considera affidabile, quindi tutti i visitatori risultano con il suo indirizzo. Imposta RESUME_TRUSTED_PROXIES in core/.env (vedi la guida di configurazione).',
+        ],
         'admin_ips' => [
             'title' => 'IP esclusi',
-            'help' => 'Indirizzi da cui è stato usato l\'admin: le visite da lì non contano per :days giorni dall\'ultimo accesso. Il tuo indirizzo adesso è :ip.',
+            'help' => 'Indirizzi pubblici da cui è stato usato l\'admin: le visite da lì non contano per :days giorni dall\'ultimo accesso. Il tuo indirizzo adesso è :ip.',
             'remove' => 'Togli dall\'elenco',
             'last_seen' => 'ultimo accesso :when',
             'submit' => 'Togli i selezionati',

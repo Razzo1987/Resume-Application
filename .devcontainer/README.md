@@ -10,6 +10,10 @@ The Codespace starts with the sample CV of "John Doe" (Italian and English) alre
   right click on 8000, *Port Visibility*, *Private*.
 - **Admin**: the same address followed by `/admin`, user `demo@example.com`, password `demo-password`.
 
+- **Statistics**: the page shows sample visits; real ones are added when you open the site. Codespaces port forwarding
+  does not pass on the visitor's address (everybody arrives from the same private address), so visits are counted
+  without country and city, and yours do not count only while the browser is signed in to the admin.
+
 Everything runs inside the Codespace and is deleted with it: feel free to change any content.
 
 Useful commands in the terminal:

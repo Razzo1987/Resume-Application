@@ -78,10 +78,17 @@ the sign-in page, `RESUME_ADMIN_LOCALE` applies.
   browser, and from the IP address country, region, city and network (provider or company).
 - **What is not**: no cookies and nothing read from the device, so no cookie banner is needed. The IP address is
   shortened straight away (`93.44.12.x`, IPv6 to the first 48 bits) and never stored in full. Bots, scripts (curl,
-  libraries), browser previews (prefetch) and visits from the IP address of an administrator do not count.
-- **Your own visits**: the address you use the admin from is excluded for 14 days after your last access (change it in
-  *Settings*; *Excluded IPs* lists and removes them). With a shared address (office, mobile network) other people
-  would be excluded too: that is why the exclusion expires.
+  libraries), browser previews (prefetch) and the administrators' visits do not count.
+- **Your own visits** do not count in two ways: from the browser signed in to the admin (the admin session cookie is
+  only read, visitors never get one), whatever the address; and from the public address you use the admin from, for
+  14 days after your last access (change it in *Settings*; *Excluded IPs* lists and removes them), which also covers
+  your phone on the same network. With a shared address (office, mobile network) other people would be excluded too:
+  that is why the exclusion expires.
+- **Behind a proxy** (CDN, tunnel) the site must trust it to read the visitor's address: set `RESUME_TRUSTED_PROXIES`
+  (see [Server settings](#server-settings-coreenv)), otherwise every visitor gets the proxy's address. Some proxies do
+  not pass the visitor's address at all: GitHub Codespaces port forwarding gives everybody the same private address.
+  Private and local addresses (10.x, 192.168.x, 127.0.0.1...) are never excluded as admin IPs, so visits are still
+  counted there, without country, city and network; the *Statistics* page says so when it happens.
 - **How long**: single visits are deleted after 12 months (configurable); the daily totals per page stay, so the
   charts keep working for older periods.
 - **Location**: the free MaxMind GeoLite2 City and ASN databases, installed on the server (the IP address is not sent

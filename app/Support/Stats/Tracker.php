@@ -20,8 +20,8 @@ use Symfony\Component\HttpFoundation\Response;
  * browser sends with every request (URL, IP, user agent, referring page). Runs after the response.
  *
  * Pages (200 HTML responses, or 304 if the browser already had them) and CV downloads are counted; bots, previews
- * (prefetch) and visits from an administrator's IP are not. The IP is only kept in memory for the origin and the
- * exclusion, then stored truncated.
+ * (prefetch) and the administrator's visits (browser signed in to the admin, or an administrator's public IP) are
+ * not. The IP is only kept in memory for the origin and the exclusion, then stored truncated.
  */
 class Tracker
 {
@@ -46,6 +46,7 @@ class Tracker
         private readonly PageResolver $pages,
         private readonly GeoIp $geoIp,
         private readonly AdminIps $adminIps,
+        private readonly AdminSession $adminSession,
     ) {}
 
     public function isEnabled(): bool
@@ -81,7 +82,7 @@ class Tracker
         $userAgent = (string) $request->userAgent();
         $ip = (string) $request->ip();
 
-        if ($page === null || $userAgent === '' || $ip === '' || $this->adminIps->isExcluded($ip)) {
+        if ($page === null || $userAgent === '' || $ip === '' || $this->adminIps->isExcluded($ip) || $this->adminSession->isSignedIn($request)) {
             return null;
         }
 

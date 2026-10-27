@@ -17,13 +17,15 @@ use App\Support\System\Backup;
 use Database\Seeders\DemoStatsSeeder;
 use Filament\Facades\Filament;
 use Illuminate\Http\Client\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Str;
 use Illuminate\Testing\TestResponse;
 use Livewire\Livewire;
 
 /*
-| Cookieless visit statistics: collection (bots, previews and admin IPs excluded, shortened IP), origin
+| Cookieless visit statistics: collection (bots, previews and the administrator excluded, shortened IP), origin
 | from the GeoLite databases (fake, in tests/Fixtures/geoip), daily totals, admin page, database download.
 */
 
@@ -313,4 +315,68 @@ it('fills the demo with three months of sample visits', function () {
         ->and($totals['downloads'])->toBeGreaterThan(50)
         ->and($totals['countries'])->toBe(12)
         ->and(StatsQuery::forPeriod('90')->top('utm_campaign'))->toHaveKey('new-job-2026');
+});
+
+it('tells public addresses from private and local ones', function (string $ip, bool $public) {
+    expect(Ip::isPublic($ip))->toBe($public);
+})->with([
+    ['93.44.12.7', true],
+    ['2a01:4f8:c0c::1', true],
+    ['10.0.4.17', false],
+    ['172.16.0.1', false],
+    ['192.168.1.20', false],
+    ['127.0.0.1', false],
+    ['100.64.12.1', false],
+    ['::1', false],
+    ['fd00::1', false],
+    ['not an ip', false],
+]);
+
+it('does not count the administrator signed in to the admin, whatever the address', function () {
+    $user = User::factory()->create();
+    $session = app('session')->driver();
+    $session->setId($id = Str::random(40));
+    $session->start();
+    $session->put(Auth::guard()->getName(), $user->getAuthIdentifier());
+    $session->save();
+
+    pageView('/it-IT', ['REMOTE_ADDR' => '81.2.69.160']); // a visitor: no cookies
+    $this->withCookie(config('session.cookie'), $id);
+    pageView('/it-IT', ['REMOTE_ADDR' => '81.2.69.160']); // the administrator's browser
+    $this->withCookie(config('session.cookie'), Str::random(40));
+    pageView('/it-IT', ['REMOTE_ADDR' => '81.2.69.160']); // a session that is not signed in
+    $this->withCookie(config('session.cookie'), 'not encrypted');
+    pageView('/it-IT', ['REMOTE_ADDR' => '81.2.69.160']);
+
+    expect(StatVisit::query()->count())->toBe(3)
+        ->and(StatAdminIp::query()->count())->toBe(0);
+});
+
+it('recognizes the administrator from the "remember me" cookie', function () {
+    $this->withCookie(Auth::guard()->getRecallerName(), '1|token|hash');
+    pageView('/it-IT', ['REMOTE_ADDR' => '81.2.69.160']);
+
+    expect(StatVisit::query()->count())->toBe(0);
+});
+
+it('counts the visitors behind a proxy that gives everybody the same private address (GitHub Codespaces)', function () {
+    $this->actingAs(User::factory()->create())->withServerVariables(['REMOTE_ADDR' => '10.0.4.17'])->get('/admin')->assertOk();
+    auth()->logout();
+
+    pageView('/it-IT', ['REMOTE_ADDR' => '10.0.4.17']);
+
+    expect(StatAdminIp::query()->count())->toBe(0)
+        ->and(StatVisit::query()->sole())->ip->toBe('10.0.4.x')->country->toBeNull();
+});
+
+it('explains on the statistics page when the visitor address is not available', function () {
+    $this->actingAs(User::factory()->create());
+    Filament::setCurrentPanel('admin');
+
+    $this->withServerVariables(['REMOTE_ADDR' => '10.0.4.17'])->get('/admin/statistics')
+        ->assertOk()->assertSee('Indirizzo dei visitatori non disponibile')->assertSee('10.0.4.17');
+    $this->withServerVariables(['REMOTE_ADDR' => '93.44.12.7'])->get('/admin/statistics')
+        ->assertOk()->assertDontSee('Indirizzo dei visitatori non disponibile');
+    $this->withServerVariables(['REMOTE_ADDR' => '93.44.12.7', 'HTTP_X_FORWARDED_FOR' => '81.2.69.160'])->get('/admin/statistics')
+        ->assertOk()->assertSee('RESUME_TRUSTED_PROXIES');
 });

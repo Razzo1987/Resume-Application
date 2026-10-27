@@ -7,6 +7,13 @@
         </x-filament::section>
     @endunless
 
+    @if ($proxyNote)
+        <x-filament::section icon="heroicon-o-information-circle" icon-color="gray" compact class="resume-stats-proxy-note">
+            <x-slot name="heading">{{ __('admin.stats.proxy.title') }}</x-slot>
+            <p>{{ $proxyNote }}</p>
+        </x-filament::section>
+    @endif
+
     <div class="resume-stats-filters">
         <label>
             <span>{{ __('admin.stats.period') }}</span>

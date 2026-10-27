@@ -11,6 +11,7 @@ use App\Support\Stats\AdminIps;
 use App\Support\Stats\Aggregator;
 use App\Support\Stats\GeoIp;
 use App\Support\Stats\GeoIpUpdater;
+use App\Support\Stats\Ip;
 use App\Support\Stats\PageResolver;
 use App\Support\Stats\StatsQuery;
 use App\Support\Stats\WorldMap;
@@ -138,6 +139,7 @@ class Statistics extends Page implements HasTable
             'geoip' => app(GeoIp::class),
             'geoipStatus' => app(GeoIpUpdater::class)->status(),
             'retention' => (int) $settings->get('stats.retention_months', 12),
+            'proxyNote' => $this->proxyNote(),
         ];
     }
 
@@ -324,6 +326,27 @@ class Statistics extends Page implements HasTable
                     Notification::make()->danger()->title(__('admin.stats.geoip.check_failed'))->body($exception->getMessage())->persistent()->send();
                 }
             });
+    }
+
+    /**
+     * Why the visitors' address may be missing: the administrator reaches the site from a private or local address
+     * (local development, internal network, a proxy such as GitHub Codespaces port forwarding) or through a proxy that
+     * the site does not trust (RESUME_TRUSTED_PROXIES).
+     */
+    private function proxyNote(): ?string
+    {
+        $request = request();
+        $ip = (string) $request->ip();
+
+        if ($ip !== '' && ! Ip::isPublic($ip)) {
+            return (string) __('admin.stats.proxy.private', ['ip' => $ip]);
+        }
+
+        if ($request->headers->has('X-Forwarded-For') && ! $request->isFromTrustedProxy()) {
+            return (string) __('admin.stats.proxy.untrusted', ['ip' => $ip]);
+        }
+
+        return null;
     }
 
     public function adminIpsAction(): Action

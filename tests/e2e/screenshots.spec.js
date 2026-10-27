@@ -78,6 +78,8 @@ test.describe('screenshots', () => {
 
         // Statistics (with DemoStatsSeeder): the top part and the map
         await page.goto(`/${admin.path}/statistics`, { waitUntil: 'networkidle' });
+        // locally the site sees 127.0.0.1: the note about private addresses is not part of the screenshot
+        await page.addStyleTag({ content: '.resume-stats-proxy-note { display: none !important; }' });
         await page.waitForTimeout(1000);
         await page.screenshot({ path: `${dir}/admin-statistics.png` });
         // the top bar stays fixed and would cover the box

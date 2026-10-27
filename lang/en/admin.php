@@ -516,11 +516,11 @@ return [
         'settings_help' => 'No cookies and no banner: only what the browser sends with every request is recorded, with the IP address shortened (93.44.12.x). While statistics are on, the Privacy page is always visible.',
         'fields' => [
             'enabled' => 'Visit statistics',
-            'enabled_help' => 'Bots, previews and visits from the administrators\' IP addresses do not count.',
+            'enabled_help' => 'Bots, previews and the administrators\' visits do not count: those from the browser signed in to the admin and those from their IP address.',
             'retention_months' => 'Keep single visits for (months)',
             'retention_months_help' => 'After that only the daily totals remain (pages, sources, countries, devices...). The period is shown on the Privacy page.',
             'admin_ip_days' => 'Exclude the admin IP for (days)',
-            'admin_ip_days_help' => 'Visits from the address you use the admin from do not count, for these days after the last access. With a shared IP (office, mobile network) other people would be excluded too: that is why the exclusion expires.',
+            'admin_ip_days_help' => 'Visits from the address you use the admin from do not count, for these days after the last access. With a shared IP (office, mobile network) other people would be excluded too: that is why the exclusion expires. Only for public addresses; from the browser signed in to the admin your visits never count.',
         ],
         'period' => 'Period',
         'periods' => [
@@ -583,9 +583,14 @@ return [
             'car browser' => 'Car',
             'wearable' => 'Wearable',
         ],
+        'proxy' => [
+            'title' => 'Visitor address not available',
+            'private' => 'The site sees you with the address :ip, which is private or local: this happens locally, inside a network or behind a proxy that does not pass on the visitor\'s address (for example the port forwarding of GitHub Codespaces). Visits from such addresses are counted without country, city and network, and the address is not excluded as an admin IP: your visits do not count when you open the site in the browser signed in to the admin.',
+            'untrusted' => 'Requests come through a proxy (:ip) that the site does not trust, so every visitor gets its address. Set RESUME_TRUSTED_PROXIES in core/.env (see the configuration guide).',
+        ],
         'admin_ips' => [
             'title' => 'Excluded IPs',
-            'help' => 'Addresses the admin was used from: visits from there do not count for :days days after the last access. Your address right now is :ip.',
+            'help' => 'Public addresses the admin was used from: visits from there do not count for :days days after the last access. Your address right now is :ip.',
             'remove' => 'Remove from the list',
             'last_seen' => 'last access :when',
             'submit' => 'Remove the selected ones',
