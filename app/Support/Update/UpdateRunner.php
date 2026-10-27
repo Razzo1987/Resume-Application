@@ -32,8 +32,9 @@ class UpdateRunner
      * Prepara l'aggiornamento e restituisce l'indirizzo della pagina di avanzamento.
      *
      * @param  string  $returnUrl  dove tornare a estrazione finita (la pagina Sistema)
+     * @param  string  $mode  "admin" (pagina di avanzamento nel browser) o "auto" (cron, vedi AutoUpdate)
      */
-    public function start(string $package, string $returnUrl): string
+    public function start(string $package, string $returnUrl, string $mode = 'admin'): string
     {
         if ($this->storage->isExtracting()) {
             throw new RuntimeException((string) __('admin.updates.errors.in_progress'));
@@ -65,6 +66,7 @@ class UpdateRunner
             'package' => $package,
             'backup' => basename($backup),
             'maintenance_was_on' => $maintenanceWasOn,
+            'mode' => $mode,
             'started_at' => now()->toAtomString(),
         ]);
 
@@ -89,6 +91,26 @@ class UpdateRunner
     public function isExtracted(): bool
     {
         return is_file($this->storage->runFile()) && ! $this->storage->isExtracting();
+    }
+
+    /**
+     * Dati dell'aggiornamento in corso o da completare (versioni, modo, copia dei contenuti).
+     *
+     * @return array<string, mixed>|null
+     */
+    public function current(): ?array
+    {
+        return $this->storage->readJson($this->storage->runFile());
+    }
+
+    /**
+     * Indirizzo della pagina di avanzamento dell'estrazione in corso (con il suo codice), o null.
+     */
+    public function progressUrl(): ?string
+    {
+        $state = $this->storage->readJson($this->storage->stateFile());
+
+        return is_string($state['token'] ?? null) ? rtrim(url('/'), '/').'/?resume-update='.$state['token'] : null;
     }
 
     /**

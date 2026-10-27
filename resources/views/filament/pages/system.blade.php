@@ -69,6 +69,16 @@
             </dd>
             <dt>{{ __('admin.updates.repository') }}</dt>
             <dd><code>{{ $updateRepository }}</code> · {{ __('admin.updates.token_status.'.($updateTokenSource ?? 'none')) }}</dd>
+            <dt>{{ __('admin.updates.auto.title') }}</dt>
+            <dd>
+                {{ __('admin.updates.auto.levels.'.$autoLevel) }} {{ $this->autoUpdatesAction }}
+                @if ($autoLevel !== 'off' && ! $cronActive)
+                    <br><span class="resume-update-problem">{{ __('admin.updates.auto.needs_cron') }}</span>
+                @endif
+                @if ($autoEvent)
+                    <br>{{ __('admin.updates.auto.last_event.'.$autoEvent['type'], ['version' => $autoEvent['version'], 'when' => $autoEvent['at']->diffForHumans()]) }}
+                @endif
+            </dd>
         </dl>
 
         @if (! $updateSupported)
@@ -135,6 +145,58 @@
                 <li>{{ __('admin.system.update_step_4') }}</li>
             </ol>
         </details>
+    </x-filament::section>
+
+    <x-filament::section icon="heroicon-o-clock" id="cron">
+        <x-slot name="heading">{{ __('admin.cron.title') }}</x-slot>
+        <dl class="resume-system-list">
+            <dt>{{ __('admin.cron.status') }}</dt>
+            <dd>
+                @if ($cronActive)
+                    <span class="resume-update-ok">{{ __('admin.cron.active') }}</span>
+                    · {{ __('admin.cron.last', ['when' => $cronLast->diffForHumans()]) }}
+                    @if ($cronPhp) · PHP {{ $cronPhp }} @endif
+                @elseif ($cronLast)
+                    <span class="resume-update-problem">{{ __('admin.cron.stopped', ['when' => $cronLast->diffForHumans()]) }}</span>
+                @else
+                    {{ __('admin.cron.inactive') }}
+                @endif
+                @if ($cronPhp && version_compare($cronPhp, $phpRequired, '<'))
+                    <br><span class="resume-update-problem">{{ __('admin.cron.php_old', ['version' => $cronPhp, 'required' => $phpRequired]) }}</span>
+                @endif
+            </dd>
+        </dl>
+
+        @unless ($cronActive)
+            <div class="resume-update-box">
+                <h3 class="resume-update-title">{{ __('admin.cron.setup_title') }}</h3>
+                <ol class="resume-system-steps">
+                    <li>{{ __('admin.cron.setup_1') }}</li>
+                    <li>{{ __('admin.cron.setup_2') }}</li>
+                    <li>{{ __('admin.cron.setup_3') }} <pre class="resume-system-log resume-cron-command">{{ $cronCommand }}</pre></li>
+                    <li>{{ __('admin.cron.setup_4') }}</li>
+                </ol>
+            </div>
+        @endunless
+
+        <div class="resume-update-box">
+            <h3 class="resume-update-title">{{ __('admin.cron.jobs') }}</h3>
+            <table class="resume-cron-jobs">
+                <thead>
+                    <tr><th>{{ __('admin.cron.job') }}</th><th>{{ __('admin.cron.every') }}</th><th>{{ __('admin.cron.last_run') }}</th><th>{{ __('admin.cron.result') }}</th></tr>
+                </thead>
+                <tbody>
+                    @foreach ($cronJobs as $name => $job)
+                        <tr>
+                            <td>{{ __('admin.cron.names.'.$name) }}@unless ($job['light']) <span class="resume-cron-tag">{{ __('admin.cron.cron_only') }}</span>@endunless</td>
+                            <td>{{ $job['every'] >= 60 ? __('admin.cron.hours', ['count' => intdiv($job['every'], 60)]) : __('admin.cron.minutes', ['count' => $job['every']]) }}</td>
+                            <td>{{ $job['at'] ? $job['at']->diffForHumans() : __('admin.updates.never') }}</td>
+                            <td @class(['resume-update-problem' => ! $job['ok']])>{{ $job['message'] ?? '' }}</td>
+                        </tr>
+                    @endforeach
+                </tbody>
+            </table>
+        </div>
     </x-filament::section>
 
     <script>
@@ -233,5 +295,12 @@
         .resume-update-packages { margin: 0; padding: 0; list-style: none; }
         .resume-update-packages li { display: flex; gap: .75rem; align-items: center; flex-wrap: wrap; padding: .35rem 0; }
         .resume-update-check p { margin: .75rem 0 0; }
+        .resume-cron-command { margin-top: .35rem; padding: .5rem .75rem; border-radius: .5rem; background: rgb(0 0 0 / .05); user-select: all; }
+        .dark .resume-cron-command { background: rgb(255 255 255 / .06); }
+        .resume-cron-jobs { width: 100%; font-size: .9rem; border-collapse: collapse; }
+        .resume-cron-jobs th { text-align: left; font-weight: 600; padding: .35rem .75rem .35rem 0; }
+        .resume-cron-jobs td { padding: .35rem .75rem .35rem 0; vertical-align: top; word-break: break-word; }
+        .resume-cron-tag { margin-left: .35rem; padding: 0 .4rem; border-radius: .25rem; font-size: .75rem; background: rgb(0 0 0 / .06); }
+        .dark .resume-cron-tag { background: rgb(255 255 255 / .1); }
     </style>
 </x-filament-panels::page>

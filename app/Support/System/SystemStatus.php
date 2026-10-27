@@ -4,7 +4,9 @@ declare(strict_types=1);
 
 namespace App\Support\System;
 
+use App\Support\Update\AutoUpdate;
 use App\Support\Update\ReleaseChecker;
+use App\Support\Update\UpdateStorage;
 use Illuminate\Support\Facades\Cache;
 
 /**
@@ -20,6 +22,8 @@ class SystemStatus
         private readonly Maintenance $maintenance,
         private readonly Updater $updater,
         private readonly ReleaseChecker $releases,
+        private readonly AutoUpdate $auto,
+        private readonly UpdateStorage $storage,
     ) {}
 
     public function coreProtection(bool $refresh = false): string
@@ -52,8 +56,20 @@ class SystemStatus
             $alerts['maintenance_on'] = 'warning';
         }
 
-        if (! $this->updater->isPending() && $this->releases->available() !== null) {
-            $alerts['update_available'] = 'info';
+        $event = $this->auto->lastEvent();
+
+        if ($event !== null && $event['type'] === 'failed' && $event['at']->gt(now()->subDays(7))) {
+            $alerts['auto_update_failed'] = 'danger';
+        }
+
+        if ($event !== null && $event['type'] === 'installed' && $event['at']->gt(now()->subDays(3))) {
+            $alerts['auto_update_installed'] = 'success';
+        }
+
+        $available = $this->updater->isPending() ? null : $this->releases->available();
+
+        if ($available !== null) {
+            $alerts[$this->storage->package($available->packageName()) !== null ? 'update_downloaded' : 'update_available'] = 'info';
         }
 
         return $alerts;

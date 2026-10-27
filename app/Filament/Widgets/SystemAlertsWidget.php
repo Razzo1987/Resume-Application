@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Filament\Widgets;
 
 use App\Support\System\SystemStatus;
-use App\Support\Update\PackageInspector;
+use App\Support\Update\AutoUpdate;
 use App\Support\Update\ReleaseChecker;
 use Filament\Widgets\Widget;
 
@@ -24,16 +24,10 @@ class SystemAlertsWidget extends Widget
 
     protected string $view = 'filament.widgets.system-alerts';
 
+    // Il controllo delle nuove versioni su GitHub è un lavoro programmato (App\Support\Cron\CronJobs): col cron
+    // dell'hosting, oppure dall'admin dopo aver risposto quando il cron non c'è.
     public static function canView(): bool
     {
-        $releases = app(ReleaseChecker::class);
-
-        // Nuove versioni su GitHub: al massimo ogni 12 ore, dopo aver risposto (la dashboard non aspetta GitHub).
-        // Solo per le installazioni da pacchetto: una copia di sviluppo non si aggiorna da qui.
-        if ($releases->isStale() && app(PackageInspector::class)->isPackagedInstall()) {
-            app()->terminating(fn () => rescue(fn () => $releases->check(), report: false));
-        }
-
         return app(SystemStatus::class)->alerts() !== [];
     }
 
@@ -42,9 +36,17 @@ class SystemAlertsWidget extends Widget
      */
     protected function getViewData(): array
     {
+        $event = app(AutoUpdate::class)->lastEvent();
+
         return [
             'alerts' => app(SystemStatus::class)->alerts(),
-            'params' => ['update_available' => ['version' => app(ReleaseChecker::class)->available()->version ?? '']],
+            'params' => [
+                'update_available' => ['version' => app(ReleaseChecker::class)->available()->version ?? ''],
+                'update_downloaded' => ['version' => app(ReleaseChecker::class)->available()->version ?? ''],
+                'auto_update_installed' => ['version' => $event['version'] ?? ''],
+                'auto_update_failed' => ['version' => $event['version'] ?? ''],
+            ],
+            'event' => $event,
         ];
     }
 }

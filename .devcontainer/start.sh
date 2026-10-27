@@ -16,7 +16,12 @@ if php -r 'exit(@fsockopen("127.0.0.1", 8000) ? 0 : 1);'; then
     exit 0
 fi
 
-sed -i "s#^APP_URL=.*#APP_URL=${url}#" .env
+set_env() { # set_env CHIAVE valore
+    if grep -q "^$1=" .env; then sed -i "s#^$1=.*#$1=$2#" .env; else echo "$1=$2" >> .env; fi
+}
+set_env APP_URL "$url"
+# L'inoltro delle porte di Codespaces è un proxy: indirizzo pubblico e IP del visitatore negli header X-Forwarded-*
+set_env RESUME_TRUSTED_PROXIES '*'
 php artisan optimize:clear >/dev/null
 
 # La porta 8000 diventa pubblica, così il sito si apre anche fuori dalla sessione di GitHub
@@ -32,6 +37,5 @@ echo "Admin:      ${url}/admin  (demo@example.com / demo-password)"
 echo "Stop the server with Ctrl+C, start it again with: bash .devcontainer/start.sh"
 echo
 
-# Server PHP integrato con 4 processi; il router sistema l'indirizzo pubblico (vedi router.php)
-cd public
-PHP_CLI_SERVER_WORKERS=4 exec php -S 0.0.0.0:8000 ../.devcontainer/router.php
+# Server PHP integrato con 4 processi
+PHP_CLI_SERVER_WORKERS=4 exec php artisan serve --host=0.0.0.0 --port=8000 --no-reload

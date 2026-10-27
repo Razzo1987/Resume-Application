@@ -2,6 +2,8 @@
 
 namespace App\Filament\Pages;
 
+use App\Support\Cron\Cron;
+use App\Support\Settings\Settings;
 use App\Support\System\Backup;
 use App\Support\System\CoreProbe;
 use App\Support\System\Htaccess;
@@ -9,6 +11,7 @@ use App\Support\System\Maintenance;
 use App\Support\System\OrphanFiles;
 use App\Support\System\SystemStatus;
 use App\Support\System\Updater;
+use App\Support\Update\AutoUpdate;
 use App\Support\Update\PackageInspector;
 use App\Support\Update\ReleaseChecker;
 use App\Support\Update\ReleaseDownloader;
@@ -19,6 +22,7 @@ use BackedEnum;
 use Filament\Actions\Action;
 use Filament\Actions\ActionGroup;
 use Filament\Forms\Components\FileUpload;
+use Filament\Forms\Components\Radio;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
@@ -110,6 +114,7 @@ class ManageSystem extends Page
             'database' => $database,
             'paths' => ['core' => base_path(), 'webroot' => public_path()],
             ...$this->updateViewData(),
+            ...$this->cronViewData(),
         ];
     }
 
@@ -134,7 +139,56 @@ class ManageSystem extends Page
             'updatePackages' => $storage->packages(),
             'updateSupported' => app(PackageInspector::class)->isPackagedInstall(),
             'updateUploadUrl' => route('filament.admin.update-upload'),
+            'autoLevel' => app(AutoUpdate::class)->level(),
+            'autoEvent' => app(AutoUpdate::class)->lastEvent(),
         ];
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    private function cronViewData(): array
+    {
+        $cron = app(Cron::class);
+
+        return [
+            'cronActive' => $cron->isActive(),
+            'cronLast' => $cron->lastCron(),
+            'cronPhp' => $cron->cronPhpVersion(),
+            'cronCommand' => $cron->command(),
+            'cronJobs' => $cron->jobs(),
+            'phpRequired' => (string) (json_decode((string) @file_get_contents(base_path('manifest.json')), true)['requires']['php'] ?? '8.4.1'),
+        ];
+    }
+
+    public function autoUpdatesAction(): Action
+    {
+        return Action::make('autoUpdates')
+            ->label(__('admin.updates.auto.change'))
+            ->link()
+            ->size('sm')
+            ->fillForm(fn (): array => ['level' => app(AutoUpdate::class)->level()])
+            ->modalHeading(__('admin.updates.auto.title'))
+            ->modalDescription(__('admin.updates.auto.help'))
+            ->schema([
+                Radio::make('level')
+                    ->hiddenLabel()
+                    ->options([
+                        AutoUpdate::OFF => __('admin.updates.auto.levels.off'),
+                        AutoUpdate::DOWNLOAD => __('admin.updates.auto.levels.download'),
+                        AutoUpdate::PATCH => __('admin.updates.auto.levels.patch'),
+                    ])
+                    ->descriptions([
+                        AutoUpdate::OFF => __('admin.updates.auto.descriptions.off'),
+                        AutoUpdate::DOWNLOAD => __('admin.updates.auto.descriptions.download'),
+                        AutoUpdate::PATCH => __('admin.updates.auto.descriptions.patch'),
+                    ])
+                    ->required(),
+            ])
+            ->action(function (array $data): void {
+                app(Settings::class)->set(AutoUpdate::SETTING, (string) $data['level']);
+                Notification::make()->success()->title(__('admin.messages.saved'))->send();
+            });
     }
 
     /**

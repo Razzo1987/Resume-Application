@@ -41,6 +41,7 @@ class Settings
         'jsonld.include_email' => false,              // dati personali nel JSON-LD: spenti di default
         'jsonld.include_phone' => false,
         'jsonld.include_birthdate' => false,
+        'updates.auto' => 'download',                 // aggiornamenti automatici col cron: off, download, patch
     ];
 
     /** @var list<string> */

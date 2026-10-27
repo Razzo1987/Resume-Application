@@ -30,6 +30,8 @@ use App\Site\Seo\StructuredData;
 use App\Site\SiteContext;
 use App\Site\SiteUrls;
 use App\Site\UrlChangeRedirects;
+use App\Support\Cron\Cron;
+use App\Support\Cron\CronJobs;
 use App\Support\Install\InstallState;
 use App\Support\Languages\LanguagePacks;
 use App\Support\Languages\Locales;
@@ -62,6 +64,12 @@ class AppServiceProvider extends ServiceProvider
         $this->app->singleton(Settings::class);
         $this->app->singleton(PageCache::class);
         $this->app->singleton(SiteUrls::class);
+        $this->app->singleton(Cron::class, function (): Cron {
+            $cron = new Cron;
+            CronJobs::register($cron);
+
+            return $cron;
+        });
 
         // Stato della singola richiesta pubblica
         $this->app->scoped(SiteContext::class);

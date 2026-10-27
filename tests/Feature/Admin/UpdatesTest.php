@@ -2,10 +2,13 @@
 
 use App\Filament\Pages\ManageSystem;
 use App\Models\User;
+use App\Support\Cron\Cron;
 use App\Support\Languages\Locales;
 use App\Support\Settings\Settings;
 use App\Support\System\Maintenance;
 use App\Support\System\Updater;
+use App\Support\Update\AutoUpdate;
+use App\Support\Update\CronStop;
 use App\Support\Update\PackageInspector;
 use App\Support\Update\Release;
 use App\Support\Update\ReleaseChecker;
@@ -455,4 +458,160 @@ it('refuses to start an update with a package that fails the checks', function (
         ->assertNoRedirect();
 
     expect($storage->isExtracting())->toBeFalse()->and(app(Maintenance::class)->isOn())->toBeFalse();
+});
+
+// --- Aggiornamenti automatici col cron ----------------------------------------------------------------
+
+/**
+ * GitHub finto con la release $version e il suo pacchetto (scaricabile a blocchi, con SHA-256).
+ */
+function fakeGitHubWithPackage(string $version): void
+{
+    $content = (string) file_get_contents(updatePackage($version));
+
+    Http::fake(function (Request $request) use ($version, $content) {
+        if (str_ends_with($request->url(), 'releases/latest')) {
+            return Http::response(githubRelease($version, size: strlen($content)));
+        }
+
+        if (str_ends_with($request->url(), '.sha256')) {
+            return Http::response(hash('sha256', $content)."  resume-app-{$version}.zip");
+        }
+
+        preg_match('/bytes=(\d+)-(\d+)/', $request->header('Range')[0] ?? '', $range);
+
+        return Http::response(substr($content, (int) $range[1], (int) $range[2] - (int) $range[1] + 1), 206);
+    });
+}
+
+function autoUpdate(string $level): AutoUpdate
+{
+    app()->instance(Cron::class, $cron = new Cron(test()->core.'/storage'));
+    $cron->rememberWebRuntime();
+    app(Settings::class)->set(AutoUpdate::SETTING, $level);
+    app(Settings::class)->set(Updater::VERSION_KEY, app(Updater::class)->codeVersion());
+
+    return app(AutoUpdate::class);
+}
+
+function sentMails(): array
+{
+    return app('mail.manager')->mailer()->getSymfonyTransport()->messages()->all();
+}
+
+it('only checks for new versions when automatic updates are off or the cron job is missing', function () {
+    seedDemo();
+    fakeGitHubWithPackage('2.0.9');
+    $auto = autoUpdate(AutoUpdate::OFF);
+
+    expect($auto->run(fromCron: true))->toBe('available 2.0.9')
+        ->and(app(UpdateStorage::class)->packages())->toBe([]);
+
+    app(Settings::class)->set(AutoUpdate::SETTING, AutoUpdate::PATCH);
+
+    expect($auto->run(fromCron: false))->toBe('available 2.0.9')
+        ->and(app(UpdateStorage::class)->packages())->toBe([]);
+});
+
+it('downloads a new version and tells the administrators', function () {
+    seedDemo();
+    User::factory()->create(['email' => 'admin@example.com']);
+    fakeGitHubWithPackage('2.1.0');
+
+    expect(autoUpdate(AutoUpdate::DOWNLOAD)->run(fromCron: true))->toBe('downloaded 2.1.0')
+        ->and(app(UpdateStorage::class)->package('resume-app-2.1.0.zip'))->toBeFile()
+        ->and(app(AutoUpdate::class)->lastEvent()['type'])->toBe('downloaded')
+        ->and(sentMails())->toHaveCount(1);
+
+    $this->actingAs(User::query()->first());
+    $this->get('/admin')->assertSee('La versione 2.1.0 è pronta da installare');
+});
+
+it('never installs a feature release by itself, only downloads it', function () {
+    seedDemo();
+    fakeGitHubWithPackage('2.1.0');
+
+    expect(autoUpdate(AutoUpdate::PATCH)->run(fromCron: true))->toBe('downloaded 2.1.0')
+        ->and(app(UpdateStorage::class)->isExtracting())->toBeFalse()
+        ->and(app(Maintenance::class)->isOn())->toBeFalse();
+});
+
+it('recognises fix releases', function (string $version, bool $patch) {
+    expect(app(AutoUpdate::class)->isPatch($version))->toBe($patch);
+})->with([
+    ['2.0.9', true],
+    ['2.0.10', true],
+    ['2.1.0', false],
+    ['3.0.0', false],
+    ['2.0.3', false],
+    ['2.0.1', false],
+]);
+
+it('installs a fix release from the cron job and completes it in a new process', function () {
+    seedDemo();
+    User::factory()->create(['email' => 'admin@example.com']);
+    fakeGitHubWithPackage('2.0.9');
+    $auto = autoUpdate(AutoUpdate::PATCH);
+    $backups = glob(storage_path('app/private/backups/*.zip')) ?: [];
+
+    // Primo giro: download, controlli, copia dei contenuti, manutenzione, estrazione; poi il giro si ferma
+    expect(fn () => $auto->run(fromCron: true))->toThrow(CronStop::class, 'extracted 2.0.9')
+        ->and(file_get_contents("{$this->core}/app/NewFeature.php"))->toContain('2.0.9')
+        ->and(file_get_contents("{$this->web}/uploads/photo.webp"))->toBe('original')
+        ->and(app(UpdateStorage::class)->isExtracting())->toBeFalse()
+        ->and(app(Maintenance::class)->isOn())->toBeTrue()
+        ->and(count(glob(storage_path('app/private/backups/*.zip')) ?: []))->toBe(count($backups) + 1);
+
+    // Giro successivo (o "resume:update --finish"): migrazioni, cache, fine della manutenzione
+    app(Settings::class)->set(Updater::VERSION_KEY, '2.0.1');
+
+    expect($auto->run(fromCron: true))->toBe('installed 2.0.9')
+        ->and(app(Maintenance::class)->isOn())->toBeFalse()
+        ->and(app(UpdateStorage::class)->runFile())->not->toBeFile()
+        ->and($auto->lastEvent()['type'])->toBe('installed')
+        ->and(collect(sentMails())->map(fn ($message) => $message->getOriginalMessage()->getSubject())->last())->toContain('2.0.9');
+
+    foreach (array_diff(glob(storage_path('app/private/backups/*.zip')) ?: [], $backups) as $file) {
+        @unlink($file);
+    }
+});
+
+it('does not install a fix release the web server cannot run', function () {
+    seedDemo();
+    $content = (string) file_get_contents(updatePackage('2.0.9', requires: ['php' => '8.4.0', 'extensions' => ['zip', 'imaginary']]));
+
+    Http::fake(function (Request $request) use ($content) {
+        return match (true) {
+            str_ends_with($request->url(), 'releases/latest') => Http::response(githubRelease('2.0.9', size: strlen($content))),
+            str_ends_with($request->url(), '.sha256') => Http::response(hash('sha256', $content).'  resume-app-2.0.9.zip'),
+            default => Http::response($content, 200),
+        };
+    });
+
+    $auto = autoUpdate(AutoUpdate::PATCH);
+
+    expect($auto->run(fromCron: true))->toContain('not installed 2.0.9')
+        ->and($auto->lastEvent()['type'])->toBe('failed')
+        ->and(app(UpdateStorage::class)->isExtracting())->toBeFalse()
+        ->and(app(Maintenance::class)->isOn())->toBeFalse();
+
+    // Dopo tre tentativi la versione resta all'amministratore
+    $auto->run(fromCron: true);
+    $auto->run(fromCron: true);
+
+    expect($auto->run(fromCron: true))->toContain('too many attempts');
+});
+
+it('lets the administrator choose the automatic update level', function () {
+    seedDemo();
+    $this->actingAs(User::factory()->create());
+    Filament::setCurrentPanel('admin');
+
+    Livewire::test(ManageSystem::class)
+        ->callAction('autoUpdates', data: ['level' => AutoUpdate::PATCH])
+        ->assertNotified(__('admin.messages.saved'));
+
+    expect(app(AutoUpdate::class)->level())->toBe(AutoUpdate::PATCH);
+
+    $this->get('/admin/system')->assertOk()->assertSee('Installa da solo le versioni di correzione')->assertSee('schedule:run');
 });

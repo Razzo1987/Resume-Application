@@ -162,6 +162,7 @@ to the next request (if they do not, *System* → *Tools* → *Clear caches*).
 | `RESUME_ADMIN_LOCALE` | `it` or `en` | language of the admin interface |
 | `RESUME_THEME` | `base` | theme used when none is active in the admin (for example after a failed theme installation) |
 | `RESUME_PAGE_CACHE` | `true` | HTML cache of the public pages; turn it off only to debug |
+| `RESUME_TRUSTED_PROXIES` | empty | only when the site is behind a proxy that changes the request address (CDN or tunnel such as Cloudflare, GitHub Codespaces): `*` for any proxy, or a comma-separated list of IP addresses or networks. Address, protocol and visitor IP are then read from the `X-Forwarded-*` headers. Leave it empty otherwise: with `*` and no proxy in front, anybody could fake those headers |
 | `RESUME_UPDATE_REPOSITORY` | `Razzo1987/Resume-Application` | GitHub repository whose releases are offered as updates |
 | `RESUME_UPDATE_TOKEN` | empty | GitHub token for a private repository (it can also be entered from *System*) |
 | `RESUME_UPDATE_API` | `https://api.github.com` | GitHub API address (GitHub Enterprise or tests) |
