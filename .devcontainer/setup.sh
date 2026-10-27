@@ -20,7 +20,10 @@ set_env DB_PASSWORD resume
 grep -q '^APP_KEY=base64' .env || php artisan key:generate --force
 
 echo "Attendo il database..."
-for _ in $(seq 1 60); do mysqladmin ping -h db -u resume -presume --silent 2>/dev/null && break; sleep 2; done
+for _ in $(seq 1 90); do
+    php -r 'try { new PDO("mysql:host=db;dbname=resume_app", "resume", "resume"); } catch (Throwable) { exit(1); }' && break
+    sleep 2
+done
 
 php artisan migrate:fresh --seed --force
 php artisan db:seed --class=DemoSeeder --force
