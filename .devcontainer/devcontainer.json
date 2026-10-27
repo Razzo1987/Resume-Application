@@ -6,7 +6,11 @@
     "features": {
         "ghcr.io/devcontainers/features/node:1": {
             "version": "22"
-        }
+        },
+        "ghcr.io/devcontainers/features/github-cli:1": {}
+    },
+    "containerEnv": {
+        "XDEBUG_MODE": "off"
     },
     "forwardPorts": [
         8000
@@ -18,6 +22,9 @@
         }
     },
     "postCreateCommand": "bash .devcontainer/setup.sh",
+    "postAttachCommand": {
+        "server": "bash .devcontainer/start.sh"
+    },
     "customizations": {
         "codespaces": {
             "openFiles": [
@@ -30,8 +37,5 @@
                 "onecentlabs.laravel-blade"
             ]
         }
-    },
-    "postAttachCommand": {
-        "server": "bash .devcontainer/start.sh"
     }
 }

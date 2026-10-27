@@ -19,9 +19,19 @@ fi
 sed -i "s#^APP_URL=.*#APP_URL=${url}#" .env
 php artisan optimize:clear >/dev/null
 
+# La porta 8000 diventa pubblica, così il sito si apre anche fuori dalla sessione di GitHub
+# (es. da un altro browser o da chi riceve il link). Serve la GitHub CLI, inclusa nel container.
+if [ -n "${CODESPACE_NAME:-}" ] && command -v gh >/dev/null; then
+    ( sleep 5; gh codespace ports visibility 8000:public -c "$CODESPACE_NAME" >/dev/null 2>&1 \
+        || echo "Port 8000 is private: Ports tab, right click, Port Visibility, Public." ) &
+fi
+
 echo
 echo "Resume App: ${url}"
 echo "Admin:      ${url}/admin  (demo@example.com / demo-password)"
 echo "Stop the server with Ctrl+C, start it again with: bash .devcontainer/start.sh"
 echo
-PHP_CLI_SERVER_WORKERS=4 exec php artisan serve --host=0.0.0.0 --port=8000 --no-reload
+
+# Server PHP integrato con 4 processi; il router sistema l'indirizzo pubblico (vedi router.php)
+cd public
+PHP_CLI_SERVER_WORKERS=4 exec php -S 0.0.0.0:8000 ../.devcontainer/router.php

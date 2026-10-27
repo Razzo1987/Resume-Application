@@ -2,8 +2,12 @@
 
 The Codespace starts with the sample CV of "John Doe" (Italian and English) already loaded.
 
+- If VS Code asks *Do you trust the authors of the files in this folder?*, choose **Trust Folder & Continue**:
+  until then the web server cannot start.
 - **Site**: it opens by itself when the Codespace is ready; otherwise the *Ports* tab → port 8000 → globe icon.
   The web server runs in the *server* terminal (bottom panel): keep it open.
+  Port 8000 is made public, so the link also works in other browsers; to keep it to yourself: *Ports* tab,
+  right click on 8000, *Port Visibility*, *Private*.
 - **Admin**: the same address followed by `/admin`, user `demo@example.com`, password `demo-password`.
 
 Everything runs inside the Codespace and is deleted with it: feel free to change any content.

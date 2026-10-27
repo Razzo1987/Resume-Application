@@ -92,10 +92,13 @@ More in **[docs/SCREENSHOTS.md](docs/SCREENSHOTS.md)**: CV, detail pages, blog, 
 Click **Open in GitHub Codespaces** above (a free GitHub account is enough): in a couple of minutes you get your own
 copy running with the sample CV of "John Doe".
 
+- if VS Code asks *Do you trust the authors of the files in this folder?*, answer **Trust Folder & Continue**:
+  the web server starts in a terminal and is blocked until then;
 - **Site**: *Ports* tab → port 8000 → open in the browser;
 - **Admin**: the same address followed by `/admin`, user `demo@example.com`, password `demo-password`.
 
-Everything stays inside your Codespace (delete it when you are done). The configuration is in
+Port 8000 is public, so you can share the link while the Codespace is running. Everything stays inside your
+Codespace (delete it when you are done). The configuration is in
 [`.devcontainer`](.devcontainer).
 
 ## 🛠️ Technical Stack
