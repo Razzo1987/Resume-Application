@@ -1,6 +1,6 @@
 # BEGIN resume-app
-# Blocco gestito da Resume App: viene riscritto da installer e aggiornamenti.
-# Le regole fuori da questo blocco (es. quelle di cPanel per la versione PHP) non vengono toccate.
+# Block managed by Resume App: rewritten by the installer and by updates.
+# Rules outside this block (e.g. the PHP version handler added by the hosting panel) are left untouched.
 <IfModule mod_rewrite.c>
     <IfModule mod_negotiation.c>
         Options -MultiViews -Indexes

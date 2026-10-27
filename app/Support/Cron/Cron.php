@@ -11,13 +11,13 @@ use Illuminate\Support\Facades\File;
 use Throwable;
 
 /**
- * Lavori programmati: controllo degli aggiornamenti, aggiornamento automatico, database GeoLite, statistiche, pulizia.
+ * Scheduled jobs: update check, automatic update, GeoLite databases, statistics, clean-up.
  *
- * Con il cron dell'hosting (una riga in cPanel: "php …/core/artisan schedule:run" ogni 5-15 minuti) girano tutti,
- * anche quelli lunghi (download e installazione). Senza cron partono quelli leggeri dall'admin, dopo aver risposto,
- * al massimo una volta l'ora: il sito funziona comunque, ma ciò che richiede tempo si fa a mano dall'admin.
+ * With the hosting cron (one line in the control panel: "php …/core/artisan schedule:run" every 5-15 minutes) they
+ * all run, the long ones too (download and installation). Without cron the light ones start from the admin, after
+ * the response is sent, at most once an hour: the site still works, but whatever takes time is done by hand.
  *
- * Lo stato (ultimo passaggio del cron, esito di ogni lavoro) sta in core/storage/app/private/cron/state.json.
+ * The state (last cron run, result of each job) is in core/storage/app/private/cron/state.json.
  */
 class Cron
 {
@@ -275,7 +275,7 @@ class Cron
     }
 
     /**
-     * Riga da inserire nei cron job di cPanel (ogni 5 minuti).
+     * Line to add to the cron jobs of the hosting (every 5 minutes).
      */
     public function command(): string
     {
@@ -283,8 +283,8 @@ class Cron
     }
 
     /**
-     * Percorso probabile del PHP da riga di comando. Il sito gira spesso con php-fpm o lsphp: su cPanel
-     * il PHP per il cron sta accanto (es. /opt/cpanel/ea-php85/root/usr/bin/php).
+     * Likely path of the command line PHP. The site often runs with php-fpm or lsphp, and the hosting panels keep
+     * the CLI binary of each PHP version in a known place (cPanel EasyApache, CloudLinux alt-php, Plesk, DirectAdmin).
      */
     public function phpCli(): string
     {
@@ -297,6 +297,8 @@ class Cron
         $candidates = [dirname($binary).'/php', dirname($binary, 2).'/bin/php'];
         $candidates[] = sprintf('/opt/cpanel/ea-php%d%d/root/usr/bin/php', PHP_MAJOR_VERSION, PHP_MINOR_VERSION);
         $candidates[] = sprintf('/opt/alt/php%d%d/usr/bin/php', PHP_MAJOR_VERSION, PHP_MINOR_VERSION);
+        $candidates[] = sprintf('/opt/plesk/php/%d.%d/bin/php', PHP_MAJOR_VERSION, PHP_MINOR_VERSION);
+        $candidates[] = sprintf('/usr/local/php%d%d/bin/php', PHP_MAJOR_VERSION, PHP_MINOR_VERSION);
 
         foreach ($candidates as $candidate) {
             if (rescue(fn (): bool => @is_file($candidate) && @is_executable($candidate), false, report: false)) {

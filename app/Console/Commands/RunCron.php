@@ -8,7 +8,7 @@ use App\Support\Cron\Cron;
 use Illuminate\Console\Command;
 
 /**
- * Lavori programmati di Resume App. Di solito parte da "schedule:run" (il cron di cPanel); si può lanciare anche a mano.
+ * Resume App scheduled jobs. Usually started by "schedule:run" (the hosting cron job); it can also be run by hand.
  *
  *   php core/artisan resume:cron              lavori da fare adesso
  *   php core/artisan resume:cron --job=geoip  un solo lavoro, anche se non è ancora il momento

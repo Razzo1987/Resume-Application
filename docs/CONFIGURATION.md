@@ -32,7 +32,7 @@ Every change made in the admin is online immediately: the page cache is cleared 
 
 1. user menu → *Profile*: turn on **two-factor authentication** and save the recovery codes (and choose the admin
    language);
-2. *Website* → *System* → *Scheduled jobs*: add the **cron job** in cPanel (one line, shown on the page), so updates
+2. *Website* → *System* → *Scheduled jobs*: add the **cron job** in the hosting control panel (one line, shown on the page), so updates
    and statistics work by themselves;
 3. *Website* → *Site languages*: default language and active languages;
 4. *Résumé* → *Profile*, then the CV sections;
@@ -233,4 +233,4 @@ to the next request (if they do not, *System* → *Tools* → *Clear caches*).
   Keep one after every important change; an export is also created automatically before every update and import.
 - **Import the content** replaces all the content with an export (from the same or an older version); users and
   passwords stay as they are.
-- For a full backup (files and database) use the backup tool of the hosting (cPanel → *Backup*).
+- For a full backup (files and database) use the backup tool of the hosting control panel.

@@ -150,7 +150,7 @@ it('writes the .htaccess block and keeps the lines of the hosting', function () 
         ->toContain('#RewriteCond %{HTTP_HOST} ^www')
         ->and($htaccess->options())->toBe(['installed' => true, 'force_https' => true, 'strip_www' => false]);
 
-    // Riscrittura: un solo blocco, opzioni aggiornate, righe di cPanel intatte
+    // Rewrite: a single block, updated options, the hosting panel lines left untouched
     $htaccess->write(forceHttps: false, stripWww: true);
     $content = (string) file_get_contents($path);
 

@@ -2,8 +2,8 @@
 
 return [
     'title' => 'Resume App installation',
-    'intro' => 'A few details and your site is ready. You need a MySQL database (empty, or the one of a previous installation: its content is kept) (in cPanel: MySQL Databases → create a database and a user, then give the user all privileges on the database).',
-    'requirements_failed' => 'The server does not meet all the requirements: ask your hosting provider to enable them (usually in cPanel → Select PHP Version).',
+    'intro' => 'A few details and your site is ready. You need a MySQL database (empty, or the one of a previous installation: its content is kept) (from the hosting control panel: create a database and a user, then give the user all privileges on the database).',
+    'requirements_failed' => 'The server does not meet all the requirements: ask your hosting provider to enable them (usually in the PHP settings of the hosting control panel).',
     'submit' => 'Install',
 
     'sections' => [
@@ -35,9 +35,9 @@ return [
 
     'help' => [
         'url' => 'Full address, without trailing slash (e.g. https://jane.doe.com).',
-        'database' => 'In cPanel the server is almost always "localhost"; database and user names start with the account name (e.g. account_resume).',
+        'database' => 'On shared hosting the server is almost always "localhost"; database and user names often start with the account name (e.g. account_resume).',
         'admin_path' => 'Lowercase letters, numbers and hyphens only. A path other than "admin" makes the area less exposed to automated attempts.',
-        'addresses' => 'The rules are written in the .htaccess file, in a separate block: lines added by cPanel are left untouched.',
+        'addresses' => 'The rules are written in the .htaccess file, in a separate block: lines added by the hosting control panel are left untouched.',
     ],
 
     'errors' => [

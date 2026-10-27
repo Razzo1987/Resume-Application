@@ -2,8 +2,8 @@
 
 return [
     'title' => 'Installazione di Resume App',
-    'intro' => 'Pochi dati e il sito è pronto. Serve un database MySQL (vuoto, oppure quello di un\'installazione precedente: i contenuti restano) (da cPanel: Database MySQL → crea database e utente, poi assegna all\'utente tutti i privilegi sul database).',
-    'requirements_failed' => 'Il server non soddisfa tutti i requisiti: chiedi all\'hosting di attivarli (di solito da cPanel → Seleziona versione PHP).',
+    'intro' => 'Pochi dati e il sito è pronto. Serve un database MySQL (vuoto, oppure quello di un\'installazione precedente: i contenuti restano) (dal pannello dell\'hosting: crea database e utente, poi assegna all\'utente tutti i privilegi sul database).',
+    'requirements_failed' => 'Il server non soddisfa tutti i requisiti: chiedi all\'hosting di attivarli (di solito si fa dalle impostazioni PHP del pannello dell\'hosting).',
     'submit' => 'Installa',
 
     'sections' => [
@@ -35,9 +35,9 @@ return [
 
     'help' => [
         'url' => 'Indirizzo completo, senza slash finale (es. https://mario.rossi.it).',
-        'database' => 'Su cPanel il server è quasi sempre "localhost"; nome del database e utente hanno davanti il nome dell\'account (es. utente_resume).',
+        'database' => 'Sugli hosting condivisi il server è quasi sempre "localhost"; spesso nome del database e utente hanno davanti il nome dell\'account (es. utente_resume).',
         'admin_path' => 'Solo lettere minuscole, numeri e trattini. Un percorso diverso da "admin" rende l\'area meno esposta ai tentativi automatici.',
-        'addresses' => 'Le regole vengono scritte nel file .htaccess, in un blocco separato: le righe aggiunte da cPanel restano intatte.',
+        'addresses' => 'Le regole vengono scritte nel file .htaccess, in un blocco separato: le righe aggiunte dal pannello dell\'hosting restano intatte.',
     ],
 
     'errors' => [

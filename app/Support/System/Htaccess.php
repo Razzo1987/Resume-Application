@@ -8,7 +8,7 @@ use RuntimeException;
 
 /**
  * Blocco "# BEGIN resume-app … # END resume-app" nel .htaccess della webroot.
- * Il resto del file (es. le righe di cPanel per la versione di PHP) non viene mai toccato.
+ * The rest of the file (e.g. the PHP version handler added by the hosting panel) is never touched.
  */
 class Htaccess
 {

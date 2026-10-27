@@ -10,7 +10,7 @@
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 
 > A professional, multilingual CV / résumé website that you manage entirely from the browser.
-> Upload one zip to ordinary shared hosting (cPanel works fine), run the web installer, fill in your CV in the admin
+> Upload one zip to ordinary shared hosting (any control panel), run the web installer, fill in your CV in the admin
 > panel and keep it up to date with one click. The public site sets **no cookies** and loads **nothing from third
 > parties**: fonts, icons, scripts and styles are all self-hosted.
 
@@ -85,7 +85,7 @@ can be imported (see [docs/INSTALL.md](docs/INSTALL.md#from-version-1)).
 - **Updates from the admin**: new versions are announced from the GitHub releases; the package is downloaded
   straight to the server (or uploaded from your computer, with no upload-size limit), checked, installed in a few
   seconds and completed automatically. No FTP needed.
-- **Scheduled jobs** with one cPanel cron line: update check, **automatic updates** (off, download and notify, or
+- **Scheduled jobs** with one cron line in the hosting panel: update check, **automatic updates** (off, download and notify, or
   install fix releases by themselves), GeoLite updates, statistics summaries and clean-up.
 
 ## 📸 Screenshots
@@ -130,14 +130,16 @@ Codespace (delete it when you are done). The configuration is in
 - ![PHP](https://img.shields.io/badge/PHP-8.4+-777BB4?style=flat&logo=php&logoColor=white) **PHP 8.4 or 8.5** with `ctype`, `dom`,
   `fileinfo`, `filter`, `gd`, `intl`, `mbstring`, `openssl`, `pdo_mysql`, `session`, `tokenizer`, `zip`, `zlib`
 - ![MySQL](https://img.shields.io/badge/MySQL-8.0+-4479A1?style=flat&logo=mysql&logoColor=white) **MySQL 8.0+** or MariaDB 10.11+
-- **Apache** with `mod_rewrite` and `.htaccess` files enabled (standard on cPanel hosting)
+- **Apache** with `mod_rewrite` and `.htaccess` files enabled: the usual setup of shared hosting, whatever the
+  control panel. LiteSpeed reads the same files and should work too (not tested yet); on an nginx-only server the
+  rules have to be written by hand (see [docs/INSTALL.md](docs/INSTALL.md#without-htaccess-nginx))
 
 No Composer, Node.js or command line is needed on the server: the release zip contains everything.
 
 ## 🚀 Installation
 
 1. Download `resume-app-x.y.z.zip` from the [latest release](https://github.com/Razzo1987/Resume-Application/releases/latest).
-2. Create a MySQL database and a user (cPanel → *MySQL Databases*).
+2. Create a MySQL database and a user from the hosting control panel.
 3. Upload the zip to your web root (e.g. `public_html`) and extract it there.
 4. Open `https://your-domain/install` and follow the installer.
 5. Log in to the admin area and fill in your CV.
@@ -166,7 +168,7 @@ From version 2.0.3 the site updates itself from the admin: *System* → *Updates
 3. **Update now**: content backup, maintenance, files replaced in a few seconds (visitors see a "Site being updated"
    page), database and caches updated, maintenance off.
 
-With the cron job set up (*System* → *Scheduled jobs* shows the line to paste in cPanel) the new package is
+With the cron job set up (*System* → *Scheduled jobs* shows the line to paste in the hosting panel) the new package is
 downloaded by itself, and fix releases (2.1.0 → 2.1.1) can also install themselves; you get the result on the
 dashboard and by email.
 

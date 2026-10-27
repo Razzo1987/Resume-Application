@@ -1,6 +1,7 @@
 # Installing and updating Resume App
 
-This guide covers a standard shared hosting account with **cPanel**; any Apache + PHP + MySQL server works the same way.
+This guide covers a standard shared hosting account managed from a **control panel**; any Apache + PHP + MySQL server
+works the same way. The panels give the same tools different names (see [Where to find it](#where-to-find-it-in-the-control-panel)).
 Once the site is installed, [CONFIGURATION.md](CONFIGURATION.md) explains how to set it up from the admin panel.
 
 - [Requirements](#requirements)
@@ -19,7 +20,7 @@ Once the site is installed, [CONFIGURATION.md](CONFIGURATION.md) explains how to
 |---|---|
 | PHP | 8.4 or 8.5 with `ctype`, `dom`, `fileinfo`, `filter`, `gd`, `intl`, `mbstring`, `openssl`, `pdo_mysql`, `session`, `tokenizer`, `zip`, `zlib` |
 | Database | MySQL 8.0+ or MariaDB 10.11+ |
-| Web server | Apache with `mod_rewrite` and `.htaccess` files enabled (`AllowOverride All`) |
+| Web server | Apache with `mod_rewrite` and `.htaccess` files enabled (`AllowOverride All`); LiteSpeed reads the same files (not tested yet); for nginx alone see [below](#without-htaccess-nginx) |
 | Recommended | `mod_headers`, `mod_deflate`, an SSL certificate (AutoSSL / Let's Encrypt) |
 
 The installer checks all of them before doing anything. Nothing else is needed on the server: no SSH, Composer or
@@ -67,12 +68,13 @@ If your hosting lets you keep files outside the web root, you can move `core/` t
 
 ## First installation
 
-1. **Database** — cPanel → *MySQL Databases*: create a database (e.g. `account_resume`) and a user, then add the
-   user to the database with *All privileges*. Write down the three names and the password.
-2. **PHP version** — cPanel → *Select PHP Version* (or *MultiPHP Manager*): choose PHP 8.4 or 8.5 and enable the
-   extensions listed above (most are on by default; `intl` and `zip` are the ones usually missing).
-3. **Upload** — cPanel → *File Manager* → `public_html`: upload the zip and *Extract* it there.
-   Remove any old site files first (keep a copy): only the `.htaccess` lines added by cPanel may stay.
+1. **Database** — create a MySQL database (e.g. `account_resume`) and a user, then give the user *All privileges* on
+   the database. Write down the three names and the password.
+2. **PHP version** — choose PHP 8.4 or 8.5 for the site and enable the extensions listed above (most are on by
+   default; `intl` and `zip` are the ones usually missing).
+3. **Upload** — with the file manager of the panel (or FTP) upload the zip to the web root (`public_html`,
+   `httpdocs`... depending on the hosting) and extract it there. Remove any old site files first (keep a copy): only
+   the `.htaccess` lines added by the panel may stay.
 4. **Install** — open `https://your-domain/install`. If the address does not work yet, open
    `https://your-domain/index.php/install` (the `.htaccess` rules are written at the end of the installation).
    Fill in the form:
@@ -82,6 +84,17 @@ If your hosting lets you keep files outside the web root, you can move `core/` t
    - HTTPS and "without www" redirects (turn on HTTPS only once the certificate works).
 5. Done. The installer creates the tables, the administrator, `core/.env` (permissions `0600`), the `uploads/`
    folder and the managed block in `public_html/.htaccess`. From now on `/install` answers 404.
+
+### Where to find it in the control panel
+
+Menu names change from one version to the next; these are the usual ones.
+
+| | cPanel | Plesk | DirectAdmin |
+|---|---|---|---|
+| Database and user | *MySQL Databases* | *Databases* | *MySQL Management* |
+| PHP version and extensions | *Select PHP Version* or *MultiPHP Manager* | *PHP* (in the domain settings) | *Select PHP version* |
+| Files | *File Manager* | *File Manager* | *File Manager* |
+| Cron job | *Cron Jobs* | *Scheduled Tasks* | *Cron Jobs* |
 
 Then, in the admin area (`https://your-domain/<admin path>`):
 
@@ -103,7 +116,7 @@ Then, in the admin area (`https://your-domain/<admin path>`):
 | Your name | the owner of the CV: profile name, site name and sender of the emails |
 | Main language, other languages | the site languages; more can be added later from the admin |
 | Sample CV | loads the "John Doe" demo content, useful to see how everything works |
-| Database | server (`localhost` on cPanel), port (`3306`), database name, user, password |
+| Database | server (almost always `localhost` on shared hosting), port (`3306`), database name, user, password |
 | Administrator | email and password (at least 10 characters) |
 | Admin path | the address of the admin area (`/admin` by default: a less obvious one keeps bots away) |
 | HTTPS, without www | permanent redirects; turn on HTTPS only when the certificate already works |
@@ -154,10 +167,12 @@ One cron job runs everything that has to happen by itself: the update check, aut
 databases of the statistics, the daily statistics summaries and the clean-up of temporary files.
 
 1. Admin → *System* → **Scheduled jobs**: the page shows the exact line, with the PHP path of your server, e.g.
-   `*/5 * * * * /opt/cpanel/ea-php85/root/usr/bin/php /home/user/public_html/core/artisan schedule:run >/dev/null 2>&1`.
-2. cPanel → **Cron Jobs** → *Common settings*: once per five minutes → paste the command → *Add new cron job*.
+   `*/5 * * * * /usr/local/bin/php /home/user/public_html/core/artisan schedule:run >/dev/null 2>&1`.
+2. In the control panel open the cron jobs (see [the table above](#where-to-find-it-in-the-control-panel)), add a
+   job every five minutes and paste the command (if the panel asks for a user, use the one that owns the site).
 3. Within a few minutes the page shows "active" with the PHP version used by the cron job: it must be the same as the
-   site's (on cPanel the command line PHP can be a different version: change the path in the command if needed).
+   site's. On many hostings the command line PHP is a different version: if so, change the path in the command
+   (the hosting documentation lists the path of each version).
 
 Without the cron job the site works anyway: the light jobs (update check, statistics summaries) start from the admin
 at most once an hour, and downloads are done from the admin pages.
@@ -177,7 +192,7 @@ cron job retries it; the email also contains a link to continue it from the brow
 
 ### By hand (FTP or File Manager)
 
-1. Admin → *System* → *Start maintenance*, then *Tools* → *Export the content* (or a full backup from cPanel).
+1. Admin → *System* → *Start maintenance*, then *Tools* → *Export the content* (or a full backup from the control panel).
 2. Extract the new zip into `public_html`, overwriting the files.
    `core/.env`, `uploads/`, `core/storage/` (CV PDFs) and the installed themes are not part of the package and are never touched.
 3. Admin → *System*: the page shows "New version uploaded" → press **Complete the update**
@@ -223,7 +238,7 @@ zip of the same theme updates it in place. A theme that is not in use can be rem
 ## The `.htaccess` file
 
 Resume App writes only its own block, between `# BEGIN resume-app` and `# END resume-app`; everything outside it
-(for example the PHP version handler added by cPanel) is left untouched. The block:
+(for example the PHP version handler added by the control panel) is left untouched. The block:
 
 - denies `core/`, `core-path.php` and hidden files;
 - optionally redirects to HTTPS and to the domain without `www`;
@@ -232,6 +247,25 @@ Resume App writes only its own block, between `# BEGIN resume-app` and `# END re
 
 The block can be rewritten from *System* → *Tools* → *.htaccess rules* (for example to turn on HTTPS later).
 The template is `htaccess.dist`.
+
+### Without `.htaccess` (nginx)
+
+A server that runs nginx alone does not read `.htaccess` files, and the installer stops because `core/` can be
+downloaded. The same rules have to go into the site configuration; an example to adapt (socket path and folders
+depend on the server):
+
+```nginx
+root /home/user/public_html;
+index index.php;
+
+location ~ ^/(core|core-path\.php)(/|$) { deny all; return 404; }
+location ~ /\.(?!well-known) { deny all; return 404; }
+location / { try_files $uri /index.php?$query_string; }
+location ~ \.php$ { include fastcgi_params; fastcgi_param SCRIPT_FILENAME $realpath_root$fastcgi_script_name; fastcgi_pass unix:/run/php/php8.4-fpm.sock; }
+```
+
+The caching and compression headers of the block are not essential. Panels that put nginx in front of Apache (as
+Plesk does by default) still read `.htaccess` files and need nothing of this.
 
 ## Troubleshooting
 

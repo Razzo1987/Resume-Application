@@ -20,7 +20,7 @@ A clear description of the problem.
 - Resume App version (admin → *System*):
 - PHP version:
 - Database (MySQL / MariaDB and version):
-- Hosting (cPanel, VPS, local...):
+- Hosting (shared hosting with a control panel, VPS, local...):
 - Theme:
 - Browser (for problems on the site or in the admin):
 
