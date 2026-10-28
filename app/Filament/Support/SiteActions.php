@@ -58,13 +58,14 @@ class SiteActions
     }
 
     /**
-     * Site home for the "Vai al sito" button in the top bar: in the admin language if it is active on the site
-     * ("it" → it-IT), otherwise in the default language.
+     * Site home for the "Go to site" button in the top bar: in the language of the admin as the current administrator
+     * sees it (their profile choice, or RESUME_ADMIN_LOCALE) if it is active on the site ("it" → it-IT), otherwise in
+     * the default language.
      */
-    public static function homeUrl(): string
+    public static function homeUrl(?string $adminLocale = null): string
     {
         $locales = app(Locales::class);
-        $admin = strtolower((string) config('resume.admin_locale', 'it'));
+        $admin = strtolower($adminLocale ?? app()->getLocale());
 
         $match = $locales->activeLanguages()
             ->map(fn (Language $language): string => $language->code)

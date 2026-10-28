@@ -278,3 +278,22 @@ it('moves an experience between work and volunteering', function () {
 
     expect($experience->fresh()->kind)->toBe(ExperienceKind::Work);
 });
+
+it('accepts SEO descriptions longer than search results show and explains errors in the admin language', function () {
+    app()->setLocale('it');
+    $long = str_repeat('Consulente Data & AI Governance. ', 6); // 198 characters
+
+    Livewire::test(ManageSettings::class)
+        ->fillForm(['seo' => ['description' => ['it-IT' => $long, 'en-GB' => '']]])
+        ->call('save')
+        ->assertHasNoFormErrors();
+
+    expect(app(Settings::class)->translated('seo.description', 'it-IT'))->toBe($long);
+
+    Livewire::test(ManageSettings::class)
+        ->fillForm(['seo' => ['description' => ['it-IT' => str_repeat('a', 301), 'en-GB' => '']]])
+        ->call('save')
+        ->assertHasFormErrors(['seo.description.it-IT' => 'max'])
+        ->assertSee('non può contenere più di 300 caratteri')
+        ->assertDontSee('validation.max');
+});

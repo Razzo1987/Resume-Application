@@ -6,6 +6,9 @@ All notable changes to this project are documented here. The format follows [Kee
 
 ### Fixed
 - Public site: a social link of type "Website" without a label of its own showed `admin.enums.social.website` instead of "Website" in the page language (new key `contact.website` in the language packs).
+- Admin: validation errors showed the raw key (`validation.max.string`) with the admin in Italian: the Laravel messages (validation, password reset, sign-in) are now translated (from Laravel Lang, MIT); the installer benefits too.
+- Admin: SEO descriptions (site and projects) accept up to 300 characters, with a note that search results show about 160; before, 170 was the limit, so settings imported with a longer text could not be saved. Short descriptions of interests accept up to 300 characters too.
+- Admin: *Go to site* opens the site in the language of the administrator (profile choice), not in the one of `RESUME_ADMIN_LOCALE`.
 
 ## [2.1.0] — 2026-10-27
 

@@ -78,7 +78,7 @@ class ProjectForm
                         Fieldset::make(__('admin.sections.seo'))->schema([
                             TextInput::make("slug.{$locale}")->label(__('admin.fields.slug'))->helperText(__('admin.help.slug'))->maxLength(150),
                             TextInput::make("seo_title.{$locale}")->label(__('admin.fields.seo_title'))->maxLength(70),
-                            Textarea::make("seo_description.{$locale}")->label(__('admin.fields.seo_description'))->maxLength(170)->rows(2)->columnSpanFull(),
+                            Textarea::make("seo_description.{$locale}")->label(__('admin.fields.seo_description'))->helperText(__('admin.help.seo_description_length'))->maxLength(300)->rows(2)->columnSpanFull(),
                         ]),
                     ]),
                 ])

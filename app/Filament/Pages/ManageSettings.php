@@ -178,7 +178,7 @@ class ManageSettings extends Page
                             ->imageCropAspectRatio('1:1'),
                         Translatable::tabs(fn (string $locale): array => [
                             TextInput::make("seo.title.{$locale}")->label(__('admin.fields.seo_title'))->helperText(__('admin.help.default_seo_title'))->maxLength(70),
-                            Textarea::make("seo.description.{$locale}")->label(__('admin.fields.seo_description'))->maxLength(170)->rows(2),
+                            Textarea::make("seo.description.{$locale}")->label(__('admin.fields.seo_description'))->helperText(__('admin.help.seo_description_length'))->maxLength(300)->rows(2),
                             Textarea::make("footer.gdpr_text.{$locale}")->label(__('admin.fields.gdpr_text'))->helperText(__('admin.help.gdpr_text'))->rows(3),
                         ], 'settings-texts', missing: fn (string $locale): array => array_values(array_diff(app(Settings::class)->missingTranslations($locale), ['privacy.text']))),
                     ])

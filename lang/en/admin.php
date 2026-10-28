@@ -189,6 +189,7 @@ return [
     ],
 
     'help' => [
+        'seo_description_length' => 'Ideally up to about 160 characters: search results cut the rest.',
         'theme_on_themes_page' => 'Change it on the Themes page',
         'blog_menu' => 'For this section the menu item always leads to the blog page, even when the section is hidden on the CV; it only appears when there are published articles in that language.',
         'og_image' => 'Shown when the CV is shared on social networks (Open Graph). 1200×630 recommended; saved as JPG. If missing, the profile photo is used.',

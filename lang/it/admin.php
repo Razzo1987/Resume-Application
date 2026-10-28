@@ -189,6 +189,7 @@ return [
     ],
 
     'help' => [
+        'seo_description_length' => 'Ideale fino a circa 160 caratteri: nei risultati di ricerca il resto viene tagliato.',
         'theme_on_themes_page' => 'Si cambia dalla pagina Temi',
         'blog_menu' => 'Per questa sezione la voce del menu porta sempre alla pagina del blog, anche se la sezione è spenta nel CV; compare solo se ci sono articoli pubblicati in quella lingua.',
         'og_image' => 'Mostrata quando il CV viene condiviso sui social (Open Graph). Consigliata 1200×630; salvata in JPG. Se manca si usa la foto del profilo.',

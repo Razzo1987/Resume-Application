@@ -38,7 +38,7 @@ class InterestResource extends Resource
         return $schema->components([
             Translatable::tabs(fn (string $locale, bool $isDefault): array => [
                 TextInput::make("name.{$locale}")->label(__('admin.fields.name'))->required($isDefault)->maxLength(100),
-                TextInput::make("description.{$locale}")->label(__('admin.fields.short_description'))->maxLength(160),
+                TextInput::make("description.{$locale}")->label(__('admin.fields.short_description'))->maxLength(300),
             ]),
             Fields::icon(),
             Fields::visible(),

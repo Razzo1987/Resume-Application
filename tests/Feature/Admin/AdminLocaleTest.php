@@ -38,3 +38,14 @@ it('lets administrators choose their language in the profile', function () {
 
     $this->get('/admin')->assertSee('lang="en"', escape: false);
 });
+
+it('opens the site from the top bar in the language of the administrator', function () {
+    seedDemo();
+    config(['resume.admin_locale' => 'en']);
+
+    $italian = User::factory()->create(['locale' => 'it'])->fresh();
+    $english = User::factory()->create(['locale' => 'en'])->fresh();
+
+    $this->actingAs($italian)->get('/admin')->assertOk()->assertSee('href="'.url('/it-IT').'"', escape: false);
+    $this->actingAs($english)->get('/admin')->assertOk()->assertSee('href="'.url('/en-GB').'"', escape: false);
+});
