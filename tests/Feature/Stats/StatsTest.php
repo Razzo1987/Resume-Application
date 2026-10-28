@@ -379,6 +379,9 @@ it('explains on the statistics page when the visitor address is not available', 
         ->assertOk()->assertDontSee('Indirizzo dei visitatori non disponibile');
     $this->withServerVariables(['REMOTE_ADDR' => '93.44.12.7', 'HTTP_X_FORWARDED_FOR' => '81.2.69.160'])->get('/admin/statistics')
         ->assertOk()->assertSee('RESUME_TRUSTED_PROXIES');
+    // the hosting already resolved the visitor's address and passes the header with the same one: no note
+    $this->withServerVariables(['REMOTE_ADDR' => '93.44.12.7', 'HTTP_X_FORWARDED_FOR' => '93.44.12.7'])->get('/admin/statistics')
+        ->assertOk()->assertDontSee('RESUME_TRUSTED_PROXIES');
 });
 
 it('filters the statistics by campaign, referrer, IP and the other details, also combined', function () {

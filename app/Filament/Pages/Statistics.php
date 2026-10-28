@@ -452,7 +452,11 @@ class Statistics extends Page implements HasTable
             return (string) __('admin.stats.proxy.private', ['ip' => $ip]);
         }
 
-        if ($request->headers->has('X-Forwarded-For') && ! $request->isFromTrustedProxy()) {
+        // Untrusted proxy: X-Forwarded-For names a different client. Many hostings already put the visitor's address
+        // in REMOTE_ADDR and still pass the header with the same address: that is not a problem.
+        $forwarded = array_map('trim', explode(',', (string) $request->headers->get('X-Forwarded-For')));
+
+        if ($forwarded !== [''] && ! $request->isFromTrustedProxy() && ! in_array($ip, $forwarded, true)) {
             return (string) __('admin.stats.proxy.untrusted', ['ip' => $ip]);
         }
 
