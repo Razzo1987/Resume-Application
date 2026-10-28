@@ -44,6 +44,15 @@ enum SocialPlatform: string implements HasLabel
         };
     }
 
+    /**
+     * Name shown on the public site, in the language of the page: the admin label of "website" comes from the admin
+     * language files, which the site does not load.
+     */
+    public function siteLabel(): string
+    {
+        return $this === self::Website ? (string) __('site.contact.website') : $this->getLabel();
+    }
+
     public function icon(): string
     {
         return $this->value;

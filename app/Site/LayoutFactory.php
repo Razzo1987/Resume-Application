@@ -87,7 +87,7 @@ final class LayoutFactory
                 'platform' => $link->platform->value,
                 'icon' => $link->platform->icon(),
                 'url' => $link->url,
-                'label' => $link->label ?: $link->platform->getLabel(),
+                'label' => $link->label ?: $link->platform->siteLabel(),
             ])->values()->all(),
             cvUrl: $cvDocument !== null ? url($this->urls->cvDownloadPath($locale)) : null,
             cvLanguageName: $cvDocument?->language->name,

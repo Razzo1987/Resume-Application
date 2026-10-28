@@ -41,6 +41,7 @@ return [
         'location' => 'Locatie',
         'birthdate' => 'Geboortedatum',
         'reveal_hint' => 'Schakel JavaScript in om de volledige contactgegevens te zien',
+        'website' => 'Website',
     ],
 
     'time' => [

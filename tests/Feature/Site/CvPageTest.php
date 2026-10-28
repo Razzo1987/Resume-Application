@@ -1,11 +1,13 @@
 <?php
 
 use App\Enums\PageSectionKey;
+use App\Enums\SocialPlatform;
 use App\Models\CvDocument;
 use App\Models\Experience;
 use App\Models\Interest;
 use App\Models\Language;
 use App\Models\PageSection;
+use App\Models\SocialLink;
 use App\Site\Contact\Cloak;
 use App\Support\Settings\Settings;
 use Illuminate\Support\Carbon;
@@ -156,4 +158,15 @@ it('shows the profile photo right after the name', function () {
     $html = (string) $this->get('/it-IT')->getContent();
 
     expect($html)->toMatch('#<h1 class="profile-name">John Doe</h1>\s*<img class="profile-photo" src="http://localhost/[a-z/]+/profile/john-doe-[a-z0-9]{6}\.webp" width="600" height="600" alt="Foto di John Doe"#');
+});
+
+it('names a personal website link in the page language, never with an admin key', function () {
+    SocialLink::query()->create(['platform' => SocialPlatform::Website, 'url' => 'https://example.org', 'sort_order' => 0]);
+
+    $this->get('/it-IT')->assertOk()->assertSee('title="Sito web"', escape: false)->assertDontSee('admin.');
+    $this->get('/en-GB')->assertOk()->assertSee('title="Website"', escape: false)->assertDontSee('admin.');
+
+    SocialLink::query()->where('platform', 'website')->sole()->update(['label' => 'Example.org']);
+
+    $this->get('/it-IT')->assertSee('title="Example.org"', escape: false);
 });

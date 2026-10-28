@@ -41,6 +41,7 @@ return [
         'location' => 'Lieu',
         'birthdate' => 'Date de naissance',
         'reveal_hint' => 'Activez JavaScript pour afficher les coordonnées complètes',
+        'website' => 'Site web',
     ],
 
     'time' => [

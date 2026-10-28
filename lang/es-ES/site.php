@@ -41,6 +41,7 @@ return [
         'location' => 'Ubicación',
         'birthdate' => 'Fecha de nacimiento',
         'reveal_hint' => 'Activa JavaScript para ver los datos de contacto completos',
+        'website' => 'Sitio web',
     ],
 
     'time' => [

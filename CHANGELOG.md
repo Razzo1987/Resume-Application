@@ -2,6 +2,11 @@
 
 All notable changes to this project are documented here. The format follows [Keep a Changelog](https://keepachangelog.com/) and the project uses [Semantic Versioning](https://semver.org/).
 
+## [2.1.1] — 2026-10-28
+
+### Fixed
+- Public site: a social link of type "Website" without a label of its own showed `admin.enums.social.website` instead of "Website" in the page language (new key `contact.website` in the language packs).
+
 ## [2.1.0] — 2026-10-27
 
 ### Added

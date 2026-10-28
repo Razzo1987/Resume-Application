@@ -41,6 +41,7 @@ return [
         'location' => 'Ort',
         'birthdate' => 'Geburtsdatum',
         'reveal_hint' => 'Aktivieren Sie JavaScript, um die vollständigen Kontaktdaten zu sehen',
+        'website' => 'Website',
     ],
 
     'time' => [

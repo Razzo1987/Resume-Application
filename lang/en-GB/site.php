@@ -40,6 +40,7 @@ return [
         'location' => 'Location',
         'birthdate' => 'Date of birth',
         'reveal_hint' => 'Enable JavaScript to see the full contact details',
+        'website' => 'Website',
     ],
 
     'time' => [

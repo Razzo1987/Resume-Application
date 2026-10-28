@@ -40,6 +40,7 @@ return [
         'location' => 'Località',
         'birthdate' => 'Data di nascita',
         'reveal_hint' => 'Attiva JavaScript per vedere il contatto completo',
+        'website' => 'Sito web',
     ],
 
     'time' => [
