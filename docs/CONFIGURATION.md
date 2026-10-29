@@ -232,7 +232,7 @@ to the next request (if they do not, *System* → *Tools* → *Clear caches*).
 | `RESUME_UPDATE_API` | `https://api.github.com` | GitHub API address (GitHub Enterprise or tests) |
 | `RESUME_GEOIP_ACCOUNT_ID`, `RESUME_GEOIP_LICENSE_KEY` | empty | MaxMind account for the GeoLite databases of the statistics (they can also be entered from *Statistics*) |
 | `DB_HOST`, `DB_PORT`, `DB_DATABASE`, `DB_USERNAME`, `DB_PASSWORD` | from the installer | database connection |
-| `MAIL_MAILER`, `MAIL_FROM_ADDRESS`, `MAIL_FROM_NAME` | `sendmail`, `noreply@your-domain`, your name | emails sent by the admin (password reset). If the hosting needs SMTP, set `MAIL_MAILER=smtp` with `MAIL_HOST`, `MAIL_PORT`, `MAIL_USERNAME`, `MAIL_PASSWORD` |
+| `MAIL_MAILER`, `MAIL_FROM_ADDRESS`, `MAIL_FROM_NAME` | `sendmail`, `noreply@your-domain`, your name | emails sent by the site (update notices, password reset). *System* → *Tools* → *Send a test email* checks that they arrive. If the hosting needs SMTP, set `MAIL_MAILER=smtp` with `MAIL_HOST`, `MAIL_PORT`, `MAIL_USERNAME`, `MAIL_PASSWORD` |
 | `LOG_CHANNEL`, `LOG_LEVEL` | `daily`, `warning` | error logs in `core/storage/logs` |
 
 ## Privacy and security

@@ -150,7 +150,7 @@ it('describes the job results in the admin language', function (string $message,
     ['available 2.1.1', 'disponibile la versione 2.1.1'],
     ['deleted 0', 'niente da eliminare'],
     ['deleted 3', '3 file eliminati'],
-    ['days 2, deleted 5 visits, 1 admin IPs', 'totali di 2 giorni aggiornati, 5 visite vecchie e 1 IP admin scaduti eliminati'],
+    ['days 2, deleted 5 visits, 1 admin IPs', 'giorni aggiornati: 2, visite vecchie eliminate: 5, IP admin scaduti eliminati: 1'],
     ['not installed 2.1.1: PHP too old', 'versione 2.1.1 non installata: PHP too old'],
     ['GitHub is down', 'GitHub is down'],
 ]);

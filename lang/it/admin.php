@@ -189,6 +189,7 @@ return [
     ],
 
     'help' => [
+        'characters' => ':count / :recommended caratteri',
         'seo_description_length' => 'Ideale fino a circa 160 caratteri: nei risultati di ricerca il resto viene tagliato.',
         'theme_on_themes_page' => 'Si cambia dalla pagina Temi',
         'blog_menu' => 'Per questa sezione la voce del menu porta sempre alla pagina del blog, anche se la sezione è spenta nel CV; compare solo se ci sono articoli pubblicati in quella lingua.',
@@ -310,6 +311,12 @@ return [
     ],
 
     'system' => [
+        'test_mail' => 'Invia un\'email di prova',
+        'test_mail_help' => 'Invia un messaggio a :email per controllare che il server spedisca le email (avvisi degli aggiornamenti, reset della password). Metodo di invio: :mailer, mittente: :from.',
+        'test_mail_subject' => 'Email di prova',
+        'test_mail_body' => 'Se leggi questo messaggio, il sito :site riesce a spedire le email.',
+        'test_mail_sent' => 'Email inviata a :email. Se entro qualche minuto non arriva, controlla lo spam e le impostazioni MAIL_ in core/.env.',
+        'test_mail_failed' => 'Invio non riuscito',
         'complete_update' => 'Completa l\'aggiornamento',
         'complete_update_help' => 'Dopo aver estratto il nuovo pacchetto: aggiorna il database, svuota le cache, riscrive il blocco .htaccess e registra la nuova versione.',
         'update_completed' => 'Aggiornamento completato',
@@ -460,6 +467,8 @@ return [
                 'failed' => 'Versione :version non installata (:when).',
             ],
             'mail' => [
+                'available_subject' => 'disponibile la versione :version',
+                'available' => 'È disponibile la versione :version di Resume App per :site. Puoi installarla dall\'admin.',
                 'downloaded_subject' => 'versione :version pronta da installare',
                 'downloaded' => 'La versione :version di Resume App è stata scaricata sul server di :site ed è pronta da installare.',
                 'installed_subject' => 'aggiornato alla versione :version',
@@ -702,7 +711,7 @@ return [
             'skipped' => 'versione :version lasciata all\'amministratore dopo tre tentativi',
             'extraction_failed' => 'estrazione interrotta: :reason',
             'deleted' => '{0} niente da eliminare|{1} :count file eliminato|[2,*] :count file eliminati',
-            'stats' => 'totali di :days giorni aggiornati, :visits visite vecchie e :ips IP admin scaduti eliminati',
+            'stats' => 'giorni aggiornati: :days, visite vecchie eliminate: :visits, IP admin scaduti eliminati: :ips',
             'geoip_available' => 'nuova versione dei database disponibile',
             'no_account' => 'manca l\'account MaxMind',
             'geoip_updated' => 'aggiornati :editions',

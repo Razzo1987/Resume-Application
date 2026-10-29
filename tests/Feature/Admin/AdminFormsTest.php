@@ -297,3 +297,12 @@ it('accepts SEO descriptions longer than search results show and explains errors
         ->assertSee('non può contenere più di 300 caratteri')
         ->assertDontSee('validation.max');
 });
+
+it('counts the characters of SEO texts against the length search results show', function () {
+    app()->setLocale('it');
+
+    Livewire::test(ManageSettings::class)
+        ->fillForm(['seo' => ['description' => ['it-IT' => str_repeat('a', 170), 'en-GB' => 'Breve']]])
+        ->assertSee('170 / 160 caratteri')
+        ->assertSee('5 / 160 caratteri');
+});

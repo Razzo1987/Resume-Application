@@ -10,6 +10,8 @@ use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\RichEditor;
 use Filament\Forms\Components\Select;
+use Filament\Forms\Components\Textarea;
+use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
 use Filament\Schemas\Components\Grid;
 use Filament\Schemas\Components\Utilities\Get;
@@ -20,6 +22,30 @@ use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
  */
 class Fields
 {
+    /** Lengths shown by search results: titles and descriptions longer than this are cut */
+    public const int SEO_TITLE_LENGTH = 60;
+
+    public const int SEO_DESCRIPTION_LENGTH = 160;
+
+    /**
+     * Character counter next to the label ("142 / 160"), in orange over the recommended length. The field is not
+     * limited by it: the hard limit stays maxLength().
+     *
+     * @template T of TextInput|Textarea
+     *
+     * @param  T  $field
+     * @return T
+     */
+    public static function counted(TextInput|Textarea $field, int $recommended): TextInput|Textarea
+    {
+        $length = fn (mixed $state): int => is_string($state) ? mb_strlen($state) : 0;
+
+        return $field
+            ->live(debounce: 400)
+            ->hint(fn (mixed $state): string => __('admin.help.characters', ['count' => $length($state), 'recommended' => $recommended]))
+            ->hintColor(fn (mixed $state): string => $length($state) > $recommended ? 'warning' : 'gray');
+    }
+
     /**
      * Long text (detail pages, articles): headings, lists, quotes, tables and images.
      * Inserted images end up in public/uploads/{directory}, served directly by the web server.

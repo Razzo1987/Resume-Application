@@ -33,8 +33,13 @@ final class CronJobs
         $cron->register('geoip', 24 * 60, light: true, run: function (bool $fromCron): string {
             $updater = app(GeoIpUpdater::class);
 
-            if (! app(Settings::class)->bool('stats.enabled') || app(GeoIp::class)->credentials() === null) {
+            if (! app(Settings::class)->bool('stats.enabled')) {
                 return 'off';
+            }
+
+            // Statistics on but no account: say what is missing instead of "off"
+            if (app(GeoIp::class)->credentials() === null) {
+                return 'no MaxMind account';
             }
 
             if ($fromCron) {

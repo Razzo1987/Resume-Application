@@ -627,3 +627,44 @@ it('lets the administrator choose the automatic update level', function () {
 
     $this->get('/admin/system')->assertOk()->assertSee('Installa da solo le versioni di correzione')->assertSee('schedule:run');
 });
+
+it('checks GitHub at every cron run with a conditional request, and emails a new version once', function () {
+    seedDemo();
+    User::factory()->create(['email' => 'admin@example.com']);
+    $content = (string) file_get_contents(updatePackage(UPDATES_FIX));
+    $requests = [];
+
+    Http::fake(function (Request $request) use (&$requests, $content) {
+        $requests[] = $request->header('If-None-Match')[0] ?? null;
+
+        return $request->hasHeader('If-None-Match')
+            ? Http::response('', 304)
+            : Http::response(githubRelease(UPDATES_FIX, size: strlen($content)), 200, ['ETag' => '"abc"']);
+    });
+
+    $auto = autoUpdate(AutoUpdate::OFF);
+
+    expect($auto->run(fromCron: true))->toBe('available '.UPDATES_FIX)
+        ->and($auto->run(fromCron: true))->toBe('available '.UPDATES_FIX)
+        ->and($requests)->toBe([null, '"abc"'])
+        ->and(sentMails())->toHaveCount(1)
+        ->and(sentMails()[0]->getOriginalMessage()->getSubject())->toContain(UPDATES_FIX);
+
+    // from the admin (no cron) the check is still at most every 12 hours
+    $auto->run(fromCron: false);
+    expect($requests)->toHaveCount(2);
+});
+
+it('sends a test email from the System page', function () {
+    seedDemo();
+    app()->setLocale('it');
+    $this->actingAs(User::factory()->create(['email' => 'admin@example.com']));
+    Filament::setCurrentPanel('admin');
+
+    Livewire::test(ManageSystem::class)
+        ->callAction('testMail')
+        ->assertNotified('Email inviata a admin@example.com. Se entro qualche minuto non arriva, controlla lo spam e le impostazioni MAIL_ in core/.env.');
+
+    expect(sentMails())->toHaveCount(1)
+        ->and(sentMails()[0]->getEnvelope()->getRecipients()[0]->getAddress())->toBe('admin@example.com');
+});

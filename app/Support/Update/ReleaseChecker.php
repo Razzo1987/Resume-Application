@@ -13,9 +13,10 @@ use Illuminate\Support\Facades\Http;
 use Throwable;
 
 /**
- * New versions published on GitHub. The check runs at most every 12 hours (when the dashboard is opened, after
- * the response is sent) or with "Controlla ora"; the result is kept in core/storage, so the dashboard does not
- * wait for GitHub.
+ * New versions published on GitHub. With the hosting cron the check runs at every "updates" job (every 30 minutes);
+ * without it at most every 12 hours (when the dashboard is opened, after the response is sent); always with
+ * "Check now". The result is kept in core/storage, so the dashboard does not wait for GitHub. Requests are
+ * conditional (ETag): when nothing changed GitHub answers 304, which does not count against its rate limit.
  */
 class ReleaseChecker
 {
@@ -38,6 +39,16 @@ class ReleaseChecker
             'release' => is_array($data['release'] ?? null) ? Release::fromArray($data['release']) : null,
             'error' => is_string($data['error'] ?? null) ? $data['error'] : null,
         ];
+    }
+
+    /**
+     * ETag of the last answer from GitHub (for the conditional request).
+     */
+    private function etag(): ?string
+    {
+        $etag = ($this->storage->readJson($this->storage->checkFile()) ?? [])['etag'] ?? null;
+
+        return is_string($etag) && $etag !== '' ? $etag : null;
     }
 
     /**
@@ -81,11 +92,18 @@ class ReleaseChecker
     {
         $release = null;
         $error = null;
+        $previous = $this->status()['release'];
+        $etag = $previous !== null ? $this->etag() : null;
+        $newEtag = $etag;
 
         try {
-            $response = $this->api()->get($this->apiUrl('releases/latest'));
+            $request = $this->api();
+            $response = ($etag !== null ? $request->withHeaders(['If-None-Match' => $etag]) : $request)->get($this->apiUrl('releases/latest'));
 
-            if ($response->successful()) {
+            if ($response->status() === 304) {
+                $release = $previous; // nothing new since the last check
+            } elseif ($response->successful()) {
+                $newEtag = $response->header('ETag') !== '' ? $response->header('ETag') : null;
                 $release = Release::fromGitHub((array) $response->json());
                 $error = $release === null ? __('admin.updates.errors.no_version') : null;
             } else {
@@ -97,13 +115,12 @@ class ReleaseChecker
             $error = $exception->getMessage();
         }
 
-        $previous = $this->status()['release'];
-
         $this->storage->writeJson($this->storage->checkFile(), [
             'checked_at' => now()->toAtomString(),
             // If GitHub does not respond, the last known release is kept
             'release' => ($release ?? $previous)?->toArray(),
             'error' => $error,
+            'etag' => $newEtag,
         ]);
 
         return $this->status();

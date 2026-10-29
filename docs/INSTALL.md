@@ -140,9 +140,10 @@ Every release is a **full package**: there are no patches to apply in a specific
 
 Admin → *System* → **Updates**:
 
-- the site checks the GitHub releases of `RESUME_UPDATE_REPOSITORY` (default `Razzo1987/Resume-Application`) at most
-  every 12 hours, when the dashboard is opened, and shows "Version x.y.z is available" with its release notes;
-  *Check now* checks immediately;
+- the site checks the GitHub releases of `RESUME_UPDATE_REPOSITORY` (default `Razzo1987/Resume-Application`):
+  with the cron job every 30 minutes (conditional requests, which do not count against the GitHub limit), without it
+  at most every 12 hours when the dashboard is opened; it shows "Version x.y.z is available" with its release notes
+  and emails the administrators; *Check now* checks immediately;
 - **Download and install** fetches the package straight from GitHub to the server, in 8 MB chunks, and verifies the
   SHA-256 published with the release; **Upload a package** sends a zip from your computer in 1 MB chunks, so the
   hosting upload limit does not matter; a zip copied into `core/storage/app/private/updates/packages` with the File

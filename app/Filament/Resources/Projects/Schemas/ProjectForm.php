@@ -77,8 +77,8 @@ class ProjectForm
                         TextInput::make("image_alt.{$locale}")->label(__('admin.fields.image_alt'))->maxLength(255),
                         Fieldset::make(__('admin.sections.seo'))->schema([
                             TextInput::make("slug.{$locale}")->label(__('admin.fields.slug'))->helperText(__('admin.help.slug'))->maxLength(150),
-                            TextInput::make("seo_title.{$locale}")->label(__('admin.fields.seo_title'))->maxLength(70),
-                            Textarea::make("seo_description.{$locale}")->label(__('admin.fields.seo_description'))->helperText(__('admin.help.seo_description_length'))->maxLength(300)->rows(2)->columnSpanFull(),
+                            Fields::counted(TextInput::make("seo_title.{$locale}")->label(__('admin.fields.seo_title'))->maxLength(120), Fields::SEO_TITLE_LENGTH),
+                            Fields::counted(Textarea::make("seo_description.{$locale}")->label(__('admin.fields.seo_description'))->helperText(__('admin.help.seo_description_length'))->maxLength(300)->rows(2), Fields::SEO_DESCRIPTION_LENGTH)->columnSpanFull(),
                         ]),
                     ]),
                 ])

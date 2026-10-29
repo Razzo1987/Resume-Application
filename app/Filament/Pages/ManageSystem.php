@@ -31,6 +31,7 @@ use Filament\Pages\Page;
 use Filament\Schemas\Components\Utilities\Get;
 use Filament\Support\Icons\Heroicon;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\HtmlString;
 use Illuminate\Support\Str;
@@ -396,6 +397,32 @@ class ManageSystem extends Page
                         $orphans = app(OrphanFiles::class);
                         $deleted = $orphans->delete($orphans->find());
                         Notification::make()->success()->title(__('admin.system.orphans_deleted', ['count' => $deleted]))->send();
+                    }),
+
+                Action::make('testMail')
+                    ->label(__('admin.system.test_mail'))
+                    ->icon(Heroicon::OutlinedEnvelope)
+                    ->requiresConfirmation()
+                    ->modalIcon(Heroicon::OutlinedEnvelope)
+                    ->modalDescription(fn (): string => __('admin.system.test_mail_help', [
+                        'email' => (string) auth()->user()?->email,
+                        'mailer' => (string) config('mail.default'),
+                        'from' => (string) config('mail.from.address'),
+                    ]))
+                    ->action(function (): void {
+                        $email = (string) auth()->user()?->email;
+
+                        try {
+                            Mail::raw((string) __('admin.system.test_mail_body', ['site' => url('/')]), fn ($message) => $message
+                                ->to($email)
+                                ->subject('['.config('app.name').'] '.__('admin.system.test_mail_subject')));
+                        } catch (Throwable $exception) {
+                            Notification::make()->danger()->title(__('admin.system.test_mail_failed'))->body($exception->getMessage())->persistent()->send();
+
+                            return;
+                        }
+
+                        Notification::make()->success()->title(__('admin.system.test_mail_sent', ['email' => $email]))->persistent()->send();
                     }),
 
                 Action::make('backup')

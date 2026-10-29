@@ -189,6 +189,7 @@ return [
     ],
 
     'help' => [
+        'characters' => ':count / :recommended characters',
         'seo_description_length' => 'Ideally up to about 160 characters: search results cut the rest.',
         'theme_on_themes_page' => 'Change it on the Themes page',
         'blog_menu' => 'For this section the menu item always leads to the blog page, even when the section is hidden on the CV; it only appears when there are published articles in that language.',
@@ -310,6 +311,12 @@ return [
     ],
 
     'system' => [
+        'test_mail' => 'Send a test email',
+        'test_mail_help' => 'Sends a message to :email to check that the server delivers emails (update notices, password reset). Sending method: :mailer, sender: :from.',
+        'test_mail_subject' => 'Test email',
+        'test_mail_body' => 'If you are reading this message, the site :site can send emails.',
+        'test_mail_sent' => 'Email sent to :email. If it does not arrive within a few minutes, check the spam folder and the MAIL_ settings in core/.env.',
+        'test_mail_failed' => 'Sending failed',
         'complete_update' => 'Complete the update',
         'complete_update_help' => 'After extracting the new package: updates the database, clears the caches, rewrites the .htaccess block and records the new version.',
         'update_completed' => 'Update completed',
@@ -460,6 +467,8 @@ return [
                 'failed' => 'Version :version not installed (:when).',
             ],
             'mail' => [
+                'available_subject' => 'version :version available',
+                'available' => 'Version :version of Resume App is available for :site. You can install it from the admin.',
                 'downloaded_subject' => 'version :version ready to install',
                 'downloaded' => 'Version :version of Resume App was downloaded to the server of :site and is ready to install.',
                 'installed_subject' => 'updated to version :version',
@@ -702,7 +711,7 @@ return [
             'skipped' => 'version :version left to the administrator after three attempts',
             'extraction_failed' => 'extraction stopped: :reason',
             'deleted' => '{0} nothing to delete|{1} :count file deleted|[2,*] :count files deleted',
-            'stats' => 'totals of :days days updated, :visits old visits and :ips expired admin IPs deleted',
+            'stats' => 'days updated: :days, old visits deleted: :visits, expired admin IPs deleted: :ips',
             'geoip_available' => 'new version of the databases available',
             'no_account' => 'MaxMind account missing',
             'geoip_updated' => 'updated :editions',

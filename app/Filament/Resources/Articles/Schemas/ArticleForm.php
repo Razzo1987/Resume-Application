@@ -37,7 +37,7 @@ class ArticleForm
                     Translatable::tabs(fn (string $locale, bool $isDefault): array => [
                         TextInput::make("title.{$locale}")->label(__('admin.fields.title'))->required($isDefault)->maxLength(255),
                         TextInput::make("slug.{$locale}")->label(__('admin.fields.slug'))->helperText(__('admin.help.slug'))->maxLength(150),
-                        Textarea::make("excerpt.{$locale}")->label(__('admin.fields.excerpt'))->helperText(__('admin.help.excerpt'))->rows(3)->maxLength(300),
+                        Fields::counted(Textarea::make("excerpt.{$locale}")->label(__('admin.fields.excerpt'))->helperText(__('admin.help.excerpt'))->rows(3)->maxLength(300), Fields::SEO_DESCRIPTION_LENGTH),
                         Fields::richText("body.{$locale}", 'articles/content')
                             ->label(__('admin.fields.body')),
                         TextInput::make("cover_alt.{$locale}")->label(__('admin.fields.image_alt'))->maxLength(255),

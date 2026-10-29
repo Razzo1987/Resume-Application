@@ -78,7 +78,8 @@ class AutoUpdate
             return $this->finish();
         }
 
-        $this->checker->refreshIfStale();
+        // From the cron at every run (conditional request, cheap); from the admin at most every 12 hours
+        $fromCron ? $this->checker->check() : $this->checker->refreshIfStale();
         $release = $this->checker->available();
 
         if ($release === null) {
@@ -86,6 +87,11 @@ class AutoUpdate
         }
 
         if (! $fromCron || $this->level() === self::OFF || $this->updater->isPending()) {
+            // Without automatic download the administrators still get one email per new version
+            if ($fromCron) {
+                $this->mailOnce('available', $release->version);
+            }
+
             return 'available '.$release->version;
         }
 
@@ -353,7 +359,24 @@ class AutoUpdate
     }
 
     /**
-     * Email to all administrators; if the hosting does not send mail, the dashboard notice remains.
+     * Email about a version sent only once (e.g. "new version available").
+     */
+    private function mailOnce(string $type, string $version): void
+    {
+        $data = $this->storage->readJson($this->eventFile()) ?? [];
+
+        if (($data['mailed'][$type] ?? null) === $version) {
+            return;
+        }
+
+        $data['mailed'][$type] = $version;
+        $this->storage->writeJson($this->eventFile(), $data);
+        $this->mail($this->subject($type, $version), $this->body($type, $version, null, null));
+    }
+
+    /**
+     * Email to all administrators; if the hosting does not send mail, the dashboard notice remains and the error
+     * goes to the log (System page).
      */
     private function mail(string $subject, string $body): void
     {
@@ -361,8 +384,8 @@ class AutoUpdate
             foreach ($this->recipients() as $email) {
                 Mail::raw($body, fn ($message) => $message->to($email)->subject($subject));
             }
-        } catch (Throwable) {
-            // no email: the result stays on the dashboard and in System
+        } catch (Throwable $exception) {
+            report($exception);
         }
     }
 }
