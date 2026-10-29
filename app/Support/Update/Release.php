@@ -28,13 +28,19 @@ final readonly class Release
 
     /**
      * From the GitHub API response; null for drafts, pre-releases and tags that are not a version.
+     * The app uses tags "vX.Y.Z" and the package "resume-app-X.Y.Z.zip"; a theme can use its own tag prefix
+     * ("folio-v") and package name ("folio-X.Y.Z.zip").
      *
      * @param  array<string, mixed>  $data
      */
-    public static function fromGitHub(array $data): ?self
+    public static function fromGitHub(array $data, string $tagPrefix = 'v', string $package = 'resume-app'): ?self
     {
         $tag = is_string($data['tag_name'] ?? null) ? $data['tag_name'] : '';
-        $version = ltrim($tag, 'vV');
+        $version = match (true) {
+            $tagPrefix === 'v' => ltrim($tag, 'vV'),
+            str_starts_with($tag, $tagPrefix) => substr($tag, strlen($tagPrefix)),
+            default => '',
+        };
 
         if (($data['draft'] ?? false) || ($data['prerelease'] ?? false) || preg_match(self::VERSION_PATTERN, $version) !== 1) {
             return null;
@@ -61,8 +67,8 @@ final readonly class Release
             notes: is_string($data['body'] ?? null) ? $data['body'] : '',
             url: (string) ($data['html_url'] ?? ''),
             publishedAt: is_string($data['published_at'] ?? null) ? $data['published_at'] : null,
-            package: $assets["resume-app-{$version}.zip"] ?? null,
-            checksum: $assets["resume-app-{$version}.zip.sha256"] ?? null,
+            package: $assets["{$package}-{$version}.zip"] ?? null,
+            checksum: $assets["{$package}-{$version}.zip.sha256"] ?? null,
         );
     }
 

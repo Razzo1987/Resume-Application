@@ -11,6 +11,7 @@ use App\Support\Stats\GeoIp;
 use App\Support\Stats\GeoIpUpdater;
 use App\Support\Update\AutoUpdate;
 use App\Support\Update\UpdateStorage;
+use App\Themes\ThemeUpdates;
 use Illuminate\Support\Facades\File;
 
 /**
@@ -22,6 +23,9 @@ final class CronJobs
     {
         // New versions on GitHub (at most every 12 hours) and, from the cron, automatic download or installation
         $cron->register('updates', 30, light: true, run: fn (bool $fromCron): ?string => app(AutoUpdate::class)->run($fromCron));
+
+        // New versions of the installed themes that declare where they are published (theme.json "updates")
+        $cron->register('themes', 30, light: true, run: fn (bool $fromCron): string => app(ThemeUpdates::class)->run($fromCron));
 
         // Statistics: daily totals, deletion of old visits and of expired admin IPs
         $cron->register('stats', 60, light: true, run: fn (): string => app(Settings::class)->bool('stats.enabled') || StatVisit::query()->exists()

@@ -100,7 +100,7 @@ Then, in the admin area (`https://your-domain/<admin path>`):
 
 1. user menu → *Profile*: turn on **two-factor authentication** and keep the recovery codes;
 2. *Website* → *Site languages*: check the default language and the active ones;
-3. *Résumé* → *Profile*: name, photo, headlines, contacts; then the CV sections (experience, projects, education...);
+3. *CV* → *Profile*: name, photo, headlines, contacts; then the CV sections (experience, projects, education...);
 4. *Content* → *CV PDFs*: upload the CV of each language;
 5. *Website* → *Settings*: SEO texts, sharing image, site icon, privacy options;
 6. *Website* → *CV layout*: order of the sections and which ones appear in the menu;

@@ -26,6 +26,7 @@ class Settings
      */
     public const array DEFAULTS = [
         'site.theme' => null,                         // null = theme from the configuration (RESUME_THEME)
+        'site.theme_variant' => null,                 // variant of the active theme (null = its default one)
         'cv.filename_pattern' => 'CV {name} - {lang}.pdf',
         'cv.fallback_to_default' => false,           // language without a CV → offer the default language's CV
         'seo.title' => [],

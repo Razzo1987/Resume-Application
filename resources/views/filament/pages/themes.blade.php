@@ -6,6 +6,10 @@
         </x-filament::section>
     @endif
 
+    @if ($hasUpdatable)
+        <p class="resume-themes-checked">{{ $updatesChecked ? __('admin.themes.updates.checked', ['when' => $updatesChecked->diffForHumans()]) : __('admin.themes.updates.never') }}</p>
+    @endif
+
     <div class="resume-themes">
         @foreach ($themes as $item)
             @php($theme = $item['theme'])
@@ -24,6 +28,33 @@
                     <p>{{ $theme->description }}</p>
                 @endif
 
+                @if ($item['update'])
+                    <div class="resume-themes-update">
+                        <x-filament::badge color="warning" icon="heroicon-o-arrow-down-circle">{{ __('admin.themes.updates.available', ['version' => $item['update']->version]) }}</x-filament::badge>
+                        @if ($item['update']->url)
+                            <a href="{{ $item['update']->url }}" target="_blank" rel="noopener" class="resume-link">{{ __('admin.themes.updates.notes') }}</a>
+                        @endif
+                        {{ ($this->updateAction)(['theme' => $theme->name, 'version' => $item['update']->version]) }}
+                    </div>
+                @endif
+
+                @if ($theme->variants)
+                    <div class="resume-themes-variants">
+                        <span class="resume-themes-variants-label">{{ __('admin.themes.variants') }}</span>
+                        @foreach ($theme->variants as $variant)
+                            @if ($theme->name === $active && $variant->name === $activeVariant)
+                                <x-filament::badge color="success" icon="heroicon-o-check">{{ $variant->title }}</x-filament::badge>
+                            @elseif ($item['assets'])
+                                <x-filament::button size="xs" color="gray" outlined
+                                    wire:click="mountAction('activate', {{ \Illuminate\Support\Js::from(['theme' => $theme->name, 'variant' => $variant->name]) }})"
+                                    :tooltip="$variant->description">{{ $variant->title }}</x-filament::button>
+                            @else
+                                <span>{{ $variant->title }}</span>
+                            @endif
+                        @endforeach
+                    </div>
+                @endif
+
                 <dl class="resume-system-list">
                     <dt>{{ __('admin.themes.name') }}</dt>
                     <dd><code>{{ $theme->name }}</code></dd>
@@ -34,6 +65,13 @@
                     @if ($theme->requires)
                         <dt>{{ __('admin.themes.requires') }}</dt>
                         <dd>{{ $theme->requires }} @unless ($item['compatible']) — <strong>{{ __('admin.themes.incompatible') }}</strong> @endunless</dd>
+                    @endif
+                    @if ($theme->updateRepository)
+                        <dt>{{ __('admin.themes.updates.source') }}</dt>
+                        <dd>
+                            <code>{{ $theme->updateRepository }}</code>
+                            @if ($item['updateError']) <br><span class="resume-themes-problem">{{ $item['updateError'] }}</span> @endif
+                        </dd>
                     @endif
                     @unless ($item['assets'])
                         <dt>{{ __('admin.themes.assets') }}</dt>
@@ -63,5 +101,9 @@
         .resume-system-list dt { font-weight: 600; }
         .resume-system-list dd { margin: 0; }
         .resume-themes-actions { display: flex; gap: .75rem; margin-top: 1rem; }
+        .resume-themes-update, .resume-themes-variants { display: flex; flex-wrap: wrap; align-items: center; gap: .5rem .75rem; margin-top: 1rem; }
+        .resume-themes-variants-label { font-weight: 600; margin-right: .25rem; }
+        .resume-themes-problem { color: var(--danger-600, #dc2626); }
+        .resume-link { text-decoration: underline; }
     </style>
 </x-filament-panels::page>

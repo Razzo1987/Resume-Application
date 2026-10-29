@@ -180,7 +180,9 @@ Updating by hand (extract the zip over the previous version, then *Complete the 
 
 The open **`base`** theme is included: two columns, Bootstrap 5, Font Awesome Free icons, light and fast.
 Other themes extend it and only override what they change (a single view, colours, fonts, icons). They are
-installed and updated from the admin (*Themes* → *Install or update a theme*) as a zip.
+installed from the admin (*Themes* → *Install or update a theme*) as a zip, also several themes in one package; a
+theme can offer **variants** (palettes and fonts to choose from) and be **updated from its GitHub releases**, private
+repositories included. The details are in [docs/THEMES.md](docs/THEMES.md).
 
 Icons are **semantic names** (`briefcase`, `cycling`, `energy`...) that each theme maps to its own icon set; the
 names you can choose for interests and key figures are listed in

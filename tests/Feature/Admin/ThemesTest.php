@@ -3,14 +3,18 @@
 use App\Filament\Pages\ManageThemes;
 use App\Models\User;
 use App\Support\Settings\Settings;
+use App\Support\Update\UpdateStorage;
 use App\Themes\Compatibility;
 use App\Themes\ThemeException;
 use App\Themes\ThemeInstaller;
 use App\Themes\ThemeManager;
+use App\Themes\ThemeUpdates;
 use Database\Seeders\DatabaseSeeder;
 use Filament\Facades\Filament;
+use Illuminate\Http\Client\Request;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\File;
+use Illuminate\Support\Facades\Http;
 use Livewire\Livewire;
 
 /*
@@ -32,7 +36,11 @@ beforeEach(function () {
         activeName: (string) (app(Settings::class)->get('site.theme') ?: 'base'),
         baseName: 'base',
         publicPath: "{$this->sandbox}/public",
+        activeVariant: app(Settings::class)->get('site.theme_variant'),
     ));
+
+    // Check results and downloaded packages in the sandbox too
+    $this->app->singleton(UpdateStorage::class, fn (): UpdateStorage => new UpdateStorage("{$this->sandbox}/storage"));
 });
 
 afterEach(function () {
@@ -235,3 +243,235 @@ it('checks version constraints', function (string $version, string $constraint, 
     ['2.0.0', '*', true],
     ['dev', '^9.0', true],
 ]);
+
+// --- Variants ------------------------------------------------------------------------------------------
+
+/**
+ * Manifest and compiled assets of a theme with two variants (light, default, and dark).
+ *
+ * @return array{0: array<string, mixed>, 1: array<string, string>}
+ */
+function variantTheme(string $name = 'demo-pro', string $version = '1.0.0'): array
+{
+    $entries = [
+        "themes/{$name}/resources/js/app.js" => 'assets/app-1.js',
+        "themes/{$name}/resources/scss/light.scss" => 'assets/light-1.css',
+        "themes/{$name}/resources/scss/dark.scss" => 'assets/dark-1.css',
+    ];
+
+    return [
+        [
+            'name' => $name,
+            'title' => ucfirst($name),
+            'version' => $version,
+            'entrypoints' => ["themes/{$name}/resources/js/app.js"],
+            'theme_color' => '#111111',
+            'default_variant' => 'light',
+            'variants' => [
+                'light' => ['title' => 'Light', 'entrypoints' => ["themes/{$name}/resources/scss/light.scss"]],
+                'dark' => ['title' => 'Dark', 'entrypoints' => ["themes/{$name}/resources/scss/dark.scss"], 'theme_color' => '#000000'],
+                'Bad Name' => ['title' => 'ignored'],
+            ],
+            'updates' => ['repository' => 'acme/resume-themes', 'tag_prefix' => "{$name}-v"],
+        ],
+        [
+            'dist/manifest.json' => json_encode(array_map(fn (string $file): array => ['file' => $file, 'isEntry' => true], $entries)),
+            'dist/assets/app-1.js' => 'console.log(1)',
+            'dist/assets/light-1.css' => 'body{color:#111}',
+            'dist/assets/dark-1.css' => 'body{color:#eee}',
+            'dist/assets/app-123.css' => null,
+        ],
+    ];
+}
+
+it('uses the variant chosen in the admin, the default one otherwise', function () {
+    [$manifest, $files] = variantTheme();
+    app(ThemeInstaller::class)->install(themeZip($manifest, $files));
+
+    app(Settings::class)->setMany(['site.theme' => 'demo-pro', 'site.theme_variant' => 'dark']);
+    app()->forgetInstance(ThemeManager::class);
+    $active = app(ThemeManager::class)->active();
+
+    expect($active->variant)->toBe('dark')
+        ->and($active->entrypoints)->toBe(['themes/demo-pro/resources/js/app.js', 'themes/demo-pro/resources/scss/dark.scss'])
+        ->and($active->themeColor)->toBe('#000000')
+        ->and(array_keys($active->variants))->toBe(['light', 'dark'])
+        ->and($active->updateRepository)->toBe('acme/resume-themes')
+        ->and($active->updateTagPrefix)->toBe('demo-pro-v');
+
+    foreach ([null, 'unknown'] as $variant) {
+        app(Settings::class)->set('site.theme_variant', $variant);
+        app()->forgetInstance(ThemeManager::class);
+        $active = app(ThemeManager::class)->active();
+
+        expect($active->variant)->toBe('light')
+            ->and($active->entrypoints)->toContain('themes/demo-pro/resources/scss/light.scss')
+            ->and($active->themeColor)->toBe('#111111');
+    }
+});
+
+it('refuses a theme whose variants are not compiled', function () {
+    [$manifest, $files] = variantTheme();
+    $files['dist/manifest.json'] = json_encode(['themes/demo-pro/resources/js/app.js' => ['file' => 'assets/app-1.js']]);
+
+    expect(fn () => app(ThemeInstaller::class)->install(themeZip($manifest, $files)))->toThrow(ThemeException::class);
+});
+
+it('activates a theme variant from the admin page', function () {
+    [$manifest, $files] = variantTheme();
+    app(ThemeInstaller::class)->install(themeZip($manifest, $files));
+
+    $this->actingAs(User::factory()->create());
+    Filament::setCurrentPanel('admin');
+
+    Livewire::test(ManageThemes::class)
+        ->assertSee('Light')
+        ->assertSee('Dark')
+        ->callAction('activate', arguments: ['theme' => 'demo-pro', 'variant' => 'dark'])
+        ->assertNotified(__('admin.themes.activated_variant', ['theme' => 'Demo-pro', 'variant' => 'Dark']));
+
+    expect(app(Settings::class)->get('site.theme'))->toBe('demo-pro')
+        ->and(app(Settings::class)->get('site.theme_variant'))->toBe('dark');
+});
+
+// --- Packages with several themes ----------------------------------------------------------------------
+
+/**
+ * Zip with several themes, each in its own folder.
+ *
+ * @param  list<array{0: array<string, mixed>, 1: array<string, string|null>}>  $themes
+ */
+function bundleZip(array $themes): string
+{
+    $path = sys_get_temp_dir().'/themes-'.bin2hex(random_bytes(4)).'.zip';
+    $zip = new ZipArchive;
+    $zip->open($path, ZipArchive::CREATE);
+
+    foreach ($themes as [$manifest, $extra]) {
+        $single = new ZipArchive;
+        $single->open(themeZip($manifest, $extra, folder: $manifest['name']));
+
+        for ($index = 0; $index < $single->numFiles; $index++) {
+            $zip->addFromString((string) $single->getNameIndex($index), (string) $single->getFromIndex($index));
+        }
+
+        $single->close();
+    }
+
+    $zip->close();
+
+    return $path;
+}
+
+it('installs every theme of a package with several themes', function () {
+    [$folio, $folioFiles] = variantTheme('folio');
+    [$bento, $bentoFiles] = variantTheme('bento');
+    $bento['extends'] = 'folio'; // a parent in the same package is installed first
+
+    $results = app(ThemeInstaller::class)->installAll(bundleZip([[$bento, $bentoFiles], [$folio, $folioFiles]]));
+
+    expect(array_map(fn (array $result): string => $result['theme']->name, $results))->toBe(['folio', 'bento'])
+        ->and(app(ThemeManager::class)->installed())->toBe(['base' => 'Base', 'bento' => 'Bento', 'folio' => 'Folio'])
+        ->and("{$this->sandbox}/public/themes/bento/assets/dark-1.css")->toBeFile()
+        ->and(app(ThemeInstaller::class)->inspectAll(bundleZip([[$folio, $folioFiles]])))->toHaveCount(1);
+});
+
+it('refuses a package with several themes if one of them is not valid', function () {
+    [$folio, $folioFiles] = variantTheme('folio');
+    [$bento, $bentoFiles] = variantTheme('bento');
+    $bentoFiles['secret.php'] = '<?php';
+
+    expect(fn () => app(ThemeInstaller::class)->installAll(bundleZip([[$folio, $folioFiles], [$bento, $bentoFiles]])))->toThrow(ThemeException::class)
+        ->and(app(ThemeManager::class)->installed())->toBe(['base' => 'Base']);
+});
+
+// --- Updates from GitHub ---------------------------------------------------------------------------------
+
+/**
+ * A release of a theme as returned by the GitHub API.
+ *
+ * @return array<string, mixed>
+ */
+function themeRelease(string $name, string $version, bool $draft = false): array
+{
+    return [
+        'tag_name' => "{$name}-v{$version}",
+        'name' => "{$name} {$version}",
+        'draft' => $draft,
+        'prerelease' => false,
+        'body' => 'Novità',
+        'html_url' => "https://github.com/acme/resume-themes/releases/tag/{$name}-v{$version}",
+        'published_at' => '2026-11-02T10:00:00Z',
+        'assets' => [
+            ['id' => 1, 'name' => "{$name}-{$version}.zip", 'size' => 2000, 'url' => "https://api.github.com/repos/acme/resume-themes/releases/assets/{$name}-{$version}", 'browser_download_url' => "https://github.com/acme/resume-themes/releases/download/{$name}-v{$version}/{$name}-{$version}.zip"],
+            ['id' => 2, 'name' => "{$name}-{$version}.zip.sha256", 'size' => 90, 'url' => "https://api.github.com/repos/acme/resume-themes/releases/assets/{$name}-{$version}-sha", 'browser_download_url' => "https://github.com/acme/resume-themes/releases/download/{$name}-v{$version}/{$name}-{$version}.zip.sha256"],
+        ],
+    ];
+}
+
+it('finds, announces and installs theme updates published on GitHub', function () {
+    [$manifest, $files] = variantTheme();
+    app(ThemeInstaller::class)->install(themeZip($manifest, $files));
+    User::factory()->create(['email' => 'admin@example.com']);
+
+    [$next, $nextFiles] = variantTheme(version: '1.2.0');
+    $package = (string) file_get_contents(themeZip($next, $nextFiles));
+    $calls = 0;
+
+    Http::fake(function (Request $request) use ($package, &$calls) {
+        if (str_contains($request->url(), '/releases?')) {
+            $calls++;
+
+            return $request->hasHeader('If-None-Match')
+                ? Http::response(null, 304)
+                : Http::response([
+                    themeRelease('demo-pro', '1.1.0'),
+                    themeRelease('demo-pro', '1.2.0'),
+                    themeRelease('demo-pro', '2.0.0', draft: true),
+                    themeRelease('other', '9.0.0'),
+                ], 200, ['ETag' => '"abc"']);
+        }
+
+        return str_ends_with($request->url(), '-sha') || str_ends_with($request->url(), '.sha256')
+            ? Http::response(hash('sha256', $package).'  demo-pro-1.2.0.zip')
+            : Http::response($package);
+    });
+
+    $updates = app(ThemeUpdates::class);
+
+    expect($updates->run(true))->toBe('themes available demo-pro 1.2.0')
+        ->and($updates->run(true))->toBe('themes available demo-pro 1.2.0') // 304: same answer, one email only
+        ->and($calls)->toBe(2)
+        ->and($updates->available()['demo-pro']->version)->toBe('1.2.0');
+
+    $mails = app('mail.manager')->mailer()->getSymfonyTransport()->messages()->all();
+
+    expect($mails)->toHaveCount(1)
+        ->and($mails[0]->getOriginalMessage()->getSubject())->toContain('tema Demo-pro: disponibile la versione 1.2.0')
+        ->and($mails[0]->getOriginalMessage()->getTextBody())->toContain('installata: 1.0.0');
+
+    $result = $updates->update('demo-pro');
+
+    expect($result['previous'])->toBe('1.0.0')
+        ->and($result['theme']->version)->toBe('1.2.0')
+        ->and($updates->available())->toBe([])
+        ->and(glob("{$this->sandbox}/storage/app/updates/packages/*") ?: [])->toBe([]);
+});
+
+it('explains that a private repository of themes needs the token', function () {
+    [$manifest, $files] = variantTheme();
+    app(ThemeInstaller::class)->install(themeZip($manifest, $files));
+
+    Http::fake(['api.github.com/*' => Http::response(['message' => 'Not Found'], 404)]);
+
+    expect(app(ThemeUpdates::class)->run(true))->toBe(__('admin.themes.updates.errors.private'))
+        ->and(app(ThemeUpdates::class)->available())->toBe([]);
+});
+
+it('has nothing to check without themes that declare updates', function () {
+    Http::fake();
+
+    expect(app(ThemeUpdates::class)->run(true))->toBe('no themes');
+
+    Http::assertNothingSent();
+});

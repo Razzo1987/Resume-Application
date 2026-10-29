@@ -6,7 +6,7 @@ panel; a few server-level options live in `core/.env`.
 - [Where things are configured](#where-things-are-configured)
 - [First steps](#first-steps)
 - [The admin panel](#the-admin-panel)
-  - [Résumé](#résumé)
+  - [CV](#cv)
   - [Content](#content)
   - [Website](#website)
 - [Languages and translations](#languages-and-translations)
@@ -35,7 +35,7 @@ Every change made in the admin is online immediately: the page cache is cleared 
 2. *Website* → *System* → *Scheduled jobs*: add the **cron job** in the hosting control panel (one line, shown on the page), so updates
    and statistics work by themselves;
 3. *Website* → *Site languages*: default language and active languages;
-4. *Résumé* → *Profile*, then the CV sections;
+4. *CV* → *Profile*, then the CV sections;
 5. *Content* → *CV PDFs*: one CV for each language;
 6. *Website* → *Settings*: SEO title and description, sharing image, site icon, privacy notice;
 7. *Website* → *CV layout*: section order and menu;
@@ -112,7 +112,7 @@ the sign-in page, `RESUME_ADMIN_LOCALE` applies.
 - Turning statistics on also turns on the **Privacy page** (see [Settings](#settings)), with a section describing them.
   Statistics are never part of content exports.
 
-### Résumé
+### CV
 
 | Page | What it is for |
 |---|---|
@@ -149,7 +149,7 @@ switch, so things can be prepared and published later. Items with a public page 
 | **Social profiles** | LinkedIn, GitHub, GitLab, X, Bluesky, Mastodon, Facebook, Instagram, YouTube, Medium, SlideShare, Stack Overflow or any website, with order and visibility. |
 | **Redirects** | Old addresses that must lead to new ones (301 or 302), for example after moving from another site. Changing a slug or a URL word creates the redirect by itself. |
 | **Settings** | See [Settings](#settings). |
-| **Themes** | Installed themes with their version: *Activate*, *Install or update a theme* (zip), remove the ones not in use. |
+| **Themes** | Installed themes with their version: *Activate*, choose the variant (palette and fonts) of themes that have them, *Install or update a theme* (zip with one or more themes), *Check for theme updates* and *Update to X.Y.Z* for themes published on GitHub, remove the ones not in use. See [THEMES.md](THEMES.md). |
 | **System** | Version, updates (also automatic), scheduled jobs (cron), maintenance and tools: clear caches, check the protection of `core/`, `.htaccess` rules, delete files left by older versions, export and import the content. Updates are described in [INSTALL.md](INSTALL.md#updating). |
 
 ## Languages and translations

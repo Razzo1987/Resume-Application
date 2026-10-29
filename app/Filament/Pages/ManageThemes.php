@@ -9,6 +9,7 @@ use App\Themes\Theme;
 use App\Themes\ThemeException;
 use App\Themes\ThemeInstaller;
 use App\Themes\ThemeManager;
+use App\Themes\ThemeUpdates;
 use BackedEnum;
 use Filament\Actions\Action;
 use Filament\Forms\Components\FileUpload;
@@ -16,6 +17,7 @@ use Filament\Notifications\Notification;
 use Filament\Pages\Page;
 use Filament\Support\Icons\Heroicon;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\HtmlString;
 
 /**
  * Themes: list of the installed themes, activation, installation or update from a zip, removal.
@@ -53,10 +55,16 @@ class ManageThemes extends Page
         $themes = app(ThemeManager::class);
         $version = app(Updater::class)->codeVersion();
         $active = $themes->active()->name;
+        $updates = app(ThemeUpdates::class);
+        $status = $updates->status();
+        $available = $updates->available();
 
         return [
             'active' => $active,
+            'activeVariant' => $themes->active()->variant,
             'configured' => $themes->activeName(),
+            'updatesChecked' => $status['checked_at'],
+            'hasUpdatable' => $updates->updatable() !== [],
             'themes' => collect(array_keys($themes->installed()))
                 ->map(fn (string $name): Theme => $themes->get($name))
                 ->sortBy(fn (Theme $theme): string => ($theme->name === $active ? '0' : '1').$theme->title)
@@ -65,6 +73,8 @@ class ManageThemes extends Page
                     'assets' => $theme->name === $themes->base()->name || $theme->hasAssets($themes->publicPath()),
                     'compatible' => $theme->requires === null || Compatibility::satisfies($version, $theme->requires),
                     'base' => $theme->name === $themes->base()->name,
+                    'update' => $available[$theme->name] ?? null,
+                    'updateError' => $status['errors'][$theme->name] ?? null,
                 ])
                 ->values()
                 ->all(),
@@ -94,14 +104,12 @@ class ManageThemes extends Page
                     $disk = Storage::disk('local');
 
                     try {
-                        $result = app(ThemeInstaller::class)->install($disk->path($path));
+                        $results = app(ThemeInstaller::class)->installAll($disk->path($path));
+                        $lines = array_map(fn (array $result): string => self::describe($result), $results);
 
                         Notification::make()->success()
-                            ->title(match (true) {
-                                ! $result['updated'] => __('admin.themes.installed', ['theme' => $result['theme']->title, 'version' => $result['theme']->version]),
-                                $result['previous'] === $result['theme']->version => __('admin.themes.reinstalled', ['theme' => $result['theme']->title, 'version' => $result['theme']->version]),
-                                default => __('admin.themes.updated', ['theme' => $result['theme']->title, 'from' => $result['previous'], 'to' => $result['theme']->version]),
-                            })
+                            ->title(count($lines) === 1 ? $lines[0] : __('admin.themes.installed_many', ['count' => count($lines)]))
+                            ->body(count($lines) > 1 ? new HtmlString(implode('<br>', array_map('e', $lines))) : null)
                             ->send();
                     } catch (ThemeException $exception) {
                         Notification::make()->danger()->title(__('admin.themes.errors.title'))->body($exception->getMessage())->persistent()->send();
@@ -109,7 +117,53 @@ class ManageThemes extends Page
                         $disk->delete($path);
                     }
                 }),
+            Action::make('checkUpdates')
+                ->label(__('admin.themes.updates.check'))
+                ->icon(Heroicon::OutlinedArrowPath)
+                ->color('gray')
+                ->visible(fn (): bool => app(ThemeUpdates::class)->updatable() !== [])
+                ->action(function (): void {
+                    $updates = app(ThemeUpdates::class);
+                    $status = $updates->check();
+                    $available = $updates->available();
+
+                    $notification = Notification::make()->title($available === []
+                        ? __('admin.themes.updates.none')
+                        : trans_choice('admin.themes.updates.found', count($available), ['count' => count($available)]));
+
+                    ($status['errors'] !== [] ? $notification->warning()->body(new HtmlString(implode('<br>', array_map('e', array_unique($status['errors']))))) : $notification->success())->send();
+                }),
         ];
+    }
+
+    /**
+     * Notification text for an installed theme.
+     *
+     * @param  array{theme: Theme, updated: bool, previous: string|null}  $result
+     */
+    private static function describe(array $result): string
+    {
+        return match (true) {
+            ! $result['updated'] => __('admin.themes.installed', ['theme' => $result['theme']->title, 'version' => $result['theme']->version]),
+            $result['previous'] === $result['theme']->version => __('admin.themes.reinstalled', ['theme' => $result['theme']->title, 'version' => $result['theme']->version]),
+            default => __('admin.themes.updated', ['theme' => $result['theme']->title, 'from' => $result['previous'], 'to' => $result['theme']->version]),
+        };
+    }
+
+    public function updateAction(): Action
+    {
+        return Action::make('update')
+            ->label(fn (array $arguments): string => __('admin.themes.updates.install', ['version' => (string) ($arguments['version'] ?? '')]))
+            ->icon(Heroicon::OutlinedArrowDownTray)
+            ->size('sm')
+            ->action(function (array $arguments): void {
+                try {
+                    $result = app(ThemeUpdates::class)->update((string) ($arguments['theme'] ?? ''));
+                    Notification::make()->success()->title(self::describe($result))->send();
+                } catch (ThemeException $exception) {
+                    Notification::make()->danger()->title(__('admin.themes.errors.title'))->body($exception->getMessage())->persistent()->send();
+                }
+            });
     }
 
     public function activateAction(): Action
@@ -126,10 +180,15 @@ class ManageThemes extends Page
                     return;
                 }
 
-                app(Settings::class)->set('site.theme', $name);
+                $theme = $themes->get($name);
+                $variant = $theme->variants[(string) ($arguments['variant'] ?? '')] ?? null;
+
+                app(Settings::class)->setMany(['site.theme' => $name, 'site.theme_variant' => $variant?->name]);
                 $themes->forget();
 
-                Notification::make()->success()->title(__('admin.themes.activated', ['theme' => $themes->get($name)->title]))->send();
+                Notification::make()->success()->title($variant !== null
+                    ? __('admin.themes.activated_variant', ['theme' => $theme->title, 'variant' => $variant->title])
+                    : __('admin.themes.activated', ['theme' => $theme->title]))->send();
                 $this->redirect(static::getUrl());
             });
     }

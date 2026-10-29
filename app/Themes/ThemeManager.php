@@ -22,10 +22,12 @@ final class ThemeManager
         private readonly string $activeName,
         private readonly string $baseName,
         private readonly ?string $publicPath = null,
+        private readonly ?string $activeVariant = null,
     ) {}
 
     /**
-     * Active theme; if it is missing (or its compiled assets are), the base theme is used so the site does not break.
+     * Active theme, with the chosen variant; if it is missing (or its compiled assets are), the base theme is used so
+     * the site does not break.
      */
     public function active(): Theme
     {
@@ -33,11 +35,19 @@ final class ThemeManager
             $theme = $this->get($this->activeName);
 
             if ($theme->hasAssets($this->publicPath())) {
-                return $theme;
+                return $theme->withVariant($this->activeVariant);
             }
         }
 
-        return $this->get($this->baseName);
+        return $this->get($this->baseName)->withVariant($this->activeVariant);
+    }
+
+    /**
+     * Variant chosen in the admin (it applies to the active theme only).
+     */
+    public function activeVariant(): ?string
+    {
+        return $this->activeVariant;
     }
 
     public function activeName(): string

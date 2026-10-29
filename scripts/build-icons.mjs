@@ -13,6 +13,9 @@
  *
  * Classes accepted in icons.php: "fa-solid fa-briefcase" (FA 6/7) or "fas fa-briefcase" (FA 5;
  * also far, fal, fad, fab). Duotone icons keep the second layer with opacity 0.4.
+ * Tabler Icons (MIT): "ti ti-briefcase" (outline) or "ti ti-briefcase-filled", with the folder icons/ of the
+ * @tabler/icons package as source ({outline,filled}/{icon}.svg). Outline icons are drawn with the stroke
+ * (currentColor, width 2), filled ones with the fill.
  * Output: themes/{theme}/resources/icons/sprite.svg (then compiled by Vite with a hash in the name).
  */
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
@@ -59,11 +62,19 @@ function iconMap(name, seen = new Set()) {
     return { ...inherited, ...own };
 }
 
-/** "fas fa-briefcase" / "fa-solid fa-briefcase" → { style: "solid", icon: "briefcase" } */
+/** "fas fa-briefcase" / "fa-solid fa-briefcase" → { style: "solid", icon: "briefcase" }; "ti ti-x" → Tabler */
 function parse(classes) {
     const tokens = classes.split(/\s+/).filter(Boolean);
     let style = 'solid';
     let icon = null;
+
+    if (tokens.includes('ti')) {
+        const name = tokens.find((token) => token.startsWith('ti-'))?.slice(3) ?? null;
+        if (name?.endsWith('-filled')) {
+            return { set: 'tabler', style: 'filled', icon: name.slice(0, -'-filled'.length) };
+        }
+        return { set: 'tabler', style: 'outline', icon: name };
+    }
 
     for (const token of tokens) {
         if (token in PREFIXES) {
@@ -75,7 +86,7 @@ function parse(classes) {
         }
     }
 
-    return { style, icon };
+    return { set: 'fa', style, icon };
 }
 
 const spriteCache = new Map();
@@ -113,6 +124,24 @@ function load(dir, style, icon) {
     return spriteSymbols(dir, style).get(icon) ?? null;
 }
 
+const TABLER_LICENSE = 'Tabler Icons by tabler.io - MIT License - https://tabler.io/icons';
+
+/** Tabler icon: drawing without the transparent 24x24 frame, with the stroke or fill of the original <svg> */
+function loadTabler(dir, style, icon) {
+    const file = join(dir, style, `${icon}.svg`);
+    if (!existsSync(file)) return null;
+
+    const svg = readFileSync(file, 'utf8').replace(/<!--[\s\S]*?-->/g, '');
+    const body = svg.match(/<svg[^>]*>([\s\S]*)<\/svg>/)?.[1]
+        ?.replace(/<path stroke="none" d="M0 0h24v24H0z" fill="none"\s*\/>/g, '')
+        .trim();
+    const paint = style === 'filled'
+        ? '<g fill="currentColor">'
+        : '<g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">';
+
+    return body ? { viewBox: svg.match(/viewBox="([^"]+)"/)?.[1] ?? '0 0 24 24', body: `${paint}${body}</g>`, license: TABLER_LICENSE } : null;
+}
+
 function clean(body) {
     return body
         .replace(/<defs>[\s\S]*?<\/defs>/g, '')
@@ -125,13 +154,13 @@ const symbols = [];
 const licenses = new Set();
 
 for (const [name, { classes, own }] of Object.entries(iconMap(themeName))) {
-    const { style, icon } = parse(classes);
+    const { set, style, icon } = parse(classes);
 
     if (!icon) {
         throw new Error(`Icon "${name}": invalid classes "${classes}"`);
     }
 
-    let found = load(sourceDir, style, icon);
+    let found = set === 'tabler' ? loadTabler(sourceDir, style, icon) : load(sourceDir, style, icon);
 
     // Icon inherited from a "parent" theme and missing from the theme's source: Font Awesome Free is used
     if (!found && !own && sourceDir !== freeDir) {

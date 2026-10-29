@@ -20,6 +20,8 @@ class ThemeServiceProvider extends ServiceProvider
             // Theme chosen in the admin (settings), otherwise the configured one
             activeName: (string) ($this->app->make(Settings::class)->get('site.theme') ?: config('resume.themes.active')),
             baseName: (string) config('resume.themes.base'),
+            // Palette/fonts of the active theme, for themes with variants
+            activeVariant: is_string($variant = $this->app->make(Settings::class)->get('site.theme_variant')) && $variant !== '' ? $variant : null,
         ));
     }
 

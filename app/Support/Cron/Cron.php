@@ -256,6 +256,8 @@ class Cron
         '/^no MaxMind account$/' => 'no_account',
         '/^updated (?<editions>.+)$/' => 'geoip_updated',
         '/^busy$/' => 'busy',
+        '/^no themes$/' => 'no_themes',
+        '/^themes available (?<themes>.+)$/' => 'themes_available',
     ];
 
     /**

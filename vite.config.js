@@ -12,10 +12,16 @@ if (!/^[a-z0-9][a-z0-9-]*$/.test(theme)) {
 
 const manifest = JSON.parse(readFileSync(`themes/${theme}/theme.json`, 'utf8'));
 
+// Entry points of the theme and of all its variants (palettes/fonts chosen in the admin)
+const input = [
+    ...manifest.entrypoints,
+    ...Object.values(manifest.variants ?? {}).flatMap((variant) => variant.entrypoints ?? []),
+].filter((entry, index, all) => all.indexOf(entry) === index);
+
 export default defineConfig({
     plugins: [
         laravel({
-            input: manifest.entrypoints,
+            input,
             buildDirectory: `themes/${theme}`,
             refresh: [`themes/${theme}/views/**`, 'themes/base/views/**'],
         }),
