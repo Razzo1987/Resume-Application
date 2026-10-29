@@ -12,6 +12,7 @@ All notable changes to this project are documented here. The format follows [Kee
 ### Changed
 - With the cron job, new versions are checked at every run of the updates job (every 30 minutes) instead of every 12 hours, with conditional requests (ETag) that do not count against the GitHub limit. Without the cron job the check stays at most every 12 hours. Before, a release could be noticed up to 12 hours late.
 - SEO titles accept up to 120 characters (about 60 are shown by search results); SEO descriptions of experience up to 300.
+- Statistics: the home page is called "Home page (CV)" and the CV downloads "CV download (PDF)", so that they are not mistaken for each other. In the English admin the menu group of the CV content is called "CV" instead of "Résumé", like the rest of the admin (the American English pack of the public site keeps "résumé").
 
 ### Fixed
 - Scheduled jobs: the result of the statistics job no longer reads "totals of 1 days" (no plurals to get wrong), and the GeoLite job says that the MaxMind account is missing instead of "off" when statistics are on.

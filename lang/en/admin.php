@@ -7,7 +7,7 @@
 
 return [
     'nav' => [
-        'cv' => 'Résumé',
+        'cv' => 'CV',
         'content' => 'Content',
         'site' => 'Website',
     ],
@@ -580,10 +580,10 @@ return [
             'empty' => 'No data in this period.',
         ],
         'pages' => [
-            'cv' => 'CV',
+            'cv' => 'Home page (CV)',
             'blog' => 'Blog',
             'privacy' => 'Privacy',
-            'cv-download' => 'CV download',
+            'cv-download' => 'CV download (PDF)',
             'project' => 'Project',
             'experience' => 'Experience',
             'article' => 'Article',

@@ -580,10 +580,10 @@ return [
             'empty' => 'Nessun dato nel periodo.',
         ],
         'pages' => [
-            'cv' => 'CV',
+            'cv' => 'Home page (CV)',
             'blog' => 'Blog',
             'privacy' => 'Privacy',
-            'cv-download' => 'Download del CV',
+            'cv-download' => 'Download del CV (PDF)',
             'project' => 'Progetto',
             'experience' => 'Esperienza',
             'article' => 'Articolo',
