@@ -7,6 +7,8 @@ All notable changes to this project are documented here. The format follows [Kee
 ### Added
 - Theme variants: a theme can offer several palettes and fonts (`variants` in theme.json), chosen on the *Themes* page without installing anything else.
 - Theme packages with several themes, each in its own folder: installed or updated in one go, refused as a whole if one of them is not valid.
+- Theme packages are uploaded in 1 MB chunks, like the update packages: the upload limit of the hosting (often 2 MB) no longer matters.
+- The menu highlight of the base theme leaves alone menus that a theme turns into tabs (`role="tablist"`).
 - Theme updates from GitHub (`updates` in theme.json, also from private repositories with the GitHub token of the System page): new scheduled job *New theme versions*, *Check for theme updates* and *Update to X.Y.Z* on the *Themes* page, one email per theme and version.
 - Tabler Icons (MIT) in the icon sprite builder (`ti ti-briefcase`, `ti ti-heart-filled`), as an alternative to Font Awesome.
 - docs/THEMES.md: folder, theme.json, variants, icons, packages and updates of a theme.

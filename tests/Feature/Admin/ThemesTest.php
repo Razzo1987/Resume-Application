@@ -12,7 +12,6 @@ use App\Themes\ThemeUpdates;
 use Database\Seeders\DatabaseSeeder;
 use Filament\Facades\Filament;
 use Illuminate\Http\Client\Request;
-use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Http;
 use Livewire\Livewire;
@@ -182,17 +181,22 @@ it('installs, activates and removes themes from the admin page', function () {
 
     $this->get('/admin/themes')->assertOk()->assertSee('Base');
 
-    $upload = UploadedFile::fake()->createWithContent('demo-pro-1.0.0.zip', (string) file_get_contents(themeZip()));
+    // The modal uploads the zip in chunks (UpdateUploadController, target=theme), then calls installUploaded()
+    $uploads = app(UpdateStorage::class)->themeUploadsDirectory();
+    File::ensureDirectoryExists($uploads);
+    copy(themeZip(), "{$uploads}/demo-pro-1.0.0.zip");
 
     Livewire::test(ManageThemes::class)
-        ->callAction('install', ['package' => $upload])
+        ->mountAction('install')
+        ->call('installUploaded', 'demo-pro-1.0.0.zip')
         ->assertNotified(__('admin.themes.installed', ['theme' => 'Demo PRO', 'version' => '1.0.0']))
         ->assertSee('Demo PRO');
 
-    $again = UploadedFile::fake()->createWithContent('demo-pro-1.0.0.zip', (string) file_get_contents(themeZip()));
+    expect("{$uploads}/demo-pro-1.0.0.zip")->not->toBeFile();
+    copy(themeZip(), "{$uploads}/demo-pro-1.0.0.zip");
 
     Livewire::test(ManageThemes::class)
-        ->callAction('install', ['package' => $again])
+        ->call('installUploaded', 'demo-pro-1.0.0.zip')
         ->assertNotified(__('admin.themes.reinstalled', ['theme' => 'Demo PRO', 'version' => '1.0.0']));
 
     Livewire::test(ManageThemes::class)
@@ -214,13 +218,34 @@ it('shows why an upload is refused', function () {
     $this->actingAs(User::factory()->create());
     Filament::setCurrentPanel('admin');
 
-    $upload = UploadedFile::fake()->createWithContent('bad.zip', (string) file_get_contents(themeZip(extra: ['dist/x.php' => '<?php'])));
+    $uploads = app(UpdateStorage::class)->themeUploadsDirectory();
+    File::ensureDirectoryExists($uploads);
+    copy(themeZip(extra: ['dist/x.php' => '<?php']), "{$uploads}/bad.zip");
 
     Livewire::test(ManageThemes::class)
-        ->callAction('install', ['package' => $upload])
+        ->call('installUploaded', 'bad.zip')
+        ->assertNotified(__('admin.themes.errors.title'))
+        ->call('installUploaded', '../../.env')
         ->assertNotified(__('admin.themes.errors.title'));
 
     expect(app(ThemeManager::class)->installed())->toBe(['base' => 'Base']);
+});
+
+it('receives theme packages in chunks, next to the update packages but not among them', function () {
+    $this->actingAs(User::factory()->create());
+    $zip = (string) file_get_contents(themeZip());
+    $half = intdiv(strlen($zip), 2);
+    $id = str_repeat('ab', 16);
+
+    foreach ([substr($zip, 0, $half), substr($zip, $half)] as $index => $chunk) {
+        $this->call('POST', "/admin/system/update-upload?target=theme&id={$id}&index={$index}&count=2&name=folio-1.0.0.zip", [], [], [], ['CONTENT_TYPE' => 'application/octet-stream', 'HTTP_ACCEPT' => 'application/json'], $chunk)
+            ->assertOk();
+    }
+
+    $storage = app(UpdateStorage::class);
+
+    expect(file_get_contents($storage->themeUploadsDirectory().'/folio-1.0.0.zip'))->toBe($zip)
+        ->and($storage->packages())->toBe([]);
 });
 
 it('checks version constraints', function (string $version, string $constraint, bool $expected) {

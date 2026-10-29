@@ -272,10 +272,10 @@ return [
 
     'themes' => [
         'install' => 'Install or update a theme',
-        'install_help' => 'Upload the theme zip. If the theme is already installed it is updated; the active theme stays the same.',
+        'install_help' => 'Choose the zip of a theme or the one with several themes: it is uploaded in pieces, so it works even beyond the upload limit of the server. Themes already installed are updated; the active theme stays the same.',
         'install_submit' => 'Install',
         'package' => 'Theme package (.zip)',
-        'upload_limit' => 'Server upload limit: :size (changed in the PHP settings of the hosting control panel: upload_max_filesize and post_max_size).',
+        'close' => 'Close',
         'installed' => 'Theme ":theme" :version installed',
         'updated' => 'Theme ":theme" updated from :from to :to',
         'reinstalled' => 'Theme ":theme" :version installed again',

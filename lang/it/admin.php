@@ -272,10 +272,10 @@ return [
 
     'themes' => [
         'install' => 'Installa o aggiorna un tema',
-        'install_help' => 'Carica lo zip del tema. Se il tema è già installato viene aggiornato; il tema attivo resta quello scelto.',
+        'install_help' => 'Scegli lo zip di un tema o quello con più temi: viene caricato a pezzi, quindi va bene anche se supera il limite di caricamento del server. I temi già installati vengono aggiornati; il tema attivo resta quello scelto.',
         'install_submit' => 'Installa',
         'package' => 'Pacchetto del tema (.zip)',
-        'upload_limit' => 'Limite di caricamento del server: :size (si cambia nelle impostazioni PHP del pannello dell\'hosting: upload_max_filesize e post_max_size).',
+        'close' => 'Chiudi',
         'installed' => 'Tema ":theme" :version installato',
         'updated' => 'Tema ":theme" aggiornato da :from a :to',
         'reinstalled' => 'Tema ":theme" :version reinstallato',

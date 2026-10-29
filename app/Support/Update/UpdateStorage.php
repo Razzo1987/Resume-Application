@@ -37,6 +37,14 @@ class UpdateStorage
     }
 
     /**
+     * Theme packages uploaded from the Themes page, waiting to be installed (deleted right after).
+     */
+    public function themeUploadsDirectory(): string
+    {
+        return $this->directory().'/theme-uploads';
+    }
+
+    /**
      * Extraction state: as long as it exists, index.php does not boot the app.
      */
     public function stateFile(): string

@@ -4,6 +4,7 @@ namespace App\Filament\Pages;
 
 use App\Support\Settings\Settings;
 use App\Support\System\Updater;
+use App\Support\Update\UpdateStorage;
 use App\Themes\Compatibility;
 use App\Themes\Theme;
 use App\Themes\ThemeException;
@@ -12,11 +13,10 @@ use App\Themes\ThemeManager;
 use App\Themes\ThemeUpdates;
 use BackedEnum;
 use Filament\Actions\Action;
-use Filament\Forms\Components\FileUpload;
 use Filament\Notifications\Notification;
 use Filament\Pages\Page;
 use Filament\Support\Icons\Heroicon;
-use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\File;
 use Illuminate\Support\HtmlString;
 
 /**
@@ -88,35 +88,10 @@ class ManageThemes extends Page
                 ->label(__('admin.themes.install'))
                 ->icon(Heroicon::OutlinedArrowUpTray)
                 ->modalDescription(__('admin.themes.install_help'))
-                ->schema([
-                    FileUpload::make('package')
-                        ->label(__('admin.themes.package'))
-                        ->helperText(__('admin.themes.upload_limit', ['size' => ini_get('upload_max_filesize') ?: '?']))
-                        ->disk('local')
-                        ->directory('theme-uploads')
-                        ->acceptedFileTypes(['application/zip', 'application/x-zip-compressed'])
-                        ->maxSize(50 * 1024)
-                        ->required(),
-                ])
-                ->modalSubmitActionLabel(__('admin.themes.install_submit'))
-                ->action(function (array $data): void {
-                    $path = (string) $data['package'];
-                    $disk = Storage::disk('local');
-
-                    try {
-                        $results = app(ThemeInstaller::class)->installAll($disk->path($path));
-                        $lines = array_map(fn (array $result): string => self::describe($result), $results);
-
-                        Notification::make()->success()
-                            ->title(count($lines) === 1 ? $lines[0] : __('admin.themes.installed_many', ['count' => count($lines)]))
-                            ->body(count($lines) > 1 ? new HtmlString(implode('<br>', array_map('e', $lines))) : null)
-                            ->send();
-                    } catch (ThemeException $exception) {
-                        Notification::make()->danger()->title(__('admin.themes.errors.title'))->body($exception->getMessage())->persistent()->send();
-                    } finally {
-                        $disk->delete($path);
-                    }
-                }),
+                // Chunked upload (no upload_max_filesize limit): the page script calls installUploaded() at the end
+                ->modalContent(view('filament.pages.themes-upload', ['uploadUrl' => route('filament.admin.update-upload', ['target' => 'theme'])]))
+                ->modalSubmitAction(false)
+                ->modalCancelActionLabel(__('admin.themes.close')),
             Action::make('checkUpdates')
                 ->label(__('admin.themes.updates.check'))
                 ->icon(Heroicon::OutlinedArrowPath)
@@ -134,6 +109,37 @@ class ManageThemes extends Page
                     ($status['errors'] !== [] ? $notification->warning()->body(new HtmlString(implode('<br>', array_map('e', array_unique($status['errors']))))) : $notification->success())->send();
                 }),
         ];
+    }
+
+    /**
+     * Installs the package uploaded in chunks from the Themes modal (one theme or several), then deletes it.
+     */
+    public function installUploaded(string $package): void
+    {
+        $storage = app(UpdateStorage::class);
+        $path = $storage->themeUploadsDirectory().'/'.$package;
+
+        if (preg_match('/^[A-Za-z0-9._-]{1,120}\.zip$/', $package) !== 1 || ! is_file($path)) {
+            Notification::make()->danger()->title(__('admin.themes.errors.title'))->body(__('admin.themes.errors.not_zip'))->send();
+
+            return;
+        }
+
+        try {
+            $results = app(ThemeInstaller::class)->installAll($path);
+            $lines = array_map(fn (array $result): string => self::describe($result), $results);
+
+            Notification::make()->success()
+                ->title(count($lines) === 1 ? $lines[0] : __('admin.themes.installed_many', ['count' => count($lines)]))
+                ->body(count($lines) > 1 ? new HtmlString(implode('<br>', array_map('e', $lines))) : null)
+                ->send();
+
+            $this->unmountAction();
+        } catch (ThemeException $exception) {
+            Notification::make()->danger()->title(__('admin.themes.errors.title'))->body($exception->getMessage())->persistent()->send();
+        } finally {
+            File::delete($path);
+        }
     }
 
     /**

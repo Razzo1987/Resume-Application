@@ -11,8 +11,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\File;
 
 /**
- * Chunked upload of the update package (System page): the browser sends the zip in 1 MB pieces,
- * so the hosting's upload limit (upload_max_filesize, often 2 MB) does not matter.
+ * Chunked upload of the update package (System page) or of a theme package (Themes page, ?target=theme): the browser
+ * sends the zip in 1 MB pieces, so the hosting's upload limit (upload_max_filesize, often 2 MB) does not matter.
  * Each chunk is the raw request body; the upload resumes from the chunk indicated by the server.
  */
 class UpdateUploadController extends Controller
@@ -55,8 +55,9 @@ class UpdateUploadController extends Controller
             return response()->json(['next' => $state['next']]);
         }
 
-        File::ensureDirectoryExists($storage->packagesDirectory());
-        rename($part, $storage->packagesDirectory().'/'.$name);
+        $target = $request->query('target') === 'theme' ? $storage->themeUploadsDirectory() : $storage->packagesDirectory();
+        File::ensureDirectoryExists($target);
+        rename($part, $target.'/'.$name);
         File::delete($meta);
 
         return response()->json(['done' => true, 'file' => $name]);
