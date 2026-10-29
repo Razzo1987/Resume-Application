@@ -668,3 +668,22 @@ it('sends a test email from the System page', function () {
     expect(sentMails())->toHaveCount(1)
         ->and(sentMails()[0]->getEnvelope()->getRecipients()[0]->getAddress())->toBe('admin@example.com');
 });
+
+it('writes the update emails in the admin language of each administrator, also from the cron job', function () {
+    seedDemo();
+    app()->setLocale('it-IT'); // like the cron job: the site language, which has no admin texts
+    User::factory()->create(['email' => 'it@example.com', 'locale' => 'it']);
+    User::factory()->create(['email' => 'en@example.com', 'locale' => 'en']);
+    fakeGitHubWithPackage(UPDATES_FEATURE);
+
+    autoUpdate(AutoUpdate::DOWNLOAD)->run(fromCron: true);
+
+    $mails = collect(sentMails())->mapWithKeys(fn ($sent) => [
+        $sent->getEnvelope()->getRecipients()[0]->getAddress() => $sent->getOriginalMessage(),
+    ]);
+
+    expect($mails['it@example.com']->getSubject())->toContain('versione '.UPDATES_FEATURE.' pronta da installare')
+        ->and($mails['it@example.com']->getTextBody())->toContain('premi "Controlla e installa"')->not->toContain('admin.updates')
+        ->and($mails['en@example.com']->getSubject())->toContain('ready to install')
+        ->and($mails['en@example.com']->getTextBody())->toContain('press "Check and install"');
+});

@@ -7,6 +7,7 @@ namespace App\Support\Update;
 use App\Filament\Pages\ManageSystem;
 use App\Models\User;
 use App\Support\Cron\Cron;
+use App\Support\Languages\AdminLocales;
 use App\Support\Settings\Settings;
 use App\Support\System\Updater;
 use Illuminate\Support\Carbon;
@@ -89,7 +90,7 @@ class AutoUpdate
         if (! $fromCron || $this->level() === self::OFF || $this->updater->isPending()) {
             // Without automatic download the administrators still get one email per new version
             if ($fromCron) {
-                $this->mailOnce('available', $release->version);
+                $this->mailOnce('available', $release);
             }
 
             return 'available '.$release->version;
@@ -161,7 +162,7 @@ class AutoUpdate
             $result = $this->downloader->next($release);
         } while (! $result['done']);
 
-        $this->notify('downloaded', $release->version);
+        $this->notify('downloaded', $release->version, release: $release);
 
         return (string) $this->storage->package((string) $result['file']);
     }
@@ -210,9 +211,7 @@ class AutoUpdate
         $eventFile = $this->eventFile();
         $progress = $this->runner->progressUrl();
         // Prepared beforehand: once the extraction has started, no app classes, not even for the email
-        $failedSubject = $this->subject('failed', $version);
-        $failedBody = $this->body('failed', $version, null, $progress);
-        $recipients = $this->recipients();
+        $failedMails = $this->messages('failed', $version, null, $progress, null);
         $from = (string) config('mail.from.address');
 
         require_once $this->storage->updaterFile();
@@ -228,8 +227,8 @@ class AutoUpdate
             @file_put_contents($eventFile, json_encode(['last' => [
                 'type' => 'failed', 'version' => $version, 'at' => date(DATE_ATOM), 'message' => $exception->getMessage(), 'url' => $progress,
             ]], JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE));
-            foreach ($recipients as $email) {
-                @mail($email, $failedSubject, $failedBody."\n\n".$exception->getMessage(), $from !== '' ? 'From: '.$from : '');
+            foreach ($failedMails as $email => $mail) {
+                @mail($email, $mail['subject'], $mail['body']."\n\n".$exception->getMessage(), $from !== '' ? 'From: '.$from : '');
             }
 
             throw new CronStop('extraction failed: '.$exception->getMessage(), ok: false);
@@ -314,14 +313,67 @@ class AutoUpdate
     /**
      * Event for the dashboard and email to the administrators.
      */
-    private function notify(string $type, string $version, ?string $message = null): void
+    private function notify(string $type, string $version, ?string $message = null, ?Release $release = null): void
     {
         $url = $type === 'failed' ? $this->runner->progressUrl() : null;
         $data = $this->storage->readJson($this->eventFile()) ?? [];
         $data['last'] = ['type' => $type, 'version' => $version, 'at' => now()->toAtomString(), 'message' => $message, 'url' => $url];
         $this->storage->writeJson($this->eventFile(), $data);
 
-        $this->mail($this->subject($type, $version), $this->body($type, $version, $message, $url));
+        $this->mail($type, $version, $message, $url, $release);
+    }
+
+    /**
+     * Email about a version sent only once (e.g. "new version available").
+     */
+    private function mailOnce(string $type, Release $release): void
+    {
+        $data = $this->storage->readJson($this->eventFile()) ?? [];
+
+        if (($data['mailed'][$type] ?? null) === $release->version) {
+            return;
+        }
+
+        $data['mailed'][$type] = $release->version;
+        $this->storage->writeJson($this->eventFile(), $data);
+        $this->mail($type, $release->version, null, null, $release);
+    }
+
+    /**
+     * Subject and body for each administrator, in the language they use in the admin (the cron runs without one).
+     *
+     * @return array<string, array{subject: string, body: string}> email => message
+     */
+    private function messages(string $type, string $version, ?string $message, ?string $url, ?Release $release): array
+    {
+        $messages = [];
+
+        foreach ($this->recipients() as $user) {
+            $messages[(string) $user->email] = $this->inAdminLocale($user, fn (): array => [
+                'subject' => $this->subject($type, $version),
+                'body' => $this->body($type, $version, $message, $url, $release),
+            ]);
+        }
+
+        return $messages;
+    }
+
+    /**
+     * @template T
+     *
+     * @param  callable(): T  $callback
+     * @return T
+     */
+    private function inAdminLocale(User $user, callable $callback): mixed
+    {
+        $previous = app()->getLocale();
+        app()->setLocale(app(AdminLocales::class)->for($user));
+
+        try {
+            return $callback();
+        } finally {
+            app()->setLocale($previous);
+        }
     }
 
     private function subject(string $type, string $version): string
@@ -329,7 +381,7 @@ class AutoUpdate
         return '['.config('app.name').'] '.__('admin.updates.auto.mail.'.$type.'_subject', ['version' => $version]);
     }
 
-    private function body(string $type, string $version, ?string $message, ?string $url): string
+    private function body(string $type, string $version, ?string $message, ?string $url, ?Release $release): string
     {
         $lines = [(string) __('admin.updates.auto.mail.'.$type, ['version' => $version, 'site' => url('/')])];
 
@@ -337,7 +389,14 @@ class AutoUpdate
             $lines[] = (string) __('admin.updates.auto.mail.resume', ['url' => $url]);
         }
 
-        $lines[] = (string) __('admin.updates.auto.mail.admin', ['url' => ManageSystem::getUrl()]);
+        // What to do next: for a new version, which button to press in System
+        $lines[] = in_array($type, ['available', 'downloaded'], true)
+            ? (string) __('admin.updates.auto.mail.'.$type.'_next', ['url' => ManageSystem::getUrl()])
+            : (string) __('admin.updates.auto.mail.admin', ['url' => ManageSystem::getUrl()]);
+
+        if ($release !== null && $release->url !== '') {
+            $lines[] = (string) __('admin.updates.auto.mail.notes', ['url' => $release->url]);
+        }
 
         if ($message !== null && $message !== '' && $type !== 'installed') {
             $lines[] = $message;
@@ -347,42 +406,26 @@ class AutoUpdate
     }
 
     /**
-     * @return list<string>
+     * @return list<User>
      */
     private function recipients(): array
     {
         try {
-            return User::query()->pluck('email')->filter()->values()->all();
+            return User::query()->whereNotNull('email')->get()->all();
         } catch (Throwable) {
             return [];
         }
     }
 
     /**
-     * Email about a version sent only once (e.g. "new version available").
-     */
-    private function mailOnce(string $type, string $version): void
-    {
-        $data = $this->storage->readJson($this->eventFile()) ?? [];
-
-        if (($data['mailed'][$type] ?? null) === $version) {
-            return;
-        }
-
-        $data['mailed'][$type] = $version;
-        $this->storage->writeJson($this->eventFile(), $data);
-        $this->mail($this->subject($type, $version), $this->body($type, $version, null, null));
-    }
-
-    /**
      * Email to all administrators; if the hosting does not send mail, the dashboard notice remains and the error
      * goes to the log (System page).
      */
-    private function mail(string $subject, string $body): void
+    private function mail(string $type, string $version, ?string $message, ?string $url, ?Release $release): void
     {
         try {
-            foreach ($this->recipients() as $email) {
-                Mail::raw($body, fn ($message) => $message->to($email)->subject($subject));
+            foreach ($this->messages($type, $version, $message, $url, $release) as $email => $mail) {
+                Mail::raw($mail['body'], fn ($message) => $message->to($email)->subject($mail['subject']));
             }
         } catch (Throwable $exception) {
             report($exception);

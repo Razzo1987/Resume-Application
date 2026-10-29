@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Support\Cron;
 
+use App\Support\Languages\AdminLocales;
 use App\Support\Update\CronStop;
 use Closure;
 use Illuminate\Support\Carbon;
@@ -63,6 +64,11 @@ class Cron
      */
     public function run(bool $fromCron, ?string $only = null): array
     {
+        // From the cron there is no request: messages and errors in the admin language, not in the site one
+        if ($fromCron) {
+            app()->setLocale(app(AdminLocales::class)->default());
+        }
+
         File::ensureDirectoryExists($this->directory());
         $lock = fopen($this->directory().'/cron.lock', 'c');
 

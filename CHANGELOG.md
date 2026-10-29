@@ -15,6 +15,8 @@ All notable changes to this project are documented here. The format follows [Kee
 
 ### Fixed
 - Scheduled jobs: the result of the statistics job no longer reads "totals of 1 days" (no plurals to get wrong), and the GeoLite job says that the MaxMind account is missing instead of "off" when statistics are on.
+- Update emails sent by the cron job showed the text keys (`admin.updates.auto.mail.downloaded`) instead of the message: the cron job has no admin language. Each administrator now gets the email in the admin language chosen in the profile, and the results of the scheduled jobs are written in the admin language too.
+- Update emails are clearer: they say that the site has not been changed yet, which button to press on the System page and where to read what is new.
 - Update emails that the server could not send are recorded in the log instead of being ignored silently.
 
 ## [2.1.1] — 2026-10-28
