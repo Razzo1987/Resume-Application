@@ -62,7 +62,8 @@ test.describe('CV', () => {
         await expect(page.locator('#certifications-title')).toBeInViewport();
 
         if (!isMobile) {
-            await expect(page.locator('.site-nav a[href="#certifications"]')).toHaveAttribute('aria-current', 'true');
+            // the menu item of the section is marked: aria-current, or aria-selected when a theme shows the menu as tabs
+            await expect(page.locator('.site-nav a[href="#certifications"]:is([aria-current="true"], [aria-selected="true"])')).toHaveCount(1);
         }
     });
 
@@ -89,6 +90,8 @@ test.describe('CV', () => {
     test('shows the back-to-top button after scrolling', async ({ page }) => {
         await page.goto('/it-IT');
 
+        // themes that show one section at a time (tabs) can have a page too short to scroll
+        test.skip(await page.evaluate(() => document.documentElement.scrollHeight < window.innerHeight + 700), 'page too short to scroll');
         await expect(page.locator('.back-to-top')).toBeHidden();
         // pointer over the content: over the sidebar the wheel would scroll only the sidebar
         await page.mouse.move(page.viewportSize().width - 50, 300);

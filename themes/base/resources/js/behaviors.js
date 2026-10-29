@@ -92,6 +92,12 @@ if (menuSections.length > 0) {
 
     const update = () => {
         scheduled = false;
+
+        // A theme can turn the menu into tabs (role="tablist"): the tabs say which section is shown
+        if (menuLinks[0].closest('[role="tablist"]')) {
+            return;
+        }
+
         const line = window.innerHeight / 3;
         const atBottom = window.scrollY + window.innerHeight >= document.documentElement.scrollHeight - 2;
         const visible = ([, section]) => {

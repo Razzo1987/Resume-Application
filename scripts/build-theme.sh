@@ -30,7 +30,7 @@ if [ "$SRC" != "$ROOT/themes/$NAME" ]; then
   echo "== Copying the theme to themes/$NAME"
   rm -rf "themes/$NAME"
   mkdir -p "themes/$NAME"
-  ( cd "$SRC" && tar --exclude=node_modules --exclude=.git --exclude=dist -cf - . ) | tar -xf - -C "themes/$NAME"
+  ( cd "$SRC" && tar --exclude=node_modules --exclude=.git --exclude=.github --exclude=dist -cf - . ) | tar -xf - -C "themes/$NAME"
 fi
 
 echo "== Icons"
