@@ -7,6 +7,7 @@ namespace App\Site;
 use App\Http\Middleware\NormalizeSitePath;
 use App\Http\Middleware\SiteSecurityHeaders;
 use App\Support\Languages\Locales;
+use App\Support\Stats\Tracker;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Throwable;
@@ -61,6 +62,15 @@ final class NotFound
 
             return null;
         }
+
+        // statistics: addresses that do not exist, by path (after the response, never breaking it; once per request
+        // even where the application serves more than one, as in the tests)
+        app()->terminating(function () use ($request): void {
+            if ($request->attributes->get('resume.stats_recorded') !== true) {
+                $request->attributes->set('resume.stats_recorded', true);
+                rescue(fn () => app(Tracker::class)->recordNotFound($request), report: false);
+            }
+        });
 
         return SiteSecurityHeaders::apply($request, response($html, 404));
     }

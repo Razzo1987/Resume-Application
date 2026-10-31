@@ -32,14 +32,14 @@ test.describe('admin accessibility (axe, WCAG 2.1 AA)', () => {
         await context.close();
     });
 
-    for (const path of ['', '/statistics', '/system', '/translations', '/profile-data', '/settings']) {
+    for (const path of ['', '/statistics', '/statistics?filter[country]=IT', '/statistics/exclusions', '/system', '/translations', '/profile-data', '/settings']) {
         test(path || '/', async ({ browser }, testInfo) => {
             test.skip(testInfo.project.name !== 'chromium', 'Chromium only');
 
             const context = await browser.newContext({ baseURL: testInfo.project.use.baseURL, storageState: session, reducedMotion: 'reduce' });
             const page = await context.newPage();
             await page.goto(`/${admin.path}${path}`, { waitUntil: 'networkidle' });
-            await expect(page).toHaveURL(new RegExp(`/${admin.path}${path}$`));
+            await expect(page).toHaveURL(new RegExp(`/${admin.path}${path.replace(/[?[\]]/g, '\\$&')}$`));
 
             const results = await new AxeBuilder({ page })
                 .withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa'])

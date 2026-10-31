@@ -153,7 +153,7 @@ return [
         'stats_title' => 'Besuchsstatistik',
         'stats' => 'Um zu wissen, wie viele Menschen die Website besuchen und welche Seiten sie lesen, speichere ich zu jedem Besuch einige Angaben: Datum und Uhrzeit, Seite, die verweisende Website und eventuelle Kampagnenparameter (UTM), Gerätetyp, Betriebssystem und Browser.',
         'stats_zone' => 'Aus der IP-Adresse ermittle ich außerdem die Herkunft (Land, ungefähre Stadt und Netz) mit einer Datenbank auf dem Server: die Adresse wird an niemanden gesendet.',
-        'stats_ip' => 'Die IP-Adresse wird nicht vollständig gespeichert, sondern sofort gekürzt (zum Beispiel 93.44.12.x). Ich verwende keine Cookies und erkenne wiederkehrende Besucher nicht.',
+        'stats_ip' => 'Die IP-Adresse wird nicht vollständig gespeichert, sondern sofort gekürzt (zum Beispiel 93.44.12.x). Ich verwende keine Cookies. Um zu zählen, wie viele verschiedene Personen die Website besuchen und wie viele Seiten sie nacheinander lesen, berechne ich aus IP-Adresse und Browser einen verschlüsselten Code mit einem zufälligen Schlüssel, der sich täglich ändert: Er dient nur dazu, die innerhalb von 24 Stunden aufgerufenen Seiten zu verknüpfen, und wird danach zusammen mit dem Schlüssel gelöscht; wer später wiederkommt, wird nicht erkannt.',
         'stats_basis' => 'Rechtsgrundlage ist mein berechtigtes Interesse zu verstehen, wie die Website genutzt wird. Die Daten der einzelnen Besuche werden nach :months Monaten gelöscht; es bleiben nur Summen, etwa die Besuche pro Tag.',
         'stats_credit' => 'Die Herkunft wird mit GeoLite2-Daten von MaxMind ermittelt, verfügbar unter https://www.maxmind.com.',
         'contact_fallback' => 'die auf der Website angegebenen Kontaktdaten',

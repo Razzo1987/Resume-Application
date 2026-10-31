@@ -10,7 +10,7 @@ use Illuminate\Support\Carbon;
 use Livewire\Attributes\Reactive;
 
 /**
- * Views and CV downloads per day (Statistics page and dashboard).
+ * Views, visitors and CV downloads per day (Statistics page and dashboard).
  */
 class StatsTimelineChart extends ChartWidget
 {
@@ -60,6 +60,20 @@ class StatsTimelineChart extends ChartWidget
             'order' => 2,
         ]];
 
+        // visitors only from the days that have them (version 2.3 onwards)
+        if (array_sum($timeline['visitors']) > 0) {
+            $datasets[] = [
+                'label' => (string) __('admin.stats.visitors'),
+                'data' => $timeline['visitors'],
+                'borderColor' => 'rgb(139, 92, 246)',
+                'pointBackgroundColor' => 'rgb(139, 92, 246)',
+                'backgroundColor' => 'rgba(139, 92, 246, 0.15)',
+                'tension' => 0.25,
+                'pointRadius' => $long ? 0 : 2,
+                'order' => 1,
+            ];
+        }
+
         if ($this->pageFilter === '') {
             $datasets[] = [
                 'label' => (string) __('admin.stats.downloads'),
@@ -86,7 +100,7 @@ class StatsTimelineChart extends ChartWidget
     {
         return [
             'scales' => ['y' => ['beginAtZero' => true, 'ticks' => ['precision' => 0]]],
-            'plugins' => ['legend' => ['display' => $this->pageFilter === '', 'reverse' => true]],
+            'plugins' => ['legend' => ['display' => true, 'reverse' => true]],
             'interaction' => ['intersect' => false, 'mode' => 'index'],
         ];
     }

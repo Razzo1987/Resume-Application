@@ -2,6 +2,22 @@
 
 All notable changes to this project are documented here. The format follows [Keep a Changelog](https://keepachangelog.com/) and the project uses [Semantic Versioning](https://semver.org/).
 
+## [2.3.0] — 2026-10-31
+
+### Added
+- Statistics: **visitors and visits (sessions) without cookies, for 24 hours at most**. Each page view stores two keyed hashes (HMAC-SHA256) of the IP address and of IP address + browser, with a random salt created every day and kept for two days at most; a page view joins a visitor first seen less than 24 hours ago, and the same visit if the previous page was less than 30 minutes ago. After 24 hours the hashes are removed (also without the cron job) and only random visitor and visit codes remain. New figures: visitors, visits, pages per visit, average duration, bounce rate; for a single page visitors, entrances and exits. Visits recorded before 2.3 have no visitor or visit.
+- Statistics: **exclusions** page with three statuses: *Admin (automatic)* (the public address used for the admin, it expires as before), *Excluded* (IP address, network as shortened address, or provider/organization by ASN) and *Always count* (a shared office network). Adding an exclusion deletes the visits already recorded, after showing how many (IP address: last 24 hours; network and ASN: all those kept) and recalculates the daily totals; removing it starts the count again, nothing is restored. *Exclude the network* on every row of the latest visits.
+- Statistics: when an administrator opens the admin, the visits of the last 24 hours from the same address and browser are deleted (those made just before signing in).
+- Statistics: days and hours (grid of the week in the time zone of the site), entry and exit pages, channels (direct, search engines, social networks, AI assistants, email, other sites, campaigns; also as a filter), organizations apart from connection providers and data centers (built-in lists, correctable from the page), operating system and browser versions, icons of systems, browsers, devices, channels and sites (Tabler Icons, MIT).
+- Statistics: **bots and crawlers** counted by name and day without any address (search engines, AI crawlers such as GPTBot, ClaudeBot and PerplexityBot, SEO crawlers, monitoring, social previews, feed readers, scripts).
+- Statistics: **pages not found** by path, with the requests from people, the last one and the referring site; attack attempts (`wp-login.php`, `.env`...) counted apart; *Create redirect* from the list.
+- Statistics: the world map zooms in on a country with a click (more detailed borders, 1:50m) and shows only its visits; a click on a city filters by city; *World* goes back. Countries and cities can be reached with the keyboard.
+
+### Changed
+- The excluded admin IPs (`stat_admin_ips`) become automatic entries of the exclusions (`stat_exclusions`).
+- Privacy page (9 languages): the statistics section, added by itself when statistics are on, explains the 24-hour code instead of "I do not recognise people who come back".
+- Bots, scripts and feed readers are no longer simply ignored: they are counted apart, never as visits.
+
 ## [2.2.0] — 2026-10-29
 
 ### Added

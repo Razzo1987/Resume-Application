@@ -10,6 +10,7 @@ use App\Support\Settings\Settings;
 use Carbon\CarbonInterface;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\DB;
 
 /**
  * Data for the Statistics page: views and CV downloads over time, most viewed pages and rankings by referrer,
@@ -34,6 +35,7 @@ class StatsQuery
         'utm_term' => 'utm_term',
         'utm_content' => 'utm_content',
         'click_source' => 'click_source',
+        'channel' => 'channel',
         'country' => 'country',
         'city' => 'city',
         'asn' => 'as_org',
@@ -137,30 +139,33 @@ class StatsQuery
     }
 
     /**
-     * Views and downloads per day (every day of the period, including those at zero).
+     * Views, downloads and visitors per day (every day of the period, including those at zero).
      *
-     * @return array{labels: list<string>, views: list<int>, downloads: list<int>}
+     * @return array{labels: list<string>, views: list<int>, downloads: list<int>, visitors: list<int>}
      */
     public function timeline(): array
     {
         if ($this->isDetailed()) {
             $views = $this->pageVisits()->selectRaw('day, count(*) as total')->groupBy('day')->pluck('total', 'day');
             $downloads = $this->visits()->where('page', self::DOWNLOAD)->selectRaw('day, count(*) as total')->groupBy('day')->pluck('total', 'day');
+            $visitors = $this->visits()->whereNotNull('visitor_id')->selectRaw('day, count(distinct visitor_id) as total')->groupBy('day')->pluck('total', 'day');
         } else {
             $views = $this->rows('total')->selectRaw('day, sum(views) as total')->groupBy('day')->pluck('total', 'day');
             $downloads = $this->base('total')->where('page', self::DOWNLOAD)->selectRaw('day, sum(views) as total')->groupBy('day')->pluck('total', 'day');
+            $visitors = $this->base('visitors')->where('page', $this->page ?? Aggregator::SITE)->selectRaw('day, sum(views) as total')->groupBy('day')->pluck('total', 'day');
         }
 
-        $labels = $viewSeries = $downloadSeries = [];
+        $labels = $viewSeries = $downloadSeries = $visitorSeries = [];
 
         for ($day = Carbon::parse($this->from); $day->lte($this->to); $day->addDay()) {
             $key = $day->toDateString();
             $labels[] = $key;
             $viewSeries[] = (int) ($views[$key] ?? $views[$key.' 00:00:00'] ?? 0);
             $downloadSeries[] = (int) ($downloads[$key] ?? $downloads[$key.' 00:00:00'] ?? 0);
+            $visitorSeries[] = (int) ($visitors[$key] ?? $visitors[$key.' 00:00:00'] ?? 0);
         }
 
-        return ['labels' => $labels, 'views' => $this->page === self::DOWNLOAD ? $downloadSeries : $viewSeries, 'downloads' => $downloadSeries];
+        return ['labels' => $labels, 'views' => $this->page === self::DOWNLOAD ? $downloadSeries : $viewSeries, 'downloads' => $downloadSeries, 'visitors' => $visitorSeries];
     }
 
     /**
@@ -192,16 +197,26 @@ class StatsQuery
     public function top(string $dimension, int $limit = 10): array
     {
         if ($this->isDetailed() || $dimension === 'ip') {
-            $column = $dimension === 'city' ? null : (self::FILTERS[$dimension] ?? null);
+            [$column, $required] = match (true) {
+                isset(Aggregator::COMBINED[$dimension]) => ['concat('.implode(", ' ', ", Aggregator::COMBINED[$dimension]).')', Aggregator::COMBINED[$dimension]],
+                $dimension === 'hour' => ['hour', ['hour']],
+                $dimension !== 'city' && isset(self::FILTERS[$dimension]) => [self::FILTERS[$dimension], [self::FILTERS[$dimension]]],
+                default => [null, []],
+            };
 
             if ($column === null) {
                 return [];
             }
 
-            return $this->pageVisits()
-                ->whereNotNull($column)
+            $query = $this->pageVisits();
+
+            foreach ($required as $name) {
+                $query->whereNotNull($name);
+            }
+
+            return $query
                 ->selectRaw("{$column} as value, count(*) as total")
-                ->groupBy($column)
+                ->groupByRaw($column)
                 ->orderByDesc('total')
                 ->limit($limit)
                 ->pluck('total', 'value')
@@ -267,6 +282,156 @@ class StatsQuery
             })
             ->values()
             ->all();
+    }
+
+    /**
+     * Visitors and sessions: unique visitors (somebody who comes back after 24 hours counts again, so over several
+     * days this is the sum of the days), sessions, pages per session, average duration, bounce rate; for a single
+     * page the visitors and how many sessions started or ended there. Null where the data does not exist yet
+     * (visits recorded before version 2.3).
+     *
+     * @return array{visitors: int, sessions: int|null, pages_per_session: float|null, avg_duration: int|null, bounce_rate: float|null, entries: int|null, exits: int|null}
+     */
+    public function kpis(): array
+    {
+        if ($this->isDetailed()) {
+            $visitors = $this->visits()->whereNotNull('visitor_id')->distinct()->count('visitor_id');
+            $summary = $this->sessionSummary();
+            $views = $summary['views'];
+        } else {
+            $page = $this->page ?? Aggregator::SITE;
+            $visitors = (int) $this->base('visitors')->where('page', $page)->sum('views');
+            $summary = [
+                'sessions' => (int) $this->base('sessions')->where('page', Aggregator::SITE)->sum('views'),
+                'bounces' => (int) $this->base('bounces')->where('page', Aggregator::SITE)->sum('views'),
+                'duration' => (int) $this->base('duration')->where('page', Aggregator::SITE)->sum('views'),
+                'entries' => $this->page !== null ? [$this->page => (int) $this->base('entry')->where('page', $this->page)->sum('views')] : [],
+                'exits' => $this->page !== null ? [$this->page => (int) $this->base('exit')->where('page', $this->page)->sum('views')] : [],
+            ];
+            // page views of the days with sessions (the ratio would be wrong with the views recorded before 2.3)
+            $since = $this->since();
+            $views = $since !== null ? (int) StatDaily::query()->where('dimension', 'total')
+                ->whereBetween('day', [max($since, $this->from->toDateString()), $this->to->toDateString()])->sum('views') : 0;
+        }
+
+        $sessions = $summary['sessions'];
+
+        return [
+            'visitors' => $visitors,
+            'sessions' => $this->page === null && $sessions > 0 ? $sessions : null,
+            'pages_per_session' => $this->page === null && $sessions > 0 ? round($views / $sessions, 1) : null,
+            'avg_duration' => $this->page === null && $sessions > 0 ? (int) round($summary['duration'] / $sessions) : null,
+            'bounce_rate' => $this->page === null && $sessions > 0 ? round($summary['bounces'] / $sessions * 100, 1) : null,
+            'entries' => $this->page !== null ? ($summary['entries'][$this->page] ?? 0) : null,
+            'exits' => $this->page !== null ? ($summary['exits'][$this->page] ?? 0) : null,
+        ];
+    }
+
+    /**
+     * First day with visitors and sessions (the update to 2.3), or null if there are none yet.
+     */
+    public function since(): ?string
+    {
+        $day = StatDaily::query()->where('dimension', 'sessions')->min('day') ?? StatVisit::query()->whereNotNull('session_id')->min('day');
+
+        return $day !== null ? substr((string) $day, 0, 10) : null;
+    }
+
+    /**
+     * Pages where the sessions start (entry) or end (exit): page => sessions.
+     *
+     * @return array<string, int>
+     */
+    public function sessionPages(string $which, int $limit = 10): array
+    {
+        if ($this->isDetailed()) {
+            $pages = $this->sessionSummary()[$which === 'entry' ? 'entries' : 'exits'];
+            arsort($pages);
+
+            return array_slice($pages, 0, $limit, true);
+        }
+
+        return $this->base($which)
+            ->when($this->page !== null, fn (Builder $query) => $query->where('page', $this->page))
+            ->selectRaw('page, sum(views) as total')
+            ->groupBy('page')
+            ->orderByDesc('total')
+            ->limit($limit)
+            ->pluck('total', 'page')
+            ->map(fn (mixed $total): int => (int) $total)
+            ->all();
+    }
+
+    /**
+     * Page views by day of the week (1 = Monday) and hour of the site time zone.
+     *
+     * @return array<int, array<int, int>>
+     */
+    public function heatmap(): array
+    {
+        $rows = $this->isDetailed()
+            ? $this->pageVisits()->whereNotNull('hour')->selectRaw('dayofweek(day) as weekday, hour, count(*) as total')->groupByRaw('dayofweek(day), hour')->toBase()->get()
+            : $this->rows('hour')->selectRaw('dayofweek(day) as weekday, value as hour, sum(views) as total')->groupByRaw('dayofweek(day), value')->toBase()->get();
+
+        $grid = array_fill(1, 7, array_fill(0, 24, 0));
+
+        foreach ($rows as $row) {
+            // MySQL: 1 = Sunday ... 7 = Saturday
+            $weekday = ((int) $row->weekday + 5) % 7 + 1;
+            $grid[$weekday][(int) $row->hour] += (int) $row->total;
+        }
+
+        return $grid;
+    }
+
+    /**
+     * Requests from bots and crawlers in the period (they do not depend on the page or the filters).
+     *
+     * @return array{total: int, categories: array<string, int>, bots: list<array{name: string, category: string, hits: int}>}
+     */
+    public function bots(int $limit = 15): array
+    {
+        $period = DB::table('stat_bots')->whereBetween('day', [$this->from->toDateString(), $this->to->toDateString()]);
+
+        return [
+            'total' => (int) (clone $period)->sum('hits'),
+            'categories' => (clone $period)->selectRaw('category, sum(hits) as total')->groupBy('category')->orderByDesc('total')
+                ->pluck('total', 'category')->map(fn (mixed $total): int => (int) $total)->all(),
+            'bots' => (clone $period)->selectRaw('name, category, sum(hits) as total')->groupBy('name', 'category')->orderByDesc('total')->limit($limit)->get()
+                ->map(fn (object $row): array => ['name' => (string) $row->name, 'category' => (string) $row->category, 'hits' => (int) $row->total])->all(),
+        ];
+    }
+
+    /**
+     * Addresses not found requested in the period (last request in the period; the counters cover the whole time
+     * they have been kept), separating the attack attempts.
+     *
+     * @return array{pages: list<object>, probes: int, probe_paths: list<object>}
+     */
+    public function notFound(int $limit = 15): array
+    {
+        $from = Carbon::parse($this->from->toDateString(), app(Settings::class)->timezone())->startOfDay()->utc();
+        $period = DB::table('stat_not_found')->where('last_seen_at', '>=', $from);
+
+        return [
+            'pages' => (clone $period)->where('probe', false)->orderByDesc('human_hits')->orderByDesc('hits')->limit($limit)->get()->all(),
+            'probes' => (int) (clone $period)->where('probe', true)->sum('hits'),
+            'probe_paths' => (clone $period)->where('probe', true)->orderByDesc('hits')->limit(10)->get()->all(),
+        ];
+    }
+
+    /**
+     * Sessions that include at least one of the filtered visits (with all their pages).
+     *
+     * @return array{sessions: int, views: int, bounces: int, duration: int, entries: array<string, int>, exits: array<string, int>}
+     */
+    private function sessionSummary(): array
+    {
+        return Aggregator::sessions(StatVisit::query()
+            ->whereIn('session_id', $this->visits()->whereNotNull('session_id')->select('session_id')->distinct())
+            ->orderBy('session_id')->orderBy('visited_at')->orderBy('id')
+            ->toBase()
+            ->get(['session_id', 'page', 'day', 'visited_at']));
     }
 
     /**

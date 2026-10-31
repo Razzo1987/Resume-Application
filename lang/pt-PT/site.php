@@ -153,7 +153,7 @@ return [
         'stats_title' => 'Estatísticas de visitas',
         'stats' => 'Para saber quantas pessoas visitam o site e que páginas leem, registo algumas informações de cada visita: data e hora, página, site de origem e eventuais parâmetros de campanha (UTM), tipo de dispositivo, sistema operativo e navegador.',
         'stats_zone' => 'A partir do endereço IP obtenho também a origem (país, cidade aproximada e rede) com uma base de dados instalada no servidor: o endereço não é enviado a ninguém.',
-        'stats_ip' => 'O endereço IP não é guardado por inteiro: é encurtado de imediato (por exemplo 93.44.12.x). Não uso cookies e não reconheço quem volta a visitar o site.',
+        'stats_ip' => 'O endereço IP não é guardado por inteiro: é encurtado de imediato (por exemplo 93.44.12.x). Não uso cookies. Para contar quantas pessoas diferentes visitam o site e quantas páginas leem seguidas, calculo a partir do endereço IP e do navegador um código cifrado com uma chave aleatória que muda todos os dias: serve apenas para relacionar as páginas vistas em 24 horas, depois é apagado juntamente com a chave e quem volta mais tarde não é reconhecido.',
         'stats_basis' => 'Faço-o com base no interesse legítimo em perceber como o site é usado. Os dados de cada visita são apagados após :months meses; ficam apenas os totais, como as visitas de cada dia.',
         'stats_credit' => 'A origem é obtida com os dados GeoLite2 criados pela MaxMind, disponíveis em https://www.maxmind.com.',
         'contact_fallback' => 'os contactos indicados no site',

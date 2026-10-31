@@ -153,7 +153,7 @@ return [
         'stats_title' => 'Bezoekstatistieken',
         'stats' => 'Om te weten hoeveel mensen de site bezoeken en welke pagina\'s ze lezen, leg ik bij elk bezoek enkele gegevens vast: datum en tijd, pagina, de verwijzende site en eventuele campagneparameters (UTM), type apparaat, besturingssysteem en browser.',
         'stats_zone' => 'Uit het IP-adres leid ik ook de herkomst af (land, ongeveer de stad en het netwerk) met een database op de server: het adres wordt naar niemand gestuurd.',
-        'stats_ip' => 'Het IP-adres wordt niet volledig opgeslagen: het wordt meteen ingekort (bijvoorbeeld 93.44.12.x). Ik gebruik geen cookies en herken terugkerende bezoekers niet.',
+        'stats_ip' => 'Het IP-adres wordt niet volledig opgeslagen: het wordt meteen ingekort (bijvoorbeeld 93.44.12.x). Ik gebruik geen cookies. Om te tellen hoeveel verschillende mensen de site bezoeken en hoeveel pagina\'s ze achter elkaar lezen, bereken ik uit het IP-adres en de browser een versleutelde code met een willekeurige sleutel die elke dag verandert: die dient alleen om de pagina\'s te koppelen die binnen 24 uur zijn bekeken, en wordt daarna samen met de sleutel verwijderd; wie later terugkomt, wordt niet herkend.',
         'stats_basis' => 'Ik doe dit op basis van het gerechtvaardigd belang om te begrijpen hoe de site wordt gebruikt. De gegevens van elk bezoek worden na :months maanden verwijderd; alleen de totalen blijven, zoals het aantal bezoeken per dag.',
         'stats_credit' => 'De herkomst wordt bepaald met GeoLite2-gegevens van MaxMind, beschikbaar via https://www.maxmind.com.',
         'contact_fallback' => 'de contactgegevens op de site',

@@ -4,21 +4,25 @@ declare(strict_types=1);
 
 namespace App\Filament\Pages;
 
-use App\Models\StatAdminIp;
+use App\Models\Redirect;
+use App\Models\StatExclusion;
 use App\Models\StatVisit;
 use App\Support\Settings\Settings;
-use App\Support\Stats\AdminIps;
 use App\Support\Stats\Aggregator;
+use App\Support\Stats\Channels;
+use App\Support\Stats\Exclusions;
 use App\Support\Stats\GeoIp;
 use App\Support\Stats\GeoIpUpdater;
+use App\Support\Stats\Icons;
 use App\Support\Stats\Ip;
+use App\Support\Stats\Networks;
 use App\Support\Stats\PageResolver;
 use App\Support\Stats\StatsQuery;
 use App\Support\Stats\WorldMap;
 use BackedEnum;
 use Filament\Actions\Action;
 use Filament\Actions\BulkAction;
-use Filament\Forms\Components\CheckboxList;
+use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
 use Filament\Notifications\Notification;
@@ -31,6 +35,7 @@ use Filament\Tables\Contracts\HasTable;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Lang;
 use Illuminate\Support\HtmlString;
 use Illuminate\Support\Str;
@@ -39,10 +44,11 @@ use Locale;
 use Throwable;
 
 /**
- * Visit statistics (without cookies): trend over time, most viewed pages, referrers, campaigns, countries and
- * cities with the map, devices, operating systems, browsers, languages and networks, list of the latest visits.
- * Filters by period and by single page (e.g. a blog article). Settings, MaxMind account and excluded IPs from the
- * buttons at the top.
+ * Visit statistics (without cookies): visitors and sessions, trend over time, days and hours, most viewed pages,
+ * entry and exit pages, channels, referrers, campaigns, countries and cities with the map (a click zooms in),
+ * organizations and networks, devices, operating systems and browsers with their versions, languages, bots and
+ * crawlers, pages not found, list of the latest visits. Filters by period, by single page (e.g. a blog article) and by
+ * any detail. Settings, exclusions and MaxMind account from the buttons at the top.
  */
 class Statistics extends Page implements HasTable
 {
@@ -125,7 +131,21 @@ class Statistics extends Page implements HasTable
     public function removeFilter(string $name): void
     {
         unset($this->filters[$name]);
+
+        // back to the world map: the city belongs to the country
+        if ($name === 'country') {
+            unset($this->filters['city']);
+        }
+
         $this->resetTable();
+    }
+
+    /**
+     * Marks a network as connection provider, data center or organization (null: back to the built-in lists).
+     */
+    public function markNetwork(string $name, ?string $kind): void
+    {
+        app(Networks::class)->mark($name, in_array($kind, [Networks::PROVIDER, Networks::HOSTING, Networks::ORGANIZATION], true) ? $kind : null);
     }
 
     public function clearFilters(): void
@@ -152,19 +172,36 @@ class Statistics extends Page implements HasTable
         $locale = app()->getLocale();
         $countries = $query->top('country', 300);
         $cities = $query->cities();
+        $icons = app(Icons::class);
+        $networks = app(Networks::class);
+        $allNetworks = $query->top('asn', 300);
+        $byKind = [Networks::ORGANIZATION => [], Networks::PROVIDER => [], Networks::HOSTING => []];
+
+        foreach ($allNetworks as $name => $views) {
+            $byKind[$networks->kind((string) $name)][(string) $name] = $views;
+        }
+
+        $focus = $this->filters['country'] ?? (isset($this->filters['city']) ? explode('|', $this->filters['city'], 2)[0] : null);
 
         $lists = [
             'pages' => $this->pageFilter === '' ? $this->labelled($query->pages(), fn (string $page): string => $pages->label($page)) : [],
-            'referrer' => $this->labelled($query->top('referrer'), fn (string $host): string => $host),
+            'referrer' => $this->labelled($query->top('referrer'), fn (string $host): string => $host, 'referrer'),
             'utm_source' => $this->labelled($query->top('utm_source'), fn (string $value): string => $value),
             'utm_campaign' => $this->labelled($query->top('utm_campaign'), fn (string $value): string => $value),
             'utm_medium' => $this->labelled($query->top('utm_medium'), fn (string $value): string => $value),
             'click_source' => $this->labelled($query->top('click_source'), fn (string $value): string => Str::headline($value)),
+            'channel' => $this->labelled($this->ordered($query->top('channel', 20)), fn (string $value): string => $this->filterLabel('channel', $value), 'channel'),
+            'entry' => $this->labelled($query->sessionPages('entry'), fn (string $page): string => $pages->label($page)),
+            'exit' => $this->labelled($query->sessionPages('exit'), fn (string $page): string => $pages->label($page)),
+            'organization' => $this->labelled(array_slice($byKind[Networks::ORGANIZATION], 0, 10, true), fn (string $value): string => $value, 'network', Networks::ORGANIZATION),
+            'provider' => $this->labelled(array_slice($byKind[Networks::PROVIDER] + $byKind[Networks::HOSTING], 0, 10, true), fn (string $value): string => $value, 'network', fn (string $value): string => $networks->kind($value)),
+            'os_version' => $this->labelled($query->top('os_version'), fn (string $value): string => $value, 'os_version'),
+            'browser_version' => $this->labelled($query->top('browser_version'), fn (string $value): string => $value, 'browser_version'),
             'country' => $this->labelled(array_slice($countries, 0, 10, true), fn (string $code): string => $this->filterLabel('country', $code)),
             'city' => $this->labelled(array_slice(array_column(array_map(fn (array $city): array => ['key' => $city['country'].'|'.$city['city'], 'views' => $city['views']], $cities), 'views', 'key'), 0, 10, true), fn (string $key): string => $this->filterLabel('city', $key)),
-            'device' => $this->labelled($query->top('device'), fn (string $device): string => $this->filterLabel('device', $device)),
-            'os' => $this->labelled($query->top('os'), fn (string $value): string => $value),
-            'browser' => $this->labelled($query->top('browser'), fn (string $value): string => $value),
+            'device' => $this->labelled($query->top('device'), fn (string $device): string => $this->filterLabel('device', $device), 'device'),
+            'os' => $this->labelled($query->top('os'), fn (string $value): string => $value, 'os'),
+            'browser' => $this->labelled($query->top('browser'), fn (string $value): string => $value, 'browser'),
             'locale' => $this->labelled($query->top('locale'), fn (string $code): string => $this->filterLabel('locale', $code)),
             'asn' => $this->labelled($query->top('asn'), fn (string $value): string => $value),
             'ip' => $this->labelled($query->top('ip'), fn (string $value): string => $value),
@@ -186,16 +223,28 @@ class Statistics extends Page implements HasTable
             }
         }
 
+        $bots = $query->bots();
+
         return [
             'enabled' => $enabled,
             'totals' => $query->totals(),
+            'kpis' => $query->kpis(),
+            'since' => $query->since(),
+            'heatmap' => $query->heatmap(),
+            'bots' => [...$bots, 'bots' => array_map(fn (array $bot): array => [...$bot, 'icon' => $icons->for('bot', $bot['category'])], $bots['bots'])],
+            'notFound' => $query->notFound(),
+            'focus' => $focus,
+            'focusLabel' => $focus !== null ? $this->filterLabel('country', $focus) : null,
+            'cityLabel' => isset($this->filters['city']) ? $this->filterLabel('city', $this->filters['city']) : null,
+            'icons' => $icons,
             'lists' => $lists,
             'map' => app(WorldMap::class)->render($countries, array_map(fn (array $city): array => [
                 'label' => $city['city'].' ('.$city['country'].')',
                 'latitude' => $city['latitude'],
                 'longitude' => $city['longitude'],
                 'views' => $city['views'],
-            ], $cities), $locale),
+                'key' => $city['country'].'|'.$city['city'],
+            ], $cities), $locale, $focus, $this->filters['city'] ?? null),
             'pageOptions' => $pages->labels(StatVisit::query()->distinct()->pluck('page')->merge(array_keys($query->pages(100)))->unique()->values()->all()),
             'pageLabel' => $this->pageFilter !== '' ? $pages->label($this->pageFilter) : null,
             'geoip' => app(GeoIp::class),
@@ -213,7 +262,7 @@ class Statistics extends Page implements HasTable
     }
 
     /** Filters offered as menus (the others, such as utm_term, can be set from a link) */
-    public const array FILTER_MENUS = ['referrer', 'utm_source', 'utm_medium', 'utm_campaign', 'click_source', 'country', 'city', 'device', 'os', 'browser', 'locale', 'asn', 'ip'];
+    public const array FILTER_MENUS = ['channel', 'referrer', 'utm_source', 'utm_medium', 'utm_campaign', 'click_source', 'country', 'city', 'device', 'os', 'browser', 'locale', 'asn', 'ip'];
 
     /**
      * Readable value of a filter: country and language names, device types, "Milan (IT)".
@@ -228,6 +277,7 @@ class Statistics extends Page implements HasTable
             'locale' => Locale::getDisplayName($value, $locale) ?: $value,
             'device' => Lang::has('admin.stats.devices.'.$value) ? (string) __('admin.stats.devices.'.$value) : Str::ucfirst($value),
             'click_source' => Str::headline($value),
+            'channel' => Lang::has('admin.stats.channels.'.$value) ? (string) __('admin.stats.channels.'.$value) : $value,
             default => $value,
         };
     }
@@ -235,17 +285,46 @@ class Statistics extends Page implements HasTable
     /**
      * @param  array<string, int>  $values
      * @param  callable(string): string  $label
-     * @return list<array{key: string, label: string, views: int}>
+     * @param  string|null  $icon  kind of icon (see Icons::for)
+     * @param  string|(callable(string): string)|null  $iconValue  value for the icon, if not the key
+     * @return list<array{key: string, label: string, views: int, icon?: HtmlString|null}>
      */
-    private function labelled(array $values, callable $label): array
+    private function labelled(array $values, callable $label, ?string $icon = null, string|callable|null $iconValue = null): array
     {
         $list = [];
+        $icons = app(Icons::class);
 
         foreach ($values as $key => $views) {
-            $list[] = ['key' => (string) $key, 'label' => $label((string) $key), 'views' => $views];
+            $item = ['key' => (string) $key, 'label' => $label((string) $key), 'views' => $views];
+
+            if ($icon !== null) {
+                $value = is_callable($iconValue) ? $iconValue((string) $key) : ($iconValue ?? (string) $key);
+                $item['icon'] = $icons->for($icon, $value);
+            }
+
+            $list[] = $item;
         }
 
         return $list;
+    }
+
+    /**
+     * Channels in their usual order (not by visits), the empty ones left out.
+     *
+     * @param  array<string, int>  $values
+     * @return array<string, int>
+     */
+    private function ordered(array $values): array
+    {
+        $ordered = [];
+
+        foreach (Channels::ALL as $channel) {
+            if (isset($values[$channel])) {
+                $ordered[$channel] = $values[$channel];
+            }
+        }
+
+        return $ordered;
     }
 
     public function table(Table $table): Table
@@ -279,6 +358,21 @@ class Statistics extends Page implements HasTable
                 TextColumn::make('ip')->label('IP')->fontFamily('mono')->size('sm')
                     ->tooltip(__('admin.stats.filters.by_ip'))
                     ->action(fn (StatVisit $record) => $this->addFilter('ip', $record->ip)),
+            ])
+            ->recordActions([
+                Action::make('excludeNetwork')
+                    ->label(__('admin.stats.exclusions.exclude_network'))
+                    ->icon(Heroicon::OutlinedNoSymbol)
+                    ->iconButton()
+                    ->color('gray')
+                    ->requiresConfirmation()
+                    ->modalHeading(fn (StatVisit $record): string => __('admin.stats.exclusions.exclude_network_heading', ['network' => $record->ip]))
+                    ->modalDescription(fn (StatVisit $record): string => (fn (int $count): string => trans_choice('admin.stats.exclusions.exclude_network_help', $count, ['count' => $count]))(app(Exclusions::class)->count('network', $record->ip)))
+                    ->modalSubmitActionLabel(__('admin.stats.exclusions.exclude'))
+                    ->action(function (StatVisit $record): void {
+                        $result = app(Exclusions::class)->add('network', $record->ip, StatExclusion::EXCLUDED);
+                        Notification::make()->success()->title(trans_choice('admin.stats.exclusions.added', $result['deleted'], ['count' => $result['deleted']]))->send();
+                    }),
             ])
             ->toolbarActions([
                 BulkAction::make('delete')
@@ -350,7 +444,7 @@ class Statistics extends Page implements HasTable
 
     protected function getHeaderActions(): array
     {
-        return [$this->settingsAction(), $this->geoipAccountAction(), $this->adminIpsAction()];
+        return [$this->settingsAction(), $this->exclusionsAction(), $this->geoipAccountAction()];
     }
 
     public function settingsAction(): Action
@@ -378,7 +472,7 @@ class Statistics extends Page implements HasTable
                 ]);
 
                 if ($data['enabled']) {
-                    app(AdminIps::class)->touch(request()->ip());
+                    app(Exclusions::class)->touchAdmin(request()->ip(), (string) request()->userAgent());
                 }
 
                 Notification::make()->success()->title(__('admin.messages.saved'))->send();
@@ -463,24 +557,57 @@ class Statistics extends Page implements HasTable
         return null;
     }
 
-    public function adminIpsAction(): Action
+    /**
+     * Redirect for an address not found (from the list on this page): then it is no longer listed.
+     */
+    public function createRedirectAction(): Action
     {
-        return Action::make('adminIps')
-            ->label(__('admin.stats.admin_ips.title'))
-            ->icon(Heroicon::OutlinedUserMinus)
-            ->color('gray')
-            ->modalDescription(fn (): string => __('admin.stats.admin_ips.help', ['days' => app(AdminIps::class)->days(), 'ip' => (string) request()->ip()]))
+        return Action::make('createRedirect')
+            ->label(__('admin.stats.not_found.redirect'))
+            ->icon(Heroicon::OutlinedArrowUturnRight)
+            ->link()
+            ->size('sm')
+            ->modalHeading(__('admin.stats.not_found.redirect'))
+            ->fillForm(fn (array $arguments): array => ['from_path' => (string) ($arguments['path'] ?? ''), 'status_code' => 301])
             ->schema([
-                CheckboxList::make('remove')
-                    ->label(__('admin.stats.admin_ips.remove'))
-                    ->options(fn (): array => StatAdminIp::query()->orderByDesc('last_seen_at')->get()
-                        ->mapWithKeys(fn (StatAdminIp $ip): array => [$ip->id => $ip->ip.' · '.__('admin.stats.admin_ips.last_seen', ['when' => $ip->last_seen_at->diffForHumans()])])
-                        ->all()),
+                TextInput::make('from_path')->label(__('admin.fields.from_path'))->required()->maxLength(500)->unique(Redirect::class, 'from_path'),
+                TextInput::make('to_path')->label(__('admin.fields.to_path'))->helperText(__('admin.help.to_path'))->required()->maxLength(500),
+                Select::make('status_code')->label(__('admin.fields.status_code'))
+                    ->options([301 => __('admin.labels.redirect_301'), 302 => __('admin.labels.redirect_302')])
+                    ->required(),
             ])
-            ->modalSubmitActionLabel(__('admin.stats.admin_ips.submit'))
             ->action(function (array $data): void {
-                StatAdminIp::query()->whereIn('id', $data['remove'] ?? [])->delete();
+                Redirect::query()->create([...$data, 'is_active' => true]);
+                DB::table('stat_not_found')->where('path', $data['from_path'])->delete();
                 Notification::make()->success()->title(__('admin.messages.saved'))->send();
             });
+    }
+
+    /**
+     * Forgets the addresses not found (for example after fixing a link): they are listed again only if requested again.
+     */
+    public function clearNotFoundAction(): Action
+    {
+        return Action::make('clearNotFound')
+            ->label(__('admin.stats.not_found.clear'))
+            ->icon(Heroicon::OutlinedTrash)
+            ->link()
+            ->color('gray')
+            ->size('sm')
+            ->requiresConfirmation()
+            ->modalDescription(__('admin.stats.not_found.clear_help'))
+            ->action(function (): void {
+                DB::table('stat_not_found')->delete();
+                Notification::make()->success()->title(__('admin.messages.saved'))->send();
+            });
+    }
+
+    public function exclusionsAction(): Action
+    {
+        return Action::make('exclusions')
+            ->label(__('admin.stats.exclusions.title'))
+            ->icon(Heroicon::OutlinedUserMinus)
+            ->color('gray')
+            ->url(fn (): string => StatsExclusions::getUrl());
     }
 }

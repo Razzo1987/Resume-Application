@@ -152,7 +152,7 @@ return [
         'stats_title' => 'Statistiche delle visite',
         'stats' => 'Per sapere quante persone visitano il sito e quali pagine leggono, registro alcune informazioni su ogni visita: data e ora, pagina, sito di provenienza ed eventuali parametri di campagna (UTM), tipo di dispositivo, sistema operativo e browser.',
         'stats_zone' => 'Dall\'indirizzo IP ricavo anche la zona di provenienza (Paese, città approssimativa e rete), con un database installato sul server: l\'indirizzo non viene inviato a nessuno.',
-        'stats_ip' => 'L\'indirizzo IP non viene salvato per intero: viene accorciato subito (per esempio 93.44.12.x). Non uso cookie e non riconosco chi torna a visitare il sito.',
+        'stats_ip' => 'L\'indirizzo IP non viene salvato per intero: viene accorciato subito (per esempio 93.44.12.x). Non uso cookie. Per contare quante persone diverse visitano il sito e quante pagine leggono di seguito, dall\'indirizzo IP e dal browser calcolo un codice cifrato con una chiave casuale che cambia ogni giorno: serve solo a collegare le pagine viste nelle 24 ore, poi viene cancellato insieme alla chiave e chi torna dopo non viene riconosciuto.',
         'stats_basis' => 'Lo faccio per il legittimo interesse a capire come viene usato il sito. I dati di ogni visita vengono cancellati dopo :months mesi; restano solo i totali, come le visite di ogni giorno.',
         'stats_credit' => 'La zona di provenienza è ricavata con i dati GeoLite2 creati da MaxMind, disponibili su https://www.maxmind.com.',
         'contact_fallback' => 'i contatti indicati nel sito',

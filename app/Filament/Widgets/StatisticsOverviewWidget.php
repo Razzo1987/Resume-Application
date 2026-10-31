@@ -15,7 +15,7 @@ use Illuminate\Support\Number;
 use Locale;
 
 /**
- * Dashboard, Statistics group: visits and downloads of the last 7 days (with the trend and the comparison with the
+ * Dashboard, Statistics group: page views, visitors and downloads of the last 7 days (with the trend and the comparison with the
  * previous 7), most viewed page and top referrer of the last 30 days.
  */
 class StatisticsOverviewWidget extends StatsOverviewWidget
@@ -53,6 +53,7 @@ class StatisticsOverviewWidget extends StatsOverviewWidget
         $timeline = (new StatsQuery($today->copy()->subDays(13), $today))->timeline();
         $totals = $week->totals();
         $before = $previous->totals();
+        $kpis = $week->kpis();
         $topPage = array_key_first($month->pages(1));
         $topSource = array_key_first($month->top('referrer', 1));
         $topCountry = array_key_first($month->top('country', 1));
@@ -62,6 +63,9 @@ class StatisticsOverviewWidget extends StatsOverviewWidget
                 ->description($this->change($totals['views'], $before['views']))
                 ->color($totals['views'] >= $before['views'] ? 'success' : 'warning')
                 ->chart(array_map(floatval(...), $timeline['views']))
+                ->url($url.'?period=7'),
+            Stat::make(__('admin.dashboard.visitors_week'), Number::format($kpis['visitors']))
+                ->description(trans_choice('admin.dashboard.visits_week', (int) $kpis['sessions'], ['count' => Number::format((int) $kpis['sessions'])]))
                 ->url($url.'?period=7'),
             Stat::make(__('admin.dashboard.downloads_week'), Number::format($totals['downloads']))
                 ->description($this->change($totals['downloads'], $before['downloads']))

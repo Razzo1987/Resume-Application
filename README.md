@@ -63,10 +63,13 @@ can be imported (see [docs/INSTALL.md](docs/INSTALL.md#from-version-1)).
 - Permanent redirects when a slug or a URL word changes, plus your own redirects for old addresses.
 - **Privacy by default**: no cookies for visitors, no external requests, strict Content Security Policy; email and
   phone are encoded in the HTML; email, phone and birth date stay out of the structured data unless you enable them.
-- **Visit statistics without cookies** (optional): page views and CV downloads, sources and campaigns (UTM),
-  devices, browsers, countries and cities on a world map, with filters that add up (page, referring site, campaign,
-  country, device, IP...). The IP address is shortened straight away and located with the free MaxMind GeoLite2
-  databases installed on your server; bots and your own visits do not count. No cookie banner needed; a **Privacy page** (template in 9 languages, editable)
+- **Visit statistics without cookies** (optional): visitors, visits, duration and bounces, page views and CV
+  downloads, days and hours, entry and exit pages, channels (search, social, AI assistants...), sources and campaigns
+  (UTM), organizations, devices, systems and browsers with icons, countries and cities on a world map that zooms in
+  on a click, bots and AI crawlers, pages not found, with filters that add up (page, channel, referring site,
+  campaign, country, device, IP...). The IP address is shortened straight away and located with the free MaxMind
+  GeoLite2 databases installed on your server; a visitor is recognized for 24 hours at most, with a daily random key;
+  your own visits and the addresses you exclude do not count. No cookie banner needed; a **Privacy page** (template in 9 languages, editable)
   explains it to visitors.
 - HTML page cache cleared on every change, ETags, a reduced Bootstrap build and an SVG icon sprite with only the
   icons in use. Lighthouse 100 on the demo data, WCAG 2.1 AA checked with axe on the site and the admin pages.

@@ -74,34 +74,63 @@ the sign-in page, `RESUME_ADMIN_LOCALE` applies.
 
 - **What is recorded**, for every page view and CV download: date and time, page, language, referring site, campaign
   parameters (`utm_source`, `utm_medium`, `utm_campaign`, `utm_term`, `utm_content`), the platform of the click when
-  the address has a click ID (`fbclid` is stored as "facebook", the ID itself never), device, operating system,
-  browser, and from the IP address country, region, city and network (provider or company).
+  the address has a click ID (`fbclid` is stored as "facebook", the ID itself never), the channel (direct, search
+  engines, social networks, AI assistants, email, other sites, campaigns), device, operating system and browser with
+  their versions, and from the IP address country, region, city and network (provider or organization).
 - **What is not**: no cookies and nothing read from the device, so no cookie banner is needed. The IP address is
-  shortened straight away (`93.44.12.x`, IPv6 to the first 48 bits) and never stored in full. Bots, scripts (curl,
-  libraries), browser previews (prefetch) and the administrators' visits do not count.
-- **Your own visits** do not count in two ways: from the browser signed in to the admin (the admin session cookie is
-  only read, visitors never get one), whatever the address; and from the public address you use the admin from, for
-  14 days after your last access (change it in *Settings*; *Excluded IPs* lists and removes them), which also covers
-  your phone on the same network. With a shared address (office, mobile network) other people would be excluded too:
-  that is why the exclusion expires.
+  shortened straight away (`93.44.12.x`, IPv6 to the first 48 bits) and never stored in full. Browser previews
+  (prefetch) and the administrators' visits do not count; bots, crawlers and scripts are counted apart (see below).
+- **Visitors and visits, for 24 hours at most**: to count different people and the pages they view one after the
+  other, each page view stores two keyed hashes (HMAC-SHA256): one of the IP address and one of IP address + browser
+  (user agent). The key (salt) is random, created at the first visit of each day and kept for two days at most, never
+  derived from the app key. A page view joins a visitor only if that visitor was first seen less than 24 hours ago,
+  and the same visit (session) if the previous page was less than 30 minutes ago. After 24 hours the hashes are
+  removed from the visits (by the visits themselves at most once an hour, so it works without the cron job too):
+  what remains are random visitor and visit codes that say nothing about the address. Nobody is recognized after 24
+  hours: over several days, *Visitors* is the sum of the days. The duration of a visit goes from its first to its last
+  page (the time on the last page cannot be known without a script in the browser); visits of a single page are
+  bounces. Visits recorded before version 2.3 have no visitor and no visit: those numbers start from the update.
+- **Your own visits** do not count: from the browser signed in to the admin (the admin session cookie is only read,
+  visitors never get one), whatever the address; from the public address you use the admin from, for 14 days after
+  your last access (change it in *Settings*), which also covers your phone on the same network; and when you open the
+  admin, your visits of the last 24 hours from the same address and browser are deleted, for example those made just
+  before signing in.
+- **Exclusions** (button on the *Statistics* page): the addresses used for the admin are added by themselves
+  (*Admin (automatic)*, they expire); you can add an **IP address**, a **network** (the shortened address shown in the
+  visits, `93.44.12.x`, which includes other people too) or a **provider or organization** (ASN, for example a data
+  center or a monitoring service), or mark an address as **Always count** (an office network shared with other
+  people: it is no longer excluded when you use the admin from there). Adding an exclusion deletes the visits already
+  recorded, after showing how many: for an IP address those of the last 24 hours (the only ones that can still be
+  recognized), for a network or an ASN all those kept. Removing it starts the count again from that moment; deleted
+  visits do not come back. *Exclude the network* is also on every row of the latest visits.
+- **Bots and crawlers** (search engines, AI crawlers such as GPTBot or ClaudeBot, SEO crawlers, monitoring, social
+  previews, feed readers, scripts) are not visits: they are counted by name and day, without any address.
+- **Pages not found**: addresses of the site that do not exist, by path (without parameters), with how many requests
+  came from people, when the last one arrived and from which site; *Create redirect* turns one into a redirect.
+  Requests typical of automatic attacks (`wp-login.php`, `.env`...) are counted apart.
 - **Behind a proxy** (CDN, tunnel) the site must trust it to read the visitor's address: set `RESUME_TRUSTED_PROXIES`
   (see [Server settings](#server-settings-coreenv)), otherwise every visitor gets the proxy's address. Some proxies do
   not pass the visitor's address at all: GitHub Codespaces port forwarding gives everybody the same private address.
   Private and local addresses (10.x, 192.168.x, 127.0.0.1...) are never excluded as admin IPs, so visits are still
   counted there, without country, city and network; the *Statistics* page says so when it happens.
-- **How long**: single visits are deleted after 12 months (configurable); the daily totals per page stay, so the
-  charts keep working for older periods.
+- **How long**: single visits, bot counts and pages not found are deleted after 12 months (configurable); the daily
+  totals (pages, visitors, visits, channels, countries...) stay, so the charts keep working for older periods.
 - **Location**: the free MaxMind GeoLite2 City and ASN databases, installed on the server (the IP address is not sent
   to anyone). Create a free account at [maxmind.com](https://www.maxmind.com/en/geolite2/signup), generate a license
   key, then *MaxMind account* on the *Statistics* page (or `RESUME_GEOIP_ACCOUNT_ID` and
   `RESUME_GEOIP_LICENSE_KEY` in `core/.env`). *Update the databases* downloads them; with the cron job they are
   checked every day and updated by themselves, as the GeoLite terms ask. Without the databases everything works
   except country, city, network and the map.
-- **The page**: totals, visits over time, most viewed pages, referring sites, campaigns, languages, a world map with
-  countries and cities, networks, devices, systems, browsers, shortened IP addresses, and the list of the latest
-  visits.
-- **Filters**: period and page (for example a single blog article), and under *More filters* referring site, UTM
-  source, medium and campaign, platform click, country, city, network, device, system, browser, language and
+- **The page**: visitors, visits, page views, pages per visit, average duration, bounce rate, CV downloads and
+  countries (for a single page: visitors, entrances and exits); visits over time; days and hours (a grid of the
+  week); most viewed, entry and exit pages; channels, referring sites, campaigns, languages; a world map with
+  countries and cities (a click on a country zooms in and shows only its visits, then a click on a city; *World*
+  goes back); organizations (companies, universities and public bodies with their own network) apart from
+  connection providers and data centers, with *is a provider* / *is an organization* to correct the built-in lists;
+  devices, systems and browsers with their versions and icons (Tabler Icons, MIT); shortened IP addresses; bots and
+  crawlers; pages not found; the list of the latest visits.
+- **Filters**: period and page (for example a single blog article), and under *More filters* channel, referring
+  site, UTM source, medium and campaign, platform click, country, city, network, device, system, browser, language and
   shortened IP address. Filters add up (for example: the pages seen from one campaign, or everything one address
   looked at), and a click on an entry of a ranking or on an IP address in the latest visits sets it. The filters are
   in the page address, so a filtered view can be bookmarked. With filters other than period and page the data comes
@@ -243,7 +272,8 @@ to the next request (if they do not, *System* → *Tools* → *Clear caches*).
   (Google Authenticator, 1Password...) and recovery codes.
 - `core/` is denied to browsers by `.htaccess`; the dashboard warns you if the server does not apply it.
 - Uploaded images are resized and converted to WebP; CV PDFs are stored outside the web root.
-- Visit statistics (off by default) use no cookies and store the IP address only shortened; see [Statistics](#statistics).
+- Visit statistics (off by default) use no cookies, store the IP address only shortened and recognize a visitor for
+  24 hours at most; see [Statistics](#statistics).
 - Content exports contain no users, passwords, `.env`, GitHub token, MaxMind account or statistics.
 
 ## Backups
