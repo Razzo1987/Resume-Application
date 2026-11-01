@@ -55,12 +55,14 @@ it('opens an article only in the languages it is written in', function () {
 });
 
 it('hides drafts and scheduled articles until their time', function () {
-    $scheduled = article(['it-IT' => 'In arrivo'], ['published_at' => Carbon::parse('2026-11-01 09:00')]);
-    Carbon::setTestNow('2026-10-31 12:00');
+    // in the future of the demo data (its articles are published "yesterday" from the real date)
+    $at = now()->addDays(2)->setTime(9, 0);
+    $scheduled = article(['it-IT' => 'In arrivo'], ['published_at' => $at]);
+    Carbon::setTestNow($at->copy()->subHours(21));
 
     $this->get('/it-IT/blog/in-arrivo')->assertNotFound();
 
-    Carbon::setTestNow('2026-11-01 09:00');
+    Carbon::setTestNow($at);
     app()->forgetScopedInstances();
 
     $this->get('/it-IT/blog/in-arrivo')->assertOk();
@@ -68,11 +70,14 @@ it('hides drafts and scheduled articles until their time', function () {
 });
 
 it('keeps cached pages only until the next scheduled publication', function () {
-    Carbon::setTestNow('2026-10-31 12:00');
-    article(['it-IT' => 'In arrivo'], ['published_at' => Carbon::parse('2026-10-31 13:00')]);
+    // a fixed date would fail once the real date passes it: the demo articles are published "yesterday" from the
+    // real date, so they would become the next scheduled ones
+    $now = now()->addDays(2)->setTime(12, 0);
+    Carbon::setTestNow($now);
+    article(['it-IT' => 'In arrivo'], ['published_at' => $now->copy()->addHour()]);
 
     expect(app(PageCache::class)->ttl())->toBe(3600)
-        ->and(app(Blog::class)->nextScheduledAt()?->toDateTimeString())->toBe('2026-10-31 13:00:00');
+        ->and(app(Blog::class)->nextScheduledAt()?->toDateTimeString())->toBe($now->copy()->addHour()->toDateTimeString());
 });
 
 it('publishes immediately when no date is set', function () {

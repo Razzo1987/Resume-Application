@@ -476,7 +476,8 @@ it('deletes the selected visits and recalculates the totals of their days', func
 // --- Visitors and sessions (24 hours, no cookies) ----------------------------------------------------------
 
 it('recognizes the same visitor for 24 hours at most, with sessions of 30 minutes, also across midnight', function () {
-    $this->travelTo(Carbon\Carbon::parse('2026-11-02 23:40:00', 'Europe/Rome'));
+    $start = Carbon\Carbon::now('Europe/Rome')->addDays(2)->setTime(23, 40);
+    $this->travelTo($start);
     pageView('/it-IT');
     $this->travel(10)->minutes();
     pageView('/it-IT/blog');                                   // same session
@@ -492,12 +493,12 @@ it('recognizes the same visitor for 24 hours at most, with sessions of 30 minute
         ->and($visits->take(3)->pluck('session_id')->unique())->toHaveCount(1)
         ->and($visits[3]->session_id)->not->toBe($visits[2]->session_id)
         ->and($visits[4]->visitor_id)->not->toBe($visits[0]->visitor_id)
-        ->and($visits[2]->day->toDateString())->toBe('2026-11-03')
+        ->and($visits[2]->day->toDateString())->toBe($start->copy()->addDay()->toDateString())
         ->and(DB::table('stat_salts')->count())->toBe(2)
         ->and($visits->pluck('visitor_hash')->filter()->every(fn (string $hash): bool => ! str_contains($hash, '93.44')))->toBeTrue();
 
     // 25 hours after the first visit: nobody is recognized any more
-    $this->travelTo(Carbon\Carbon::parse('2026-11-04 00:45:00', 'Europe/Rome'));
+    $this->travelTo($start->copy()->addHours(25));
     pageView('/it-IT');
 
     expect(StatVisit::query()->latest('id')->first()->visitor_id)->not->toBe($visits[0]->visitor_id);
@@ -561,7 +562,7 @@ it('tells the channel of a visit', function (?string $referrer, ?string $utm, ?s
 ]);
 
 it('shows the days and hours of the visits in the time zone of the site', function () {
-    $this->travelTo(Carbon\Carbon::parse('2026-11-04 09:30:00', 'Europe/Rome')); // a Wednesday
+    $this->travelTo(Carbon\Carbon::now('Europe/Rome')->addWeek()->startOfWeek()->addDays(2)->setTime(9, 30)); // a Wednesday
     pageView('/it-IT');
     pageView('/it-IT/blog', ['REMOTE_ADDR' => '81.2.69.160']);
     app(Aggregator::class)->aggregate(StatsQuery::today());
