@@ -1,0 +1,35 @@
+# Weekly dependency updates, grouped to keep the pull requests few.
+# Cooldown: new versions are proposed only after some days, so a compromised release is usually caught (and
+# withdrawn) before it reaches this repository. Security updates are not delayed.
+version: 2
+updates:
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+    cooldown:
+      default-days: 7
+    groups:
+      actions:
+        patterns: ['*']
+
+  - package-ecosystem: composer
+    directory: /
+    schedule:
+      interval: weekly
+    cooldown:
+      default-days: 7
+    versioning-strategy: lockfile-only
+    groups:
+      composer:
+        update-types: [minor, patch]
+
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: weekly
+    cooldown:
+      default-days: 7
+    groups:
+      npm:
+        update-types: [minor, patch]

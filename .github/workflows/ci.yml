@@ -4,11 +4,92 @@ on:
   push:
     branches: [main]
   pull_request:
+  # The Release workflow runs the same checks before building a package
+  workflow_call:
+    secrets:
+      PRIVACY_PATTERNS:
+        required: false
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
+  security:
+    name: Secrets, privacy and dependencies
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      GITLEAKS_VERSION: 8.30.1
+      GITLEAKS_SHA256: 551f6fc83ea457d62a0d98237cbad105af8d557003051f41f3e7ca7b3f2470eb
+    steps:
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
+        with:
+          fetch-depth: 0 # gitleaks scans the whole history
+          persist-credentials: false
+      - uses: shivammathur/setup-php@eb7c497e18156a6bbabfef1d3a82760b9eda3962 # 2.40.0
+        with:
+          php-version: '8.4'
+          coverage: none
+          tools: composer
+      - uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444 # v5.0.0
+        with:
+          node-version: 22
+          package-manager-cache: false
+      - name: Secrets in the repository and its history (gitleaks)
+        run: |
+          curl -sSfL -o gitleaks.tgz "https://github.com/gitleaks/gitleaks/releases/download/v${GITLEAKS_VERSION}/gitleaks_${GITLEAKS_VERSION}_linux_x64.tar.gz"
+          echo "${GITLEAKS_SHA256}  gitleaks.tgz" | sha256sum -c -
+          tar -xzf gitleaks.tgz gitleaks && rm gitleaks.tgz
+          ./gitleaks git --no-banner --redact --exit-code 1 .
+          rm gitleaks
+      - name: Personal data and private code (privacy guard)
+        env:
+          # Maintainer's personal data and private names, one extended regex per line (repository secret, never in
+          # the code). Missing on pull requests from forks: the generic rules still run.
+          PRIVACY_PATTERNS: ${{ secrets.PRIVACY_PATTERNS }}
+        run: bash scripts/check-privacy.sh
+      - name: Composer files are valid and in sync
+        run: composer validate --strict --no-check-publish
+      - name: PHP dependencies without known vulnerabilities
+        run: composer audit --locked --no-interaction
+      - name: npm lockfile only from the npm registry, over HTTPS
+        run: node scripts/check-lockfile.mjs package-lock.json
+      - name: npm dependencies without high or critical vulnerabilities
+        run: npm audit --audit-level=high
+
+  workflows:
+    name: Workflow lint
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      ACTIONLINT_VERSION: 1.7.12
+      ACTIONLINT_SHA256: 8aca8db96f1b94770f1b0d72b6dddcb1ebb8123cb3712530b08cc387b349a3d8
+    steps:
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
+        with:
+          persist-credentials: false
+      - name: actionlint
+        run: |
+          curl -sSfL -o actionlint.tgz "https://github.com/rhysd/actionlint/releases/download/v${ACTIONLINT_VERSION}/actionlint_${ACTIONLINT_VERSION}_linux_amd64.tar.gz"
+          echo "${ACTIONLINT_SHA256}  actionlint.tgz" | sha256sum -c -
+          tar -xzf actionlint.tgz actionlint && rm actionlint.tgz
+          ./actionlint -color
+          rm actionlint
+      - name: zizmor (security of the workflows)
+        uses: zizmorcore/zizmor-action@53290badfa369cb0bf7ad16342cb62c2fa47ac7b # v0.8.0
+        with:
+          version: 1.31.1
+          advanced-security: false
+          persona: regular
+
   php:
     name: PHP ${{ matrix.php }}
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     strategy:
       fail-fast: false
       matrix:
@@ -30,13 +111,15 @@ jobs:
       DB_USERNAME: root
       DB_PASSWORD: root
     steps:
-      - uses: actions/checkout@v5
-      - uses: shivammathur/setup-php@v2
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
+        with:
+          persist-credentials: false
+      - uses: shivammathur/setup-php@eb7c497e18156a6bbabfef1d3a82760b9eda3962 # 2.40.0
         with:
           php-version: ${{ matrix.php }}
           extensions: intl, mbstring, pdo_mysql, gd, zip, bcmath, fileinfo, sodium
           coverage: none
-      - uses: actions/setup-node@v5
+      - uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444 # v5.0.0
         with:
           node-version: 22
           cache: npm
@@ -50,6 +133,7 @@ jobs:
   e2e:
     name: E2E (Chromium, Firefox, WebKit)
     runs-on: ubuntu-latest
+    timeout-minutes: 45
     services:
       mysql:
         image: mysql:8.0
@@ -71,13 +155,15 @@ jobs:
       RESUME_ADMIN_LOCALE: en
       CI: true
     steps:
-      - uses: actions/checkout@v5
-      - uses: shivammathur/setup-php@v2
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
+        with:
+          persist-credentials: false
+      - uses: shivammathur/setup-php@eb7c497e18156a6bbabfef1d3a82760b9eda3962 # 2.40.0
         with:
           php-version: '8.5'
           extensions: intl, mbstring, pdo_mysql, gd, zip, bcmath, fileinfo, sodium
           coverage: none
-      - uses: actions/setup-node@v5
+      - uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444 # v5.0.0
         with:
           node-version: 22
           cache: npm
@@ -93,7 +179,7 @@ jobs:
       - run: npx playwright install --with-deps chromium firefox webkit
       - run: npx playwright test
       - name: Traces of the failed tests
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         if: failure()
         with:
           name: playwright-results
@@ -105,14 +191,14 @@ jobs:
           php artisan db:seed --class=DemoStatsSeeder --force
           SCREENSHOTS=1 npx playwright test screenshots --project=chromium --reporter=list
       - name: Test report (HTML)
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         if: always()
         with:
           name: playwright-report
           path: playwright-report/
           retention-days: 30
       - name: Screenshots
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         if: always()
         with:
           name: screenshots
