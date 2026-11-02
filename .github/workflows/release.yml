@@ -97,7 +97,8 @@ jobs:
             found { print }
           ' CHANGELOG.md > dist/RELEASE_NOTES.md
           test -s dist/RELEASE_NOTES.md
-          printf '\n---\nSHA-256 of the package: `%s`\n' "$(cut -d' ' -f1 dist/*.zip.sha256)" >> dist/RELEASE_NOTES.md
+          sha256="$(cut -d' ' -f1 dist/*.zip.sha256)"
+          printf '\n---\nSHA-256 of the package: %s\n' "\`${sha256}\`" >> dist/RELEASE_NOTES.md
       - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: release
