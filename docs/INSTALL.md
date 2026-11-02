@@ -75,15 +75,19 @@ If your hosting lets you keep files outside the web root, you can move `core/` t
 3. **Upload** — with the file manager of the panel (or FTP) upload the zip to the web root (`public_html`,
    `httpdocs`... depending on the hosting) and extract it there. Remove any old site files first (keep a copy): only
    the `.htaccess` lines added by the panel may stay.
-4. **Install** — open `https://your-domain/install`. If the address does not work yet, open
+4. **Install** — do it right after the upload: until the installation is done, anybody who opens the address
+   could start it. Open `https://your-domain/install`. If the address does not work yet, open
    `https://your-domain/index.php/install` (the `.htaccess` rules are written at the end of the installation).
    Fill in the form:
    - site address, your name, main language and other languages;
-   - database: server `localhost`, port `3306`, the database name and user created in step 1;
+   - database: server `localhost`, port `3306`, the database name and user created in step 1 (with a database on
+     another server the installer also asks for the **installation key**: open the file `core/storage/install-key.txt`
+     with the file manager and copy it);
    - administrator email and password, and the path of the admin area (anything but `admin` is a good idea);
    - HTTPS and "without www" redirects (turn on HTTPS only once the certificate works).
 5. Done. The installer creates the tables, the administrator, `core/.env` (permissions `0600`), the `uploads/`
-   folder and the managed block in `public_html/.htaccess`. From now on `/install` answers 404.
+   folder with its own `.htaccess` and the managed block in `public_html/.htaccess`. From now on `/install` answers
+   404 and the installation key is deleted.
 
 ### Where to find it in the control panel
 
@@ -117,6 +121,7 @@ Then, in the admin area (`https://your-domain/<admin path>`):
 | Main language, other languages | the site languages; more can be added later from the admin |
 | Sample CV | loads the "John Doe" demo content, useful to see how everything works |
 | Database | server (almost always `localhost` on shared hosting), port (`3306`), database name, user, password |
+| Installation key | only with a database that is not on `localhost`: the content of `core/storage/install-key.txt` |
 | Administrator | email and password (at least 10 characters) |
 | Admin path | the address of the admin area (`/admin` by default: a less obvious one keeps bots away) |
 | HTTPS, without www | permanent redirects; turn on HTTPS only when the certificate already works |
@@ -128,6 +133,9 @@ The installer speaks Italian or English, following the browser language; the adm
 
 - Before writing anything it requests `https://your-domain/core/VERSION`: if the file can be downloaded, the server
   is not applying `.htaccess` files and the installation stops (application files and `.env` would be exposed).
+- With a database on another server, the **installation key** proves that whoever fills in the form can open the
+  files of the hosting account: without it somebody could finish the installation with a database of their own and
+  become the administrator of the site. With `localhost` the database credentials already prove it.
 - An existing Resume App database is **kept**: content stays as it is, and the administrator with the given email
   gets the new password (two-factor authentication must be turned on again). This is the way to recover a
   lost `.env` or a lost password.
@@ -145,7 +153,8 @@ Admin → *System* → **Updates**:
   at most every 12 hours when the dashboard is opened; it shows "Version x.y.z is available" with its release notes
   and emails the administrators; *Check now* checks immediately;
 - **Download and install** fetches the package straight from GitHub to the server, in 8 MB chunks, and verifies the
-  SHA-256 published with the release; **Upload a package** sends a zip from your computer in 1 MB chunks, so the
+  SHA-256 published with the release (a release without its `.sha256` file is not downloaded at all; the same
+  applies to theme updates); **Upload a package** sends a zip from your computer in 1 MB chunks, so the
   hosting upload limit does not matter; a zip copied into `core/storage/app/private/updates/packages` with the File
   Manager is listed too;
 - before starting, the package is checked: it is a Resume App package, not older than the installed version, the
@@ -246,6 +255,10 @@ Resume App writes only its own block, between `# BEGIN resume-app` and `# END re
 - removes trailing slashes and routes everything else to `index.php`;
 - sets one-year immutable caching for compiled theme assets and uploaded images, and compression for text files.
 
+The `uploads/` folder has its own `.htaccess` (template `core/stubs/uploads.htaccess`), written by the installer, by
+every update and after a content import: it serves only images and PDFs and never lets the server run a file of that
+folder as code. Changes made to it by hand are overwritten.
+
 The block can be rewritten from *System* → *Tools* → *.htaccess rules* (for example to turn on HTTPS later).
 The template is `htaccess.dist`.
 
@@ -261,6 +274,7 @@ index index.php;
 
 location ~ ^/(core|core-path\.php)(/|$) { deny all; return 404; }
 location ~ /\.(?!well-known) { deny all; return 404; }
+location ~* ^/uploads/.*(?<!\.jpg|\.jpeg|\.png|\.gif|\.webp|\.avif|\.ico|\.pdf)$ { deny all; return 404; }
 location / { try_files $uri /index.php?$query_string; }
 location ~ \.php$ { include fastcgi_params; fastcgi_param SCRIPT_FILENAME $realpath_root$fastcgi_script_name; fastcgi_pass unix:/run/php/php8.4-fpm.sock; }
 ```

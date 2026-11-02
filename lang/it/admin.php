@@ -416,6 +416,9 @@ return [
             'auto_update_installed_help' => 'Il cron ha installato una versione di correzione. Novità e dettagli nella pagina',
             'auto_update_failed' => 'Aggiornamento automatico alla versione :version non riuscito',
             'auto_update_failed_help' => 'Il sito è rimasto alla versione precedente o l\'aggiornamento è da completare: controlla la pagina',
+            'mfa_off' => 'La verifica in due passaggi non è attiva',
+            'mfa_off_help' => 'Chi entra nell\'admin controlla tutto il sito e il server: può installare temi e aggiornamenti, che contengono codice. Con la verifica in due passaggi una password rubata, indovinata o riusata da un altro sito non basta: serve anche il codice a sei cifre dell\'app sul telefono (Google Authenticator, Microsoft Authenticator, 1Password...). Si attiva in un minuto e i codici di recupero permettono di entrare anche se perdi il telefono.',
+            'mfa_off_link' => 'Attivala nel profilo',
         ],
     ],
 
@@ -539,6 +542,7 @@ return [
             'no_version' => 'L\'ultima release non ha un numero di versione valido (tag vX.Y.Z).',
             'no_release' => 'Nessuna nuova versione da scaricare.',
             'no_package' => 'La release :version non contiene il pacchetto resume-app-:version.zip.',
+            'checksum_none' => 'La release :version non ha il file SHA-256 (.sha256): il pacchetto non viene scaricato, perché non si potrebbe controllare.',
             'checksum_missing' => 'Non riesco a leggere lo SHA-256 della release.',
             'checksum_mismatch' => 'Il pacchetto scaricato non corrisponde allo SHA-256 della release: è stato cancellato, riprova.',
             'upload_invalid' => 'Caricamento non valido: scegli il file zip del pacchetto.',

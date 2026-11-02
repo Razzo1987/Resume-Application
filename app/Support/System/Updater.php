@@ -67,6 +67,9 @@ class Updater
             $log[] = '.htaccess: ok';
         }
 
+        app(UploadsGuard::class)->write();
+        $log[] = 'uploads/.htaccess: ok';
+
         $this->settings->set(self::VERSION_KEY, $this->codeVersion());
         $log[] = 'version: '.$this->codeVersion();
 

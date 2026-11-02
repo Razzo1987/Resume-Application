@@ -54,3 +54,15 @@ it('does not serve pages cached before an update of the theme assets', function 
 
     expect($other->key('http://localhost/it-IT'))->not->toBe($key);
 });
+
+it('caches in production only the pages of the APP_URL domain', function () {
+    config(['app.url' => 'http://localhost']);
+    app()->detectEnvironment(fn (): string => 'production');
+
+    try {
+        $this->get('http://invented.example/it-IT')->assertOk()->assertHeaderMissing('X-Page-Cache');
+        $this->get('http://localhost/it-IT')->assertHeader('X-Page-Cache', 'MISS');
+    } finally {
+        app()->detectEnvironment(fn (): string => 'testing');
+    }
+});

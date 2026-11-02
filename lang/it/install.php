@@ -25,6 +25,7 @@ return [
         'db_database' => 'Nome del database',
         'db_username' => 'Utente',
         'db_password' => 'Password',
+        'install_key' => 'Chiave di installazione (solo se il server non è localhost)',
         'email' => 'Email per l\'accesso',
         'password' => 'Password (almeno 10 caratteri)',
         'password_confirmation' => 'Ripeti la password',
@@ -36,6 +37,7 @@ return [
     'help' => [
         'url' => 'Indirizzo completo, senza slash finale (es. https://mario.rossi.it).',
         'database' => 'Sugli hosting condivisi il server è quasi sempre "localhost"; spesso nome del database e utente hanno davanti il nome dell\'account (es. utente_resume).',
+        'install_key' => 'Con il database su un altro server serve anche questa chiave, che conferma che sei il titolare dell\'hosting: la trovi nel file :path (aprilo dal file manager del pannello dell\'hosting). Con "localhost" lascia il campo vuoto.',
         'admin_path' => 'Solo lettere minuscole, numeri e trattini. Un percorso diverso da "admin" rende l\'area meno esposta ai tentativi automatici.',
         'addresses' => 'Le regole vengono scritte nel file .htaccess, in un blocco separato: le righe aggiunte dal pannello dell\'hosting restano intatte.',
     ],
@@ -45,6 +47,7 @@ return [
         'core_exposed' => 'La cartella "core" è raggiungibile dal browser: il server non applica i file .htaccess. Non è sicuro continuare: chiedi all\'hosting di attivare AllowOverride (Apache) o di bloccare la cartella core.',
         'database_connection' => 'Connessione al database non riuscita: :message',
         'database_setup' => 'Errore durante la preparazione del database: :message',
+        'install_key' => 'Il database non è su questo server: scrivi la chiave di installazione che trovi nel file :path.',
     ],
 
     'done' => [

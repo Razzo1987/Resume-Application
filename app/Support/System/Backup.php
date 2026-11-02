@@ -57,6 +57,11 @@ class Backup
         $zip->addFromString('database.json', (string) json_encode($data, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES));
 
         foreach (Storage::disk('uploads')->allFiles() as $file) {
+            // Not the .htaccess of the folder (or other hidden files): only the content
+            if (str_starts_with(basename($file), '.')) {
+                continue;
+            }
+
             $zip->addFile(Storage::disk('uploads')->path($file), 'uploads/'.$file);
         }
 
@@ -169,6 +174,17 @@ class Backup
                     throw new RuntimeException((string) __('admin.system.restore_errors.unexpected_file', ['file' => $name]));
                 }
 
+                // Hidden files (e.g. an .htaccess copied by hand) are not content
+                if (str_starts_with(basename($name), '.')) {
+                    continue;
+                }
+
+                // Only images and PDFs: uploads/ is in the web root and a file there must never run as code
+                if (! UploadsGuard::allows($name)
+                    || (str_starts_with($name, CvDocument::DIRECTORY.'/') && strtolower(pathinfo($name, PATHINFO_EXTENSION)) !== 'pdf')) {
+                    throw new RuntimeException((string) __('admin.system.restore_errors.unexpected_file', ['file' => $name]));
+                }
+
                 $files[$index] = $name;
             }
 
@@ -233,6 +249,7 @@ class Backup
         }
 
         app(PageCache::class)->flush();
+        app(UploadsGuard::class)->write();
 
         return ['tables' => count(array_diff(array_keys($tables), ['migrations'])), 'rows' => $rows, 'files' => count($files), 'backup' => basename($safety)];
     }

@@ -357,6 +357,20 @@ it('deletes a download that does not match the published SHA-256', function () {
         ->and(app(UpdateStorage::class)->packages())->toBe([]);
 });
 
+it('refuses to download a release without its SHA-256 file', function () {
+    $data = githubRelease(UPDATES_FIX);
+    $data['assets'] = [$data['assets'][0]];
+    $release = Release::fromGitHub($data);
+
+    Http::fake(fn () => Http::response('0123456789', 206));
+
+    expect(fn () => (new ReleaseDownloader(app(UpdateStorage::class), app(ReleaseChecker::class)))->next($release))
+        ->toThrow(RuntimeException::class, 'SHA-256');
+
+    Http::assertNothingSent();
+    expect(app(UpdateStorage::class)->packages())->toBe([]);
+});
+
 it('assembles a package uploaded in chunks, only for administrators', function () {
     $url = fn (array $query): string => route('filament.admin.update-upload').'?'.http_build_query($query);
     $send = fn (array $query, string $body) => $this->call('POST', $url($query), [], [], [], ['CONTENT_TYPE' => 'application/octet-stream', 'HTTP_ACCEPT' => 'application/json'], $body);

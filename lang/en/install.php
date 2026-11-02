@@ -25,6 +25,7 @@ return [
         'db_database' => 'Database name',
         'db_username' => 'User',
         'db_password' => 'Password',
+        'install_key' => 'Installation key (only if the server is not localhost)',
         'email' => 'Login email',
         'password' => 'Password (at least 10 characters)',
         'password_confirmation' => 'Repeat the password',
@@ -36,6 +37,7 @@ return [
     'help' => [
         'url' => 'Full address, without trailing slash (e.g. https://jane.doe.com).',
         'database' => 'On shared hosting the server is almost always "localhost"; database and user names often start with the account name (e.g. account_resume).',
+        'install_key' => 'With the database on another server this key is needed too: it proves you own the hosting account. You find it in the file :path (open it from the file manager of the hosting control panel). With "localhost" leave it empty.',
         'admin_path' => 'Lowercase letters, numbers and hyphens only. A path other than "admin" makes the area less exposed to automated attempts.',
         'addresses' => 'The rules are written in the .htaccess file, in a separate block: lines added by the hosting control panel are left untouched.',
     ],
@@ -45,6 +47,7 @@ return [
         'core_exposed' => 'The "core" folder can be reached from the browser: the server does not apply .htaccess files. It is not safe to continue: ask your hosting provider to enable AllowOverride (Apache) or to block the core folder.',
         'database_connection' => 'Could not connect to the database: :message',
         'database_setup' => 'Error while preparing the database: :message',
+        'install_key' => 'The database is not on this server: enter the installation key you find in the file :path.',
     ],
 
     'done' => [

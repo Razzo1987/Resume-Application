@@ -275,6 +275,11 @@ class ThemeUpdates
         $release = $this->available()[$name] ?? throw new ThemeException((string) __('admin.themes.updates.errors.none'));
         $asset = $release->package ?? throw new ThemeException((string) __('admin.themes.updates.errors.no_package', ['version' => $release->version]));
 
+        // Without the SHA-256 published with the release the package is not downloaded at all
+        if ($release->checksum === null) {
+            throw new ThemeException((string) __('admin.updates.errors.checksum_none', ['version' => $release->version]));
+        }
+
         if ($asset['size'] > self::MAX_PACKAGE) {
             throw new ThemeException((string) __('admin.themes.errors.too_big'));
         }
@@ -291,13 +296,11 @@ class ThemeUpdates
 
             file_put_contents($file, $response->body());
 
-            if ($release->checksum !== null) {
-                $checksum = $this->fetch($release->checksum);
+            $checksum = $this->fetch($release->checksum);
 
-                if (! $checksum->successful() || preg_match('/^([a-f0-9]{64})\b/i', trim($checksum->body()), $match) !== 1
-                    || ! hash_equals(strtolower($match[1]), (string) hash_file('sha256', $file))) {
-                    throw new ThemeException((string) __('admin.updates.errors.checksum_mismatch'));
-                }
+            if (! $checksum->successful() || preg_match('/^([a-f0-9]{64})\b/i', trim($checksum->body()), $match) !== 1
+                || ! hash_equals(strtolower($match[1]), (string) hash_file('sha256', $file))) {
+                throw new ThemeException((string) __('admin.updates.errors.checksum_mismatch'));
             }
 
             $results = collect($this->installer->installAll($file));

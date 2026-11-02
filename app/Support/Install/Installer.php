@@ -13,6 +13,7 @@ use App\Support\Settings\Settings;
 use App\Support\System\CoreProbe;
 use App\Support\System\Htaccess;
 use App\Support\System\Updater;
+use App\Support\System\UploadsGuard;
 use Database\Seeders\DatabaseSeeder;
 use Database\Seeders\DemoSeeder;
 use Illuminate\Support\Facades\Artisan;
@@ -109,6 +110,7 @@ class Installer
 
         // 3) Files and folders in the web root
         File::ensureDirectoryExists(public_path('uploads'));
+        app(UploadsGuard::class)->write();
 
         if ($this->probe->isReleaseLayout()) {
             $this->htaccess->write($data['force_https'], $data['strip_www']);

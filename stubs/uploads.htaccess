@@ -1,0 +1,25 @@
+# Resume App - uploaded files (written by the installer and by every update: changes here are overwritten).
+# Only the file types the admin accepts are served; nothing in this folder is ever run as code or shown as a page.
+
+<IfModule mod_authz_core.c>
+    Require all denied
+    <FilesMatch "\.(?i:jpe?g|png|gif|webp|avif|ico|pdf)$">
+        Require all granted
+    </FilesMatch>
+</IfModule>
+<IfModule !mod_authz_core.c>
+    Order deny,allow
+    Deny from all
+    <FilesMatch "\.(?i:jpe?g|png|gif|webp|avif|ico|pdf)$">
+        Order allow,deny
+        Allow from all
+    </FilesMatch>
+</IfModule>
+
+<IfModule mod_headers.c>
+    Header always set X-Content-Type-Options "nosniff"
+    # An image opened directly cannot run scripts (not for PDFs: browsers do not show them in a sandbox)
+    <FilesMatch "\.(?i:jpe?g|png|gif|webp|avif|ico)$">
+        Header always set Content-Security-Policy "default-src 'none'; img-src 'self'; style-src 'unsafe-inline'; sandbox"
+    </FilesMatch>
+</IfModule>

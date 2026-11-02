@@ -36,6 +36,11 @@ class ReleaseDownloader
     public function next(Release $release): array
     {
         $asset = $release->package ?? throw new RuntimeException((string) __('admin.updates.errors.no_package', ['version' => $release->version]));
+
+        // Without the SHA-256 published with the release the package is not downloaded at all
+        if ($release->checksum === null) {
+            throw new RuntimeException((string) __('admin.updates.errors.checksum_none', ['version' => $release->version]));
+        }
         $final = $this->storage->packagesDirectory().'/'.$release->packageName();
         $part = $final.'.part';
         $total = $asset['size'];
@@ -81,12 +86,14 @@ class ReleaseDownloader
     }
 
     /**
-     * The zip must match the SHA-256 published with the release (if there is one).
+     * The zip must match the SHA-256 published with the release (always required).
      */
     private function verify(Release $release, string $file): void
     {
         if ($release->checksum === null) {
-            return;
+            File::delete($file);
+
+            throw new RuntimeException((string) __('admin.updates.errors.checksum_none', ['version' => $release->version]));
         }
 
         $response = $this->fetch($release->checksum);

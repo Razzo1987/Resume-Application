@@ -10,6 +10,7 @@ use App\Support\System\Backup;
 use App\Support\System\Maintenance;
 use App\Support\System\OrphanFiles;
 use App\Support\System\Updater;
+use App\Support\System\UploadsGuard;
 use Filament\Facades\Filament;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\File;
@@ -198,7 +199,63 @@ it('refuses exports that are not valid or come from a newer version', function (
     'newer schema' => [['database.json' => json_encode(['tables' => ['migrations' => [['migration' => '2099_01_01_000000_future']], 'experiences' => []]])]],
     'path traversal' => [['database.json' => json_encode(['tables' => []]), 'uploads/../../.env' => 'x']],
     'other folder' => [['database.json' => json_encode(['tables' => []]), 'core/app.php' => '<?php']],
+    'script in uploads' => [['database.json' => json_encode(['tables' => []]), 'uploads/logos/x.php' => '<?php']],
+    'page in uploads' => [['database.json' => json_encode(['tables' => []]), 'uploads/logos/x.html' => '<script></script>']],
+    'other type in uploads' => [['database.json' => json_encode(['tables' => []]), 'uploads/logos/x.pht' => '<?php']],
+    'CV that is not a PDF' => [['database.json' => json_encode(['tables' => []]), 'cv/x.php' => '<?php']],
 ]);
+
+it('never exports or restores hidden files of uploads, and protects the folder again after a restore', function () {
+    Storage::fake('uploads');
+    Storage::disk('uploads')->put('.htaccess', 'Require all granted');
+    Storage::disk('uploads')->put('logos/a.webp', 'image');
+
+    $export = app(Backup::class)->create();
+    $zip = new ZipArchive;
+    $zip->open($export);
+    $names = [];
+
+    for ($index = 0; $index < $zip->numFiles; $index++) {
+        $names[] = (string) $zip->getNameIndex($index);
+    }
+
+    // An older export with a hidden file: skipped, the rest is restored
+    $zip->addFromString('uploads/.htaccess', 'AddHandler application/x-httpd-php .webp');
+    $zip->close();
+
+    $guard = app(UploadsGuard::class)->useDirectory(sys_get_temp_dir().'/uploads-'.bin2hex(random_bytes(4)));
+    app()->instance(UploadsGuard::class, $guard);
+
+    $result = app(Backup::class)->restore($export);
+
+    expect($names)->toContain('uploads/logos/a.webp')->not->toContain('uploads/.htaccess')
+        ->and(Storage::disk('uploads')->exists('logos/a.webp'))->toBeTrue()
+        ->and(Storage::disk('uploads')->exists('.htaccess'))->toBeFalse()
+        ->and($guard->isInstalled())->toBeTrue();
+
+    @unlink($export);
+    @unlink(storage_path('app/private/backups/'.$result['backup']));
+    File::deleteDirectory($guard->directory());
+});
+
+it('allows only images and PDFs in uploads, never hidden files', function (string $name, bool $allowed) {
+    expect(UploadsGuard::allows($name))->toBe($allowed);
+})->with([
+    ['logos/a.webp', true], ['a.JPG', true], ['c/b.pdf', true], ['site/icon.png', true],
+    ['a.php', false], ['a.html', false], ['a.svg', false], ['a.pht', false], ['.htaccess', false], ['logos/.user.ini', false], ['a', false],
+]);
+
+it('writes the .htaccess of uploads, which serves only images and PDFs and never runs code', function () {
+    $guard = (new UploadsGuard)->useDirectory(sys_get_temp_dir().'/uploads-'.bin2hex(random_bytes(4)));
+
+    $guard->write();
+    $content = (string) file_get_contents($guard->path());
+
+    expect($guard->isInstalled())->toBeTrue()
+        ->and($content)->toContain('Require all denied')->toContain('jpe?g|png|gif|webp|avif|ico|pdf')->not->toContain('php');
+
+    File::deleteDirectory($guard->directory());
+});
 
 it('imports an export from the system page', function () {
     $export = app(Backup::class)->create();

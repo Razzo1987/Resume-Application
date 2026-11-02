@@ -21,7 +21,7 @@ class CacheSitePages
 
     public function handle(Request $request, Closure $next): Response
     {
-        if (! $request->isMethodSafe() || $request->getQueryString() !== null) {
+        if (! $request->isMethodSafe() || $request->getQueryString() !== null || ! $this->isSiteHost($request)) {
             return $next($request);
         }
 
@@ -56,6 +56,17 @@ class CacheSitePages
         $response->isNotModified($request);
 
         return $response;
+    }
+
+    /**
+     * In production only the requests for the domain of APP_URL are cached: the key contains the host, and requests
+     * with invented Host headers must not add files to the cache. They are still answered (links use APP_URL).
+     */
+    private function isSiteHost(Request $request): bool
+    {
+        $host = parse_url((string) config('app.url'), PHP_URL_HOST);
+
+        return ! app()->isProduction() || ! is_string($host) || $host === '' || strcasecmp($request->getHost(), $host) === 0;
     }
 
     private function isCacheableType(string $type): bool

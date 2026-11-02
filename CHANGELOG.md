@@ -2,6 +2,38 @@
 
 All notable changes to this project are documented here. The format follows [Keep a Changelog](https://keepachangelog.com/) and the project uses [Semantic Versioning](https://semver.org/).
 
+## [2.3.1] — 2026-11-02
+
+Security fixes. None of them can be used by a visitor: they all need an administrator (or a file an administrator is
+led to use), but they close the ways in which an action that does not look like "installing code" could become code.
+
+### Security
+- Images that cannot be converted (animated GIFs, unusual files) are saved with the extension of their real type,
+  never the one of the uploaded file name: an animated GIF called `x.html` could become a page of the site.
+- Importing a content export accepts only images and PDFs in `uploads/` and only PDFs among the CVs (no `.php`,
+  `.html` or other files in the web root); hidden files such as `.htaccess` are skipped, and exports no longer
+  contain them.
+- `uploads/` gets its own `.htaccess` (installer, every update, every import): only images and PDFs are served and
+  nothing in the folder can run as code. Example rule for nginx in docs/INSTALL.md.
+- Updates of the app and of the themes require the SHA-256 file published with the release: without it the package
+  is not downloaded.
+- Installer: with a database that is not on `localhost` it asks for an installation key, written in
+  `core/storage/install-key.txt` (only the owner of the hosting account can open it) and deleted at the end.
+- Admin pages: `X-Frame-Options`/`frame-ancestors` (never inside a frame of another site), `nosniff`,
+  `Referrer-Policy`, `Permissions-Policy`, HSTS on HTTPS.
+- Page cache: in production only the pages of the `APP_URL` domain are cached (requests with invented host names no
+  longer add files).
+- Pages not found: at most 5,000 different paths are kept, so a scanner cannot fill the database.
+- Dashboard: a reminder to turn on two-step verification, as long as it is off, explaining why it matters.
+- symfony/mime 8.1.10 (CVE-2026-45070).
+
+### Added
+- SECURITY.md: supported versions, private reporting, threat model.
+- CI: secrets (gitleaks), privacy guard, `composer audit`, `npm audit`, npm lockfile check, actionlint and zizmor;
+  actions pinned to a commit SHA, read-only token. Release: signed tag on `main`, the whole CI before building,
+  build and publication in separate jobs, provenance attestation, release published only when complete.
+  Dependabot for actions, Composer and npm.
+
 ## [2.3.0] — 2026-10-31
 
 ### Added

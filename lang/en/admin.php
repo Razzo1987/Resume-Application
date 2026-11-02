@@ -416,6 +416,9 @@ return [
             'auto_update_installed_help' => 'The cron job installed a fix release. What changed and details on the page',
             'auto_update_failed' => 'Automatic update to version :version failed',
             'auto_update_failed_help' => 'The site kept the previous version or the update still has to be completed: check the page',
+            'mfa_off' => 'Two-step verification is off',
+            'mfa_off_help' => 'Whoever signs in to the admin controls the whole site and the server: they can install themes and updates, which contain code. With two-step verification a password that was stolen, guessed or reused from another site is not enough: the six-digit code of the app on your phone is needed too (Google Authenticator, Microsoft Authenticator, 1Password...). It takes a minute to turn on, and the recovery codes let you in even if you lose your phone.',
+            'mfa_off_link' => 'Turn it on in your profile',
         ],
     ],
 
@@ -539,6 +542,7 @@ return [
             'no_version' => 'The latest release has no valid version number (tag vX.Y.Z).',
             'no_release' => 'No new version to download.',
             'no_package' => 'Release :version does not contain the resume-app-:version.zip package.',
+            'checksum_none' => 'The release :version has no SHA-256 file (.sha256): the package is not downloaded, because it could not be checked.',
             'checksum_missing' => 'The SHA-256 of the release cannot be read.',
             'checksum_mismatch' => 'The downloaded package does not match the SHA-256 of the release: it was deleted, please try again.',
             'upload_invalid' => 'Invalid upload: choose the zip file of the package.',

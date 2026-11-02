@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Filament\Widgets;
 
+use App\Models\User;
 use App\Support\System\SystemStatus;
 use App\Support\Update\AutoUpdate;
 use App\Support\Update\ReleaseChecker;
@@ -28,7 +29,25 @@ class SystemAlertsWidget extends Widget
     // cron or, when there is no cron, by the admin after the response is sent.
     public static function canView(): bool
     {
-        return app(SystemStatus::class)->alerts() !== [];
+        return self::alerts() !== [];
+    }
+
+    /**
+     * Alerts of the site, plus the two-step verification of the signed-in administrator when it is off: the admin
+     * controls the whole server (themes and updates contain code), so a stolen password alone is enough without it.
+     *
+     * @return array<string, string>
+     */
+    public static function alerts(): array
+    {
+        $alerts = app(SystemStatus::class)->alerts();
+        $user = auth()->user();
+
+        if ($user instanceof User && blank($user->getAttributes()['app_authentication_secret'] ?? null)) {
+            $alerts['mfa_off'] = 'warning';
+        }
+
+        return $alerts;
     }
 
     /**
@@ -39,7 +58,7 @@ class SystemAlertsWidget extends Widget
         $event = app(AutoUpdate::class)->lastEvent();
 
         return [
-            'alerts' => app(SystemStatus::class)->alerts(),
+            'alerts' => self::alerts(),
             'params' => [
                 'update_available' => ['version' => app(ReleaseChecker::class)->available()->version ?? ''],
                 'update_downloaded' => ['version' => app(ReleaseChecker::class)->available()->version ?? ''],

@@ -7,6 +7,7 @@ namespace App\Http\Controllers\Install;
 use App\Http\Controllers\Controller;
 use App\Support\Install\Installer;
 use App\Support\Install\InstallException;
+use App\Support\Install\InstallKey;
 use App\Support\Install\InstallState;
 use App\Support\Install\Requirements;
 use App\Support\Languages\LanguagePacks;
@@ -29,6 +30,7 @@ class InstallController extends Controller
         private readonly InstallState $state,
         private readonly Requirements $requirements,
         private readonly LanguagePacks $packs,
+        private readonly InstallKey $key,
     ) {}
 
     public function show(Request $request): View
@@ -64,6 +66,13 @@ class InstallController extends Controller
             'db_password' => ['nullable', 'string', 'max:255'],
         ], [], trans('install.fields'));
 
+        // Database on another server: the installation key proves that this is the owner of the hosting account
+        $validator->after(function ($validator) use ($request): void {
+            if (! InstallKey::isLocal((string) $request->input('db_host')) && ! $this->key->matches((string) $request->input('install_key'))) {
+                $validator->errors()->add('install_key', __('install.errors.install_key', ['path' => $this->key->displayPath()]));
+            }
+        });
+
         if ($validator->fails()) {
             return response($this->form($request, $validator->errors()), 422);
         }
@@ -94,6 +103,8 @@ class InstallController extends Controller
             return response($this->form($request, new MessageBag(['install' => $exception->getMessage()])), 422);
         }
 
+        $this->key->delete();
+
         return view('install.done', [
             'existing' => $existing,
             'adminUrl' => rtrim((string) $valid['url'], '/').'/'.$valid['admin_path'],
@@ -105,12 +116,16 @@ class InstallController extends Controller
     {
         $this->useLocale($request);
 
+        // The key file is ready for the owner as soon as the form is shown
+        $this->key->value();
+
         return view('install.form', [
             'checks' => $this->requirements->checks(),
             'requirementsOk' => $this->requirements->passes(),
             'languages' => $this->packs->options(),
             'errors' => $errors ?? new MessageBag,
-            'old' => $request->except(['password', 'password_confirmation', 'db_password']),
+            'old' => $request->except(['password', 'password_confirmation', 'db_password', 'install_key']),
+            'installKeyPath' => $this->key->displayPath(),
             'defaults' => [
                 'url' => $request->getSchemeAndHttpHost().$request->getBaseUrl(),
                 'default_language' => $request->getPreferredLanguage(['it-IT', 'en-GB', 'en-US', 'de-DE', 'fr-FR', 'es-ES', 'pt-PT', 'pt-BR', 'nl-NL']) ?? 'it-IT',

@@ -30,6 +30,7 @@ use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
+use RuntimeException;
 use stdClass;
 
 /**
@@ -540,7 +541,13 @@ class V1Importer
             return null;
         }
 
-        return $this->images->store($source, basename($source), 'uploads', $directory, $size);
+        try {
+            return $this->images->store($source, basename($source), 'uploads', $directory, $size);
+        } catch (RuntimeException) {
+            $this->warn("Not a supported image: {$relative}");
+
+            return null;
+        }
     }
 
     private function pdf(string $relative): ?string

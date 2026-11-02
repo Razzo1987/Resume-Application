@@ -95,6 +95,10 @@
                     <input type="password" id="db_password" name="db_password" autocomplete="off">
                 </div>
             </div>
+            <label for="install_key">{{ __('install.fields.install_key') }}</label>
+            <input type="text" id="install_key" name="install_key" autocomplete="off" spellcheck="false" aria-describedby="install_key_help">
+            <p class="muted" id="install_key_help">{{ __('install.help.install_key', ['path' => $installKeyPath]) }}</p>
+            @if ($error('install_key'))<p class="field-error">{{ $error('install_key') }}</p>@endif
         </section>
 
         <section class="card">

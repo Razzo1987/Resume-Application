@@ -11,7 +11,8 @@ use RuntimeException;
 
 /**
  * Resizes uploaded images and saves them as WebP (lighter, supported by all browsers).
- * Animated GIFs and files that cannot be resized are saved as they are.
+ * Animated GIFs and files that cannot be resized are saved as they are, always with the extension of their real type:
+ * the name given by the browser never decides it (a GIF called "x.html" would otherwise become a page of the site).
  */
 class ImageOptimizer
 {
@@ -29,7 +30,8 @@ class ImageOptimizer
         $image = $this->load($sourcePath);
 
         if ($image === null) {
-            $extension = strtolower(pathinfo($originalName, PATHINFO_EXTENSION)) ?: 'bin';
+            $extension = self::extensionOf($sourcePath)
+                ?? throw new RuntimeException('Not a supported image: '.basename($originalName));
             $path = ltrim("{$directory}/{$unique}.{$extension}", '/');
             Storage::disk($disk)->put($path, (string) file_get_contents($sourcePath));
 
@@ -59,6 +61,23 @@ class ImageOptimizer
         Storage::disk($disk)->put($path, $content);
 
         return $path;
+    }
+
+    /**
+     * Extension of the real image type (from the file content), or null if it is not an image the site accepts.
+     */
+    public static function extensionOf(string $path): ?string
+    {
+        $info = @getimagesize($path);
+
+        return match ($info[2] ?? null) {
+            IMAGETYPE_JPEG => 'jpg',
+            IMAGETYPE_PNG => 'png',
+            IMAGETYPE_GIF => 'gif',
+            IMAGETYPE_WEBP => 'webp',
+            IMAGETYPE_AVIF => 'avif',
+            default => null,
+        };
     }
 
     private function load(string $path): ?GdImage

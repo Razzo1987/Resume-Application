@@ -5,6 +5,7 @@ use App\Models\User;
 use App\Support\Install\EnvWriter;
 use App\Support\Install\Installer;
 use App\Support\Install\InstallException;
+use App\Support\Install\InstallKey;
 use App\Support\System\Htaccess;
 use Dotenv\Dotenv;
 use Illuminate\Support\Facades\Hash;
@@ -160,3 +161,29 @@ it('writes the .htaccess block and keeps the lines of the hosting', function () 
 
     @unlink($path);
 });
+
+it('asks for the installation key only when the database is on another server', function () {
+    $key = app(InstallKey::class);
+    $this->mock(Installer::class)->shouldReceive('install')->once();
+
+    // Another server, no key: refused before installing
+    $this->withHeader('Accept-Language', 'it')
+        ->post('/install', installData(['db_host' => 'db.example.com']))
+        ->assertStatus(422)
+        ->assertSee('storage/install-key.txt');
+
+    expect(is_file($key->path()))->toBeTrue();
+
+    $this->post('/install', installData(['db_host' => 'db.example.com', 'install_key' => 'WRONG-KEY']))->assertStatus(422);
+
+    // With the key from the file: installed, and the key is deleted
+    $this->post('/install', installData(['db_host' => 'db.example.com', 'install_key' => strtolower($key->value())]))->assertOk();
+
+    expect(is_file($key->path()))->toBeFalse();
+});
+
+it('does not ask for the key with the database on this server', function (string $host) {
+    expect(InstallKey::isLocal($host))->toBeTrue()
+        ->and(InstallKey::isLocal('db.example.com'))->toBeFalse()
+        ->and(InstallKey::isLocal('10.0.0.5'))->toBeFalse();
+})->with(['localhost', 'LOCALHOST', '127.0.0.1', '::1']);

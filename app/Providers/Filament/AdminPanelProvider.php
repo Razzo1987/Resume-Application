@@ -13,6 +13,7 @@ use App\Filament\Widgets\SystemAlertsWidget;
 use App\Filament\Widgets\SystemOverviewWidget;
 use App\Http\Controllers\Admin\UpdateUploadController;
 use App\Http\Middleware\AdminActivity;
+use App\Http\Middleware\AdminSecurityHeaders;
 use App\Http\Middleware\NoIndex;
 use App\Http\Middleware\SetAdminLocale;
 use Filament\Auth\MultiFactor\App\AppAuthentication;
@@ -96,6 +97,7 @@ class AdminPanelProvider extends PanelProvider
                 SubstituteBindings::class,
                 SetAdminLocale::class,
                 NoIndex::class,
+                AdminSecurityHeaders::class,
                 DisableBladeIconComponents::class,
                 DispatchServingFilamentEvent::class,
             ])

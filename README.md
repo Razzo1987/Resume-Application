@@ -223,7 +223,9 @@ npx playwright test                 # end-to-end + accessibility (needs the demo
 ```
 
 Release package: `scripts/build-release.sh` builds `resume-app-<version>.zip` (the GitHub *Release* workflow does
-the same when a `v*` tag is pushed and publishes it with its SHA-256 and the changelog entry).
+the same when a `v*` tag is pushed: it checks that the tag is signed by the maintainer and points to `main`, runs the
+whole CI again, then publishes the package with its SHA-256, a provenance attestation and the changelog entry).
+Security policy and how to report a vulnerability: [SECURITY.md](SECURITY.md).
 
 ## 📁 Project Structure
 

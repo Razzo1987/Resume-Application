@@ -28,6 +28,9 @@ use Symfony\Component\HttpFoundation\Response;
  */
 class Tracker
 {
+    /** Different paths kept in the list of pages not found */
+    public const int MAX_NOT_FOUND = 5000;
+
     /** Platform click parameters: only where the click comes from is stored, never the code. */
     public const array CLICK_IDS = [
         'fbclid' => 'facebook',
@@ -219,6 +222,13 @@ class Tracker
         }
 
         $path = mb_substr($request->getPathInfo(), 0, 255);
+
+        // A scanner trying thousands of random addresses must not fill the database: new paths stop at the limit
+        // (the ones already in the list keep counting; old ones are removed with the statistics retention)
+        if (DB::table('stat_not_found')->count() >= self::MAX_NOT_FOUND && ! DB::table('stat_not_found')->where('path', $path)->exists()) {
+            return;
+        }
+
         $referrer = $this->referrer($request);
         $now = now();
 

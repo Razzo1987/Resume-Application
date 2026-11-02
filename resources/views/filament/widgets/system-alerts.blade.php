@@ -10,7 +10,11 @@
                 @if ($alert === 'auto_update_failed' && ($event['url'] ?? null))
                     <br><x-filament::link :href="$event['url']">{{ __('admin.updates.auto.resume_link') }}</x-filament::link> ·
                 @endif
-                <x-filament::link :href="\App\Filament\Pages\ManageSystem::getUrl()">{{ __('admin.pages.system.title') }}</x-filament::link>
+                @if ($alert === 'mfa_off')
+                    <x-filament::link :href="filament()->getProfileUrl()">{{ __('admin.system.alerts.mfa_off_link') }}</x-filament::link>
+                @else
+                    <x-filament::link :href="\App\Filament\Pages\ManageSystem::getUrl()">{{ __('admin.pages.system.title') }}</x-filament::link>
+                @endif
             </p>
         </x-filament::section>
     @endforeach

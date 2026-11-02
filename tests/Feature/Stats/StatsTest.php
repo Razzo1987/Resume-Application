@@ -683,6 +683,19 @@ it('counts bots, AI crawlers and programs by name, without addresses and without
         ->and(json_encode(DB::table('stat_bots')->get()))->not->toContain('93.44');
 });
 
+it('stops adding new pages not found at the limit, so a scanner cannot fill the database', function () {
+    $now = now();
+    DB::table('stat_not_found')->insert(collect(range(1, Tracker::MAX_NOT_FOUND))->map(fn (int $n): array => [
+        'path' => "/scan/{$n}", 'hits' => 1, 'human_hits' => 1, 'probe' => false, 'first_seen_at' => $now, 'last_seen_at' => $now,
+    ])->all());
+
+    pageView('/it-IT/nuovo-indirizzo');
+    pageView('/scan/1');
+
+    expect(DB::table('stat_not_found')->count())->toBe(Tracker::MAX_NOT_FOUND)
+        ->and(DB::table('stat_not_found')->where('path', '/scan/1')->value('hits'))->toBe(2);
+});
+
 it('lists the pages not found, apart from the attack attempts, and turns them into redirects', function () {
     pageView('/it-IT/progetti/vecchio-progetto', ['HTTP_REFERER' => 'https://www.linkedin.com/in/someone']);
     pageView('/it-IT/progetti/vecchio-progetto', ['HTTP_USER_AGENT' => 'Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)']);
