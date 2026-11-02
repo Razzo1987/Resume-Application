@@ -45,6 +45,9 @@ class Aggregator
     /** Page of the totals that cover the whole site (visitors, sessions, bounces, duration) */
     public const string SITE = '*';
 
+    /** First day still to recalculate after an update that adds dimensions to the totals (null = nothing to do) */
+    public const string REBUILD = 'stats.rebuild_from';
+
     public function __construct(private readonly Settings $settings) {}
 
     /**
@@ -65,11 +68,51 @@ class Aggregator
             $days++;
         }
 
+        $days += $this->rebuild(62);
         $pruned = $this->prune();
         $admins = app(Exclusions::class)->prune();
         app(Visitors::class)->prune(force: true);
 
         return "days {$days}, deleted {$pruned} visits, {$admins} admin IPs";
+    }
+
+    /**
+     * Recalculates the totals of older days, a few at a time (from the cron job and when the Statistics page opens),
+     * after an update that adds dimensions to the totals: without it the days before the update would have no hours,
+     * channels or versions when the page reads the totals. Only days that still have their single visits: the
+     * others would lose their totals.
+     */
+    public function rebuild(int $limit = 31): int
+    {
+        $from = $this->settings->get(self::REBUILD);
+
+        if (! is_string($from) || $from === '') {
+            return 0;
+        }
+
+        $days = StatVisit::query()->where('day', '>=', $from)->distinct()->orderBy('day')->limit($limit + 1)->pluck('day')
+            ->map(fn (mixed $day): string => substr((string) $day, 0, 10))
+            ->unique()
+            ->values();
+
+        foreach ($days->take($limit) as $day) {
+            $this->aggregate(Carbon::parse($day));
+        }
+
+        // the next day to do, or done
+        $this->settings->set(self::REBUILD, $days->count() > $limit ? $days[$limit] : null);
+
+        return min($limit, $days->count());
+    }
+
+    /**
+     * True while older days are still being recalculated.
+     */
+    public function rebuilding(): bool
+    {
+        $from = $this->settings->get(self::REBUILD);
+
+        return is_string($from) && $from !== '';
     }
 
     public function aggregate(CarbonInterface $day): void

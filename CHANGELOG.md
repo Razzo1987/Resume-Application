@@ -2,6 +2,16 @@
 
 All notable changes to this project are documented here. The format follows [Keep a Changelog](https://keepachangelog.com/) and the project uses [Semantic Versioning](https://semver.org/).
 
+## [2.3.2] — 2026-11-02
+
+### Fixed
+- Statistics: without filters, the *Days and hours* grid (and the rankings of channels and of system and browser
+  versions) showed only the days after the update to 2.3, because the daily totals of the days before had no hours,
+  channels or versions; with filters, which read the single visits, they were complete. The totals of the days still
+  kept are recalculated by themselves, a month at a time, when the *Statistics* page opens and from the cron job (a
+  note on the page says so while it runs). Days whose single visits have already been deleted keep their totals.
+- Statistics: the columns of the *Days and hours* grid have the same width (the hour labels made some wider).
+
 ## [2.3.1] — 2026-11-02
 
 Security fixes. None of them can be used by a visitor: they all need an administrator (or a file an administrator is

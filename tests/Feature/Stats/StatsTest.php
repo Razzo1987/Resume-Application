@@ -781,3 +781,25 @@ it('shows the new sections of the statistics page', function () {
 
     expect(app(Networks::class)->kind('Telecom Italia'))->toBe(Networks::ORGANIZATION);
 });
+
+it('recalculates the totals of the days before the update, a few at a time', function () {
+    // visits of three past days recorded before 2.3: their totals have no hours or channels
+    foreach ([5, 4, 2] as $ago) {
+        $day = StatsQuery::today()->subDays($ago);
+        StatVisit::query()->insert(['visited_at' => $day->copy()->setTime(9, 15)->utc(), 'day' => $day->toDateString(), 'hour' => 9, 'page' => 'cv', 'path' => '/it-IT', 'locale' => 'it-IT', 'channel' => 'search', 'referrer_host' => 'google.com', 'ip' => '93.44.12.x']);
+        DB::table('stat_daily')->insert(['day' => $day->toDateString(), 'page' => 'cv', 'dimension' => 'total', 'value' => '', 'views' => 1]);
+    }
+
+    app(Settings::class)->set(Aggregator::REBUILD, StatsQuery::today()->subDays(5)->toDateString());
+    $hours = fn (): int => array_sum(array_map('array_sum', StatsQuery::forPeriod('7')->heatmap()));
+
+    expect($hours())->toBe(0)
+        ->and(app(Aggregator::class)->rebuild(2))->toBe(2)
+        ->and(app(Aggregator::class)->rebuilding())->toBeTrue()
+        ->and($hours())->toBe(2)
+        ->and(app(Aggregator::class)->rebuild(2))->toBe(1)
+        ->and(app(Aggregator::class)->rebuilding())->toBeFalse()
+        ->and($hours())->toBe(3)
+        ->and(StatsQuery::forPeriod('7')->top('channel'))->toBe(['search' => 3])
+        ->and(app(Aggregator::class)->rebuild())->toBe(0);
+});

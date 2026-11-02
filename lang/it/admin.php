@@ -596,6 +596,7 @@ return [
         'seconds' => ':count s',
         'minutes' => ':minutes min :seconds s',
         'since' => 'Visitatori e visite si contano dal :date (versione 2.3): prima di quel giorno risultano a zero.',
+        'rebuilding' => 'Ricalcolo in corso dei totali dei giorni precedenti l\'aggiornamento (ore, canali, versioni): senza filtri alcuni riquadri possono essere incompleti per qualche ora.',
         'since_none' => 'Visitatori e visite compariranno con le prossime visite al sito.',
         'heatmap' => 'Giorni e ore',
         'heatmap_help' => 'Pagine viste per giorno della settimana e ora, nel fuso orario del sito.',

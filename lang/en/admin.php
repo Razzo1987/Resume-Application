@@ -596,6 +596,7 @@ return [
         'seconds' => ':count s',
         'minutes' => ':minutes min :seconds s',
         'since' => 'Visitors and visits are counted from :date (version 2.3): before that day they are zero.',
+        'rebuilding' => 'The totals of the days before the update are being recalculated (hours, channels, versions): without filters some panels may be incomplete for a few hours.',
         'since_none' => 'Visitors and visits will appear with the next visits to the site.',
         'heatmap' => 'Days and hours',
         'heatmap_help' => 'Page views by day of the week and hour, in the time zone of the site.',

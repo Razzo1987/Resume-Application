@@ -103,6 +103,9 @@
             <div class="resume-stats-kpi"><span>{{ __('admin.stats.countries') }}</span><strong>{{ $number($totals['countries']) }}</strong></div>
         @endif
     </div>
+    @if ($rebuilding)
+        <p class="resume-stats-note">{{ __('admin.stats.rebuilding') }}</p>
+    @endif
     @if ($since === null || $since > \App\Support\Stats\StatsQuery::forPeriod($period)->from->toDateString())
         <p class="resume-stats-note">{{ $since === null ? __('admin.stats.since_none') : __('admin.stats.since', ['date' => \Illuminate\Support\Carbon::parse($since)->format('d/m/Y')]) }}</p>
     @endif
@@ -385,7 +388,9 @@
         .resume-sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0; }
         .resume-stats-probes { margin-top: 1rem; }
         .resume-stats-heatmap-wrap { overflow-x: auto; }
-        .resume-stats-heatmap { border-collapse: separate; border-spacing: 2px; width: 100%; min-width: 34rem; font-size: .7rem; }
+        .resume-stats-heatmap { table-layout: fixed; border-collapse: separate; border-spacing: 2px; width: 100%; min-width: 34rem; font-size: .7rem; }
+        .resume-stats-heatmap thead th:first-child { width: 2.75rem; }
+        .resume-stats-heatmap thead th { overflow: visible; }
         .resume-stats-heatmap th { font-weight: 500; color: rgb(107 114 128); text-align: left; padding: 0 .25rem; white-space: nowrap; }
         .resume-stats-heatmap td { position: relative; height: 1.35rem; background: rgb(0 0 0 / .04); border-radius: .2rem; }
         .dark .resume-stats-heatmap td { background: rgb(255 255 255 / .05); }

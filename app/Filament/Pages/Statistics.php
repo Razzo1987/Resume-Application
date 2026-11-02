@@ -94,6 +94,9 @@ class Statistics extends Page implements HasTable
         if (app(Settings::class)->bool('stats.enabled')) {
             rescue(fn () => app(Aggregator::class)->aggregate(StatsQuery::today()), report: false);
         }
+
+        // older days to recalculate after an update (a month at a time, the rest from the cron job or the next visits)
+        rescue(fn () => app(Aggregator::class)->rebuild(31), report: false);
     }
 
     public function updatedPeriod(): void
@@ -229,6 +232,7 @@ class Statistics extends Page implements HasTable
             'enabled' => $enabled,
             'totals' => $query->totals(),
             'kpis' => $query->kpis(),
+            'rebuilding' => app(Aggregator::class)->rebuilding(),
             'since' => $query->since(),
             'heatmap' => $query->heatmap(),
             'bots' => [...$bots, 'bots' => array_map(fn (array $bot): array => [...$bot, 'icon' => $icons->for('bot', $bot['category'])], $bots['bots'])],
