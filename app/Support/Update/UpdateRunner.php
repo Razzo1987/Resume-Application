@@ -133,7 +133,7 @@ class UpdateRunner
 
             // The package is no longer needed (it was downloaded or uploaded here); the content export is kept
             if ($package !== '' && dirname($package) === $this->storage->packagesDirectory()) {
-                File::delete($package);
+                File::delete([$package, $package.'.signed']);
             }
 
             File::delete([$this->storage->updaterFile(), $this->storage->runFile()]);

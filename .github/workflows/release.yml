@@ -1,9 +1,14 @@
 name: Release
 
-# A "vX.Y.Z" tag publishes the package of that version, in four steps:
+# A "vX.Y.Z" tag publishes the package of that version, in five steps:
 #   verify  - the tag matches VERSION, is signed with the maintainer's GPG key and points to a commit on main;
 #   tests   - the same checks as the CI (secrets, dependencies, workflows, PHP, end-to-end);
-#   build   - the package, with read-only permissions;
+#   build   - the package, with read-only permissions, then the inspection of its content (scripts/inspect-release.py
+#             and the privacy guard on the extracted files);
+#   apache  - the package installed with the web installer on Apache + PHP 8.4 (scripts/apache), the checks of
+#             scripts/smoke-test.sh and the end-to-end tests of the site;
+#   sign    - Ed25519 signature of the package (.sig) with the key of the "release" environment, checked against
+#             the public keys of the app, which refuses unsigned downloads;
 #   publish - provenance attestation, then the release: created as a draft with all its files and published only at
 #             the end (with immutable releases a published release can no longer change).
 # A failed run leaves at most a draft: delete the tag on GitHub and push it again.
@@ -88,6 +93,15 @@ jobs:
           node-version: 22
           package-manager-cache: false # never reuse a cache in a release build
       - run: bash scripts/build-release.sh dist
+      - name: Content of the package
+        run: python3 scripts/inspect-release.py dist/*.zip
+      - name: Personal data and private code in the package (privacy guard)
+        env:
+          PRIVACY_PATTERNS: ${{ secrets.PRIVACY_PATTERNS }}
+        run: |
+          mkdir -p "$RUNNER_TEMP/package"
+          unzip -q dist/*.zip -d "$RUNNER_TEMP/package"
+          bash scripts/check-privacy.sh "$RUNNER_TEMP/package"
       # Release notes: the version entry in the CHANGELOG (the admin also shows them when it announces the update)
       - name: Notes from the CHANGELOG
         run: |
@@ -106,9 +120,111 @@ jobs:
           if-no-files-found: error
           retention-days: 7
 
+  apache:
+    name: Apache test
+    needs: build
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    permissions:
+      contents: read
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_ROOT_PASSWORD: root
+          MYSQL_DATABASE: resume_app_release
+        ports: ['3306:3306']
+        options: >-
+          --health-cmd="mysqladmin ping -proot" --health-interval=10s --health-timeout=5s --health-retries=5
+    env:
+      DB_HOST: 127.0.0.1
+      DB_PORT: 3306
+      DB_DATABASE: resume_app_release
+      DB_USERNAME: root
+      DB_PASSWORD: root
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: release
+          path: dist
+      - name: Package extracted into the webroot, as on a hosting
+        run: |
+          mkdir webroot
+          unzip -q dist/*.zip -d webroot
+          cp webroot/htaccess.dist webroot/.htaccess
+          chmod -R a+rwX webroot # Apache runs as www-data in the container
+      - name: Apache + PHP 8.4
+        run: |
+          docker build -t resume-apache scripts/apache
+          docker run -d --name apache --network host -v "$PWD/webroot:/var/www/html" resume-apache
+          for _ in $(seq 30); do curl -sf -o /dev/null http://127.0.0.1/install && exit 0; sleep 1; done
+          docker logs apache
+          exit 1
+      - name: Installer, protected files, uploads, cookies and headers
+        # sudo: the files written by the installer belong to www-data; the test adds files to uploads/
+        run: sudo --preserve-env=DB_HOST,DB_PORT,DB_DATABASE,DB_USERNAME,DB_PASSWORD bash scripts/smoke-test.sh http://127.0.0.1 webroot
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: 22
+          package-manager-cache: false
+      - name: End-to-end tests of the site on the installed package
+        env:
+          E2E_BASE_URL: http://127.0.0.1
+          CI: true
+        run: |
+          npm ci --no-audit --no-fund
+          npx playwright install --with-deps chromium
+          npx playwright test tests/e2e/site.spec.js --project=chromium
+      - name: Logs of Apache and of the app
+        if: failure()
+        run: |
+          docker logs apache || true
+          sudo sh -c 'cat webroot/core/storage/logs/*.log' 2>/dev/null | tail -100 || true
+
+  sign:
+    name: Sign
+    needs: [build, apache]
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    # Settings → Environments → release: deployments only from tags "v*"; secret RELEASE_SIGNING_KEY (Ed25519, PEM)
+    environment: release
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: release
+          path: dist
+      - name: Signature of the package (Ed25519)
+        env:
+          RELEASE_SIGNING_KEY: ${{ secrets.RELEASE_SIGNING_KEY }}
+        run: |
+          test -n "$RELEASE_SIGNING_KEY" || { echo "::error::The secret RELEASE_SIGNING_KEY of the release environment is missing"; exit 1; }
+          umask 077
+          key="$(mktemp)"
+          trap 'rm -f "$key"' EXIT
+          printf '%s\n' "$RELEASE_SIGNING_KEY" > "$key"
+          for zip in dist/*.zip; do
+            openssl pkeyutl -sign -inkey "$key" -rawin -in "$zip" | base64 -w0 > "$zip.sig"
+          done
+      - name: Signature made with a key of the app
+        run: bash scripts/verify-signature.sh dist/*.zip
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: signature
+          path: dist/*.sig
+          if-no-files-found: error
+          retention-days: 7
+
   publish:
     name: Publish
-    needs: build
+    needs: [build, sign]
     runs-on: ubuntu-latest
     timeout-minutes: 10
     # Settings → Environments → release: deployments only from tags "v*"
@@ -121,6 +237,10 @@ jobs:
       - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
         with:
           name: release
+          path: dist
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: signature
           path: dist
       - name: Provenance attestation of the package
         uses: actions/attest-build-provenance@4d101475d8b20a2381f78447822ac1eab6504dd8 # v4.2.2
@@ -142,5 +262,5 @@ jobs:
           fi
           gh release create "$TAG" --draft --verify-tag \
             --title "Resume App ${TAG}" --notes-file dist/RELEASE_NOTES.md \
-            dist/*.zip dist/*.sha256
+            dist/*.zip dist/*.sha256 dist/*.sig
           gh release edit "$TAG" --draft=false --latest

@@ -4,6 +4,7 @@ namespace App\Filament\Resources\Publications\Tables;
 
 use App\Enums\PublicationType;
 use App\Filament\Support\Columns;
+use App\Filament\Support\Filters;
 use App\Models\Publication;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
@@ -29,6 +30,7 @@ class PublicationsTable
                 Columns::missingTranslations(),
             ])
             ->filters([
+                Filters::missingTranslations(),
                 SelectFilter::make('type')->label(__('admin.fields.publication_type'))->options(PublicationType::class),
             ])
             ->recordActions([EditAction::make()])

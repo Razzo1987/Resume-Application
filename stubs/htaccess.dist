@@ -38,7 +38,7 @@
 </IfModule>
 
 # Second barrier in case mod_rewrite is missing: sensitive files are denied anyway
-<FilesMatch "^(\.|core-path\.php$)">
+<FilesMatch "^(\.|core-path\.php$|htaccess\.dist$)">
     <IfModule mod_authz_core.c>
         Require all denied
     </IfModule>

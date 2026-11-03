@@ -5,7 +5,7 @@
 #
 # The theme folder can live outside the repository (e.g. ../my-themes/fancy): it is copied
 # to themes/{name} (ignored by git), built into public/themes/{name} and packaged like this:
-#   {name}/theme.json, icons.php, views/, lang/, README.md, LICENSE*   → core/themes/{name}
+#   {name}/theme.json, icons.php, views/, lang/, README.md, LICENSE*, preview.*, previews/   → core/themes/{name}
 #   {name}/dist/                                                       → webroot/themes/{name}
 # The sources (resources/) are not included in the package.
 set -euo pipefail
@@ -44,7 +44,7 @@ if [ -n "$ZIP_OUT" ]; then
   WORK="$(mktemp -d)"; trap 'rm -rf "$WORK"' EXIT
   PKG="$WORK/$NAME"
   mkdir -p "$PKG/dist"
-  ( cd "themes/$NAME" && for f in theme.json icons.php README.md LICENSE LICENSE.txt LICENSE.md views lang; do
+  ( cd "themes/$NAME" && for f in theme.json icons.php README.md LICENSE LICENSE.txt LICENSE.md views lang preview.webp preview.png preview.jpg previews; do
       [ -e "$f" ] && cp -R "$f" "$PKG/"; done; true )
   cp -R "public/themes/$NAME/." "$PKG/dist/"
   find "$PKG" -name '.DS_Store' -delete

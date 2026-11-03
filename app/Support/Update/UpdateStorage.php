@@ -113,10 +113,18 @@ class UpdateStorage
         return basename($name) === $name && preg_match('/^[A-Za-z0-9._-]+\.zip$/', $name) === 1 && is_file($path) ? $path : null;
     }
 
+    /**
+     * The package was downloaded by the app from GitHub with a valid signature (not uploaded or copied by hand).
+     */
+    public function isSigned(string $path): bool
+    {
+        return is_file($path.'.signed');
+    }
+
     public function deletePackage(string $name): void
     {
         if (($path = $this->package($name)) !== null) {
-            File::delete($path);
+            File::delete([$path, $path.'.signed']);
         }
     }
 

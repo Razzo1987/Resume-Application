@@ -4,7 +4,8 @@ All notable changes to this project are documented here. The format follows [Kee
 
 ## [2.4.0] — 2026-11-03
 
-Updates that are easy to read: one page says what can be updated, where it comes from and what is missing.
+Updates that are easy to read and signed: one page says what can be updated, where it comes from and what is missing,
+and the packages are checked with an Ed25519 signature.
 
 ### Added
 - **Updates** page (menu *Site*, with a badge when something is to update or to fix): the app and every installed
@@ -16,6 +17,19 @@ Updates that are easy to read: one page says what can be updated, where it comes
   specific one is used. *Save and verify* (and *Verify*) asks GitHub whether the key is valid, until when, and which
   repositories in use it can read, then checks the updates again. The expiration date of the keys is read from the
   answers of GitHub; the dashboard warns two weeks before and when a key has expired or was revoked.
+- **Signed packages** (Ed25519): every release has `resume-app-X.Y.Z.zip.sig`, made by the release workflow with the
+  maintainer's key only for tags signed with the maintainer's GPG key. The app downloads an update only if its
+  signature matches the public keys inside the app (a primary and a reserve key); a package uploaded by hand can
+  still be installed by an administrator, with a note that its signature was not checked, and automatic updates
+  install only signed packages. Themes can declare their keys in `theme.json` (`signing_keys`): their updates are
+  then checked with the keys of the installed version.
+- **Preview image of the themes** on the *Themes* page (`preview` in `theme.json`, also per variant), served only to
+  administrators from the theme folder. The base theme has one.
+- **"To translate into..."** filter in the lists of the admin that show the missing translations.
+- Release workflow: inspection of the package content (no data, secrets, development files, other themes, symbolic
+  links or executable files; `manifest.json` matches the files) and of the extracted files with the privacy guard;
+  installation of the package with the web installer on Apache + PHP 8.4, checks of the protected files, of
+  `uploads/`, of cookies and headers, and the end-to-end tests of the site on it.
 - Dashboard: alerts for theme updates and for components that need a GitHub key.
 - The same upload area everywhere (app and theme packages, content import): drop the zip or browse, sent in 1 MB
   chunks with its progress, errors shown in the area itself. *Upload a package* on the *Updates* page accepts the app
@@ -32,9 +46,10 @@ Updates that are easy to read: one page says what can be updated, where it comes
 - The single GitHub token of the previous versions becomes a key for every repository, with nothing to do.
 - Problems reported by GitHub are saved as codes and shown in the language of who reads them.
 
-## [2.3.2] — 2026-11-02
-
 ### Fixed
+- `htaccess.dist` in the web root was readable from the browser (found by the new Apache test): it is now denied like
+  the hidden files (the `.htaccess` block is rewritten by the update).
+- Release packages: files have no executable bit any more (only `core/artisan`).
 - Statistics: without filters, the *Days and hours* grid (and the rankings of channels and of system and browser
   versions) showed only the days after the update to 2.3, because the daily totals of the days before had no hours,
   channels or versions; with filters, which read the single visits, they were complete. The totals of the days still

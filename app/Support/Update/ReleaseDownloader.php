@@ -12,7 +12,7 @@ use RuntimeException;
 /**
  * Downloads a release package from GitHub directly to the server, in 8 MB chunks (each chunk is a short request,
  * within hosting time limits; an interrupted download resumes from where it stopped).
- * At the end it checks the SHA-256 published with the release.
+ * At the end it checks the SHA-256 and the Ed25519 signature published with the release (Signature).
  */
 class ReleaseDownloader
 {
@@ -41,11 +41,17 @@ class ReleaseDownloader
         if ($release->checksum === null) {
             throw new RuntimeException((string) __('admin.updates.errors.checksum_none', ['version' => $release->version]));
         }
+
+        // The same for the signature: a release without it is not downloaded
+        if ($release->signature === null) {
+            throw new RuntimeException((string) __('admin.updates.errors.signature_none', ['version' => $release->version]));
+        }
+
         $final = $this->storage->packagesDirectory().'/'.$release->packageName();
         $part = $final.'.part';
         $total = $asset['size'];
 
-        if (is_file($final)) {
+        if (is_file($final) && is_file($final.'.signed')) {
             return ['received' => $total, 'total' => $total, 'done' => true, 'file' => basename($final)];
         }
 
@@ -81,6 +87,8 @@ class ReleaseDownloader
 
         $this->verify($release, $part);
         rename($part, $final);
+        // Marker for the checks before the installation: this package comes from GitHub with a valid signature
+        file_put_contents($final.'.signed', $release->version);
 
         return ['received' => $total, 'total' => $total, 'done' => true, 'file' => basename($final)];
     }
@@ -106,6 +114,18 @@ class ReleaseDownloader
             File::delete($file);
 
             throw new RuntimeException((string) __('admin.updates.errors.checksum_mismatch'));
+        }
+
+        $signature = $release->signature !== null ? $this->fetch($release->signature) : null;
+
+        if ($signature === null || ! $signature->successful()) {
+            throw new RuntimeException((string) __('admin.updates.errors.signature_missing'));
+        }
+
+        if (! Signature::verify($file, $signature->body(), Signature::appKeys())) {
+            File::delete($file);
+
+            throw new RuntimeException((string) __('admin.updates.errors.signature_bad'));
         }
     }
 

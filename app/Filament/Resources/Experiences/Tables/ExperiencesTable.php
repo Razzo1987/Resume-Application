@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\Experiences\Tables;
 
 use App\Filament\Support\Columns;
+use App\Filament\Support\Filters;
 use App\Models\Experience;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
@@ -29,6 +30,7 @@ class ExperiencesTable
                 Columns::missingTranslations(),
             ])
             ->filters([
+                Filters::missingTranslations(),
                 TernaryFilter::make('is_visible')->label(__('admin.fields.is_visible')),
             ])
             ->recordActions([

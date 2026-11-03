@@ -86,9 +86,12 @@ test.describe('screenshots', () => {
         await page.addStyleTag({ content: '.fi-topbar { display: none !important; }' });
         await page.locator('.resume-stats-map').locator('xpath=ancestor::section[1]').screenshot({ path: `${dir}/admin-statistics-map.png` });
 
-        // System: only the updates box (the rest shows the server paths)
-        await page.goto(`/${admin.path}/system`, { waitUntil: 'networkidle' });
-        await page.locator('.fi-section').filter({ has: page.getByRole('button', { name: /Check now|Controlla ora/ }) })
-            .screenshot({ path: `${dir}/admin-updates.png` });
+        // Updates: the app and the themes with their state, then the upload area of "Upload a package"
+        await page.goto(`/${admin.path}/updates`, { waitUntil: 'networkidle' });
+        await page.screenshot({ path: `${dir}/admin-updates.png` });
+        await page.getByRole('button', { name: /Upload a package|Carica un pacchetto/ }).click();
+        await page.locator('.resume-upload-zone').waitFor();
+        await page.waitForTimeout(300);
+        await page.screenshot({ path: `${dir}/admin-upload.png` });
     });
 });

@@ -11,6 +11,7 @@ use App\Filament\Widgets\LanguagesOverviewWidget;
 use App\Filament\Widgets\StatisticsOverviewWidget;
 use App\Filament\Widgets\SystemAlertsWidget;
 use App\Filament\Widgets\SystemOverviewWidget;
+use App\Http\Controllers\Admin\ThemePreviewController;
 use App\Http\Controllers\Admin\UpdateUploadController;
 use App\Http\Middleware\AdminActivity;
 use App\Http\Middleware\AdminSecurityHeaders;
@@ -84,6 +85,7 @@ class AdminPanelProvider extends PanelProvider
             // Chunked upload of the zip files (app and theme packages, content exports), see x-admin.upload
             ->authenticatedRoutes(function (): void {
                 Route::post('system/update-upload', UpdateUploadController::class)->name('update-upload');
+                Route::get('themes/{theme}/preview/{variant?}', ThemePreviewController::class)->name('theme-preview');
             })
             // "Go to site" in the top bar, before the user menu
             ->renderHook(PanelsRenderHook::USER_MENU_BEFORE, fn (): View => view('filament.site-link', ['url' => SiteActions::homeUrl()]))

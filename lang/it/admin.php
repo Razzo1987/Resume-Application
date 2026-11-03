@@ -42,6 +42,11 @@ return [
         'settings' => ['title' => 'Impostazioni'],
     ],
 
+    'filters' => [
+        'missing_translation' => 'Da tradurre in',
+        'missing_translation_any' => 'Tutte le voci',
+    ],
+
     'sections' => [
         'general' => 'Dati generali',
         'content' => 'Testi',
@@ -285,6 +290,7 @@ return [
         'activated_variant' => 'Tema ":theme" attivo, variante :variant',
         'installed_many' => ':count temi installati o aggiornati',
         'variants' => 'Varianti',
+        'preview' => 'Anteprima del tema :theme',
         'updates' => [
             'install' => 'Aggiorna alla :version',
             'notes' => 'Novità',
@@ -476,6 +482,8 @@ return [
             'private' => 'privato',
             'unknown' => 'pubblico o privato: da verificare',
             'key' => 'chiave ":key"',
+            'signed' => 'pacchetti firmati',
+            'unsigned' => 'pacchetti senza firma (solo SHA-256)',
             'private_or_missing' => 'privato o inesistente',
             'no_key' => 'nessuna chiave',
             'manual' => 'Il tema non dice dove viene pubblicato: per aggiornarlo carica il suo zip.',
@@ -625,6 +633,7 @@ return [
             'not_packaged' => 'L\'aggiornamento da qui funziona solo con l\'installazione da pacchetto (core/manifest.json).',
         ],
         'notes' => [
+            'unsigned' => 'Questo pacchetto non è stato scaricato dall\'app da GitHub, quindi la sua firma non è stata controllata: installalo solo se viene dalle release ufficiali. Gli aggiornamenti automatici installano solo pacchetti firmati.',
             'same_version' => 'È la stessa versione installata: i file vengono riscritti (utile per riparare un aggiornamento).',
         ],
         'errors' => [
@@ -633,6 +642,9 @@ return [
             'no_release' => 'Nessuna nuova versione da scaricare.',
             'no_package' => 'La release :version non contiene il pacchetto resume-app-:version.zip.',
             'checksum_none' => 'La release :version non ha il file SHA-256 (.sha256): il pacchetto non viene scaricato, perché non si potrebbe controllare.',
+            'signature_none' => 'La release :version non ha la firma (.sig): il pacchetto non viene scaricato, perché non si potrebbe verificare chi l\'ha pubblicato.',
+            'signature_missing' => 'Non riesco a leggere la firma della release.',
+            'signature_bad' => 'La firma del pacchetto non è valida: non viene da chi pubblica questo componente. Il pacchetto è stato eliminato.',
             'checksum_missing' => 'Non riesco a leggere lo SHA-256 della release.',
             'checksum_mismatch' => 'Il pacchetto scaricato non corrisponde allo SHA-256 della release: è stato cancellato, riprova.',
             'upload_invalid' => 'Caricamento non valido: scegli il file zip del pacchetto.',

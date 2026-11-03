@@ -56,6 +56,7 @@ class UpdateSources
                 message: $status['errors'][$name] ?? null,
                 checkedAt: $repository !== null ? $status['checked_at'] : null,
                 active: $name === $active,
+                signed: $theme->signingKeys !== [],
             );
         }
 
@@ -130,7 +131,7 @@ class UpdateSources
         $latest = $status['release'];
 
         if (preg_match(Release::VERSION_PATTERN, $version) !== 1) {
-            return new UpdateSource('app', 'app', 'Resume App', $version, $latest, $this->releases->repository(), false, null, 'dev', null, $status['checked_at']);
+            return new UpdateSource('app', 'app', 'Resume App', $version, $latest, $this->releases->repository(), false, null, 'dev', null, $status['checked_at'], signed: true);
         }
 
         return $this->make(
@@ -144,10 +145,11 @@ class UpdateSources
             problem: $status['problem'],
             message: $status['error'],
             checkedAt: $status['checked_at'],
+            signed: true,
         );
     }
 
-    private function make(string $id, string $type, string $title, string $installed, ?Release $latest, ?string $repository, bool $newer, ?string $problem, ?string $message, ?Carbon $checkedAt, bool $active = false): UpdateSource
+    private function make(string $id, string $type, string $title, string $installed, ?Release $latest, ?string $repository, bool $newer, ?string $problem, ?string $message, ?Carbon $checkedAt, bool $active = false, bool $signed = false): UpdateSource
     {
         $known = $repository !== null ? $this->github->repository($repository) : null;
         $private = $known['private'] ?? null;
@@ -162,6 +164,6 @@ class UpdateSources
             default => 'up_to_date',
         };
 
-        return new UpdateSource($id, $type, $title, $installed, $latest, $repository, $private, $key, $state, $problem !== null ? $message : null, $checkedAt, $active);
+        return new UpdateSource($id, $type, $title, $installed, $latest, $repository, $private, $key, $state, $problem !== null ? $message : null, $checkedAt, $active, $signed);
     }
 }

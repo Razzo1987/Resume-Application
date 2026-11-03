@@ -5,7 +5,8 @@
 #   without a folder: the files tracked by git in this repository;
 #   with a folder: every file in it (e.g. an extracted release package).
 #
-# Generic rules (always): themes other than "base", Font Awesome Pro, environment files, private keys.
+# Generic rules (always): themes other than "base", Font Awesome Pro, environment files, private keys (PEM files
+# only when they contain one).
 # Maintainer's rules: PRIVACY_PATTERNS, one extended regular expression per line (case-insensitive), kept in a
 # repository secret so the personal data itself is never written in the code. Lines starting with # are ignored.
 set -euo pipefail
@@ -41,7 +42,10 @@ for file in "${FILES[@]}"; do
     case "$(basename "$file")" in
         .env|.env.*)
             [ "$(basename "$file")" = ".env.example" ] || fail "Environment file: $file" ;;
-        *.pem|*.key|*.p12|*.pfx|id_rsa|id_ed25519|*.gpg|auth.json)
+        # PEM files with public certificates only are fine (e.g. vendor/composer/ca-bundle in the release package)
+        *.pem)
+            if grep -q 'PRIVATE KEY' -- "$file" 2>/dev/null; then fail "Private key: $file"; fi ;;
+        *.key|*.p12|*.pfx|id_rsa|id_ed25519|*.gpg|auth.json)
             fail "Key or credentials file: $file" ;;
     esac
 done

@@ -12,6 +12,7 @@ use App\Filament\Resources\Languages\Pages\CreateLanguage;
 use App\Filament\Resources\Languages\Pages\EditLanguage;
 use App\Filament\Resources\PageSections\Pages\ManagePageSections;
 use App\Filament\Resources\Projects\Pages\EditProject;
+use App\Filament\Resources\Projects\Pages\ListProjects;
 use App\Filament\Resources\Volunteering\Pages\CreateVolunteering;
 use App\Filament\Resources\Volunteering\Pages\EditVolunteering;
 use App\Filament\Resources\Volunteering\Pages\ListVolunteering;
@@ -305,4 +306,20 @@ it('counts the characters of SEO texts against the length search results show', 
         ->fillForm(['seo' => ['description' => ['it-IT' => str_repeat('a', 170), 'en-GB' => 'Breve']]])
         ->assertSee('170 / 160 caratteri')
         ->assertSee('5 / 160 caratteri');
+});
+
+it('filters the records still to translate into a language', function () {
+    $done = Project::query()->create(['title' => ['it-IT' => 'Completo', 'en-GB' => 'Complete'], 'start_date' => '2024-01-01']);
+    $todo = Project::query()->create(['title' => ['it-IT' => 'Solo italiano'], 'start_date' => '2024-01-01']);
+    // Rich text with only tags does not count as a translation
+    $empty = Project::query()->create(['title' => ['it-IT' => 'Vuoto', 'en-GB' => 'Empty'], 'summary' => ['it-IT' => '<p>Testo</p>', 'en-GB' => '<p></p>'], 'start_date' => '2024-01-01']);
+
+    Livewire::test(ListProjects::class)
+        ->filterTable('missing_translation', 'en-GB')
+        ->assertCanSeeTableRecords([$todo, $empty])
+        ->assertCanNotSeeTableRecords([$done])
+        ->filterTable('missing_translation', 'it-IT')
+        ->assertCanNotSeeTableRecords([$done, $todo, $empty])
+        ->resetTableFilters()
+        ->assertCanSeeTableRecords([$done, $todo, $empty]);
 });

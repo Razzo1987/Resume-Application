@@ -5,6 +5,7 @@ namespace App\Filament\Resources\Interests;
 use App\Filament\Resources\Interests\Pages\ManageInterests;
 use App\Filament\Support\Columns;
 use App\Filament\Support\Fields;
+use App\Filament\Support\Filters;
 use App\Filament\Support\HasAdminLabels;
 use App\Filament\Support\Translatable;
 use App\Models\Interest;
@@ -56,6 +57,7 @@ class InterestResource extends Resource
                 ToggleColumn::make('is_visible')->label(__('admin.fields.is_visible')),
                 Columns::missingTranslations(),
             ])
+            ->filters([Filters::missingTranslations()])
             ->recordActions([EditAction::make(), DeleteAction::make()]);
     }
 

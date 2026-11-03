@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Themes;
 
+use App\Support\Update\Signature;
 use InvalidArgumentException;
 
 /**
@@ -20,6 +21,8 @@ final readonly class Theme
      * @param  string|null  $variant  variant in use (set by withVariant(); null = none or not resolved)
      * @param  string|null  $updateRepository  GitHub repository of the releases ("owner/name"), for updates
      * @param  string  $updateTagPrefix  prefix of the release tags of this theme ("v", "folio-v")
+     * @param  string|null  $preview  preview image for the Themes page, relative to the theme folder ("preview.webp")
+     * @param  list<string>  $signingKeys  Ed25519 public keys of the theme's packages (updates are checked with them)
      */
     public function __construct(
         public string $name,
@@ -38,7 +41,29 @@ final readonly class Theme
         public ?string $updateRepository = null,
         public string $updateTagPrefix = 'v',
         public ?string $author = null,
+        public ?string $preview = null,
+        public array $signingKeys = [],
     ) {}
+
+    /** Preview images: preview.webp (or .png, .jpg) and previews/{name}.webp for the variants */
+    public const string PREVIEW_PATTERN = '#^(preview|previews/[a-z0-9_-]+)\.(webp|png|jpe?g)$#';
+
+    public static function previewPath(?string $value): ?string
+    {
+        return is_string($value) && preg_match(self::PREVIEW_PATTERN, $value) === 1 ? $value : null;
+    }
+
+    /**
+     * Absolute path of the preview image of the theme or of one of its variants (the theme's one if the variant has
+     * none), only if the file is there.
+     */
+    public function previewFile(?string $variant = null): ?string
+    {
+        $relative = ($variant !== null ? ($this->variants[$variant]->preview ?? null) : null) ?? $this->preview;
+        $file = $relative !== null ? $this->path.DIRECTORY_SEPARATOR.$relative : null;
+
+        return $file !== null && is_file($file) ? $file : null;
+    }
 
     /**
      * A CSS color for meta theme-color ("#2c3e50"), or null.
@@ -111,6 +136,8 @@ final readonly class Theme
             updateRepository: $repository,
             updateTagPrefix: $tagPrefix,
             author: $string('author'),
+            preview: self::previewPath($string('preview')),
+            signingKeys: Signature::keys($data['signing_keys'] ?? null),
         );
     }
 
@@ -143,6 +170,8 @@ final readonly class Theme
             updateRepository: $this->updateRepository,
             updateTagPrefix: $this->updateTagPrefix,
             author: $this->author,
+            preview: $this->preview,
+            signingKeys: $this->signingKeys,
         );
     }
 

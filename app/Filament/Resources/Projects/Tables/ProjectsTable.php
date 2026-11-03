@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\Projects\Tables;
 
 use App\Filament\Support\Columns;
+use App\Filament\Support\Filters;
 use App\Models\Project;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
@@ -32,6 +33,7 @@ class ProjectsTable
                 Columns::missingTranslations(),
             ])
             ->filters([
+                Filters::missingTranslations(),
                 SelectFilter::make('client_id')->label(__('admin.fields.client'))->relationship('client', 'name')->preload(),
                 TernaryFilter::make('is_visible')->label(__('admin.fields.is_visible')),
             ])

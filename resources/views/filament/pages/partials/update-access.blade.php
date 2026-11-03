@@ -6,6 +6,7 @@
         @if ($source->access() !== 'public')
             · {{ $source->key ? __('admin.updates.access.key', ['key' => $source->key->label]) : __('admin.updates.access.no_key') }}
         @endif
+        · {{ $source->signed ? __('admin.updates.access.signed') : __('admin.updates.access.unsigned') }}
     </span>
 @else
     <span class="resume-updates-access">{{ __('admin.updates.access.manual') }}</span>

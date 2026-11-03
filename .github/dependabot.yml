@@ -33,3 +33,11 @@ updates:
     groups:
       npm:
         update-types: [minor, patch]
+
+  # Image of the Apache test in the release workflow
+  - package-ecosystem: docker
+    directory: /scripts/apache
+    schedule:
+      interval: weekly
+    cooldown:
+      default-days: 7

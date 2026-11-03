@@ -21,6 +21,8 @@ fancy/
 ├── icons.php           # semantic icon name => classes of the icon set
 ├── views/              # only the views that change (the others come from base)
 ├── lang/               # optional strings of the theme: __('theme::file.key')
+├── preview.webp        # optional image of the theme for the Themes page (also .png or .jpg)
+├── previews/           # optional images of the variants (previews/dark.webp)
 ├── resources/          # sources: SCSS, JS, fonts, icon sources (not in the package)
 └── README.md, LICENSE  # copied into the package
 ```
@@ -45,9 +47,12 @@ printed only through the helpers of `base` (see the views of `base` as reference
     "default_variant": "light",
     "variants": {
         "light": { "title": "Light", "entrypoints": ["themes/fancy/resources/scss/light.scss"], "theme_color": "#2c3e50" },
-        "dark": { "title": "Dark", "entrypoints": ["themes/fancy/resources/scss/dark.scss"], "theme_color": "#121212" }
+        "dark": { "title": "Dark", "entrypoints": ["themes/fancy/resources/scss/dark.scss"], "theme_color": "#121212",
+                  "preview": "previews/dark.webp" }
     },
+    "preview": "preview.webp",
     "updates": { "repository": "owner/fancy-themes", "tag_prefix": "fancy-v" },
+    "signing_keys": ["base64 of the 32 bytes of the public key="],
     "author": "Your name",
     "license": "proprietary"
 }
@@ -63,7 +68,9 @@ printed only through the helpers of `base` (see the views of `base` as reference
 | `sprite` | Vite key of the SVG icon sprite built from `icons.php`. |
 | `theme_color` | Color of the browser bar on phones (`meta theme-color`). |
 | `variants`, `default_variant` | See [Variants](#variants). |
+| `preview` | Image shown on the *Themes* page: `preview.webp` (or `.png`, `.jpg`) in the theme folder, 16:10, about 960 x 600 px. A variant can have its own (`previews/{name}.webp`): the page shows the one of the variant in use. The images stay in `core/themes` and are served only to administrators. |
 | `updates` | See [Updates from GitHub](#updates-from-github). |
+| `signing_keys` | Ed25519 public keys (base64) of the packages of the theme. See [Signed packages](#signed-packages). |
 
 ## Variants
 
@@ -129,3 +136,20 @@ repositories and the permission *Contents: Read-only*, used for `owner/*` or for
 [INSTALL.md](INSTALL.md#from-the-admin-version-203-and-later)). The page says for every theme whether its repository is
 public or private, which key it uses and what is missing (*A GitHub key is needed*, *The key has no access*, *Key
 expired or revoked*). Public repositories never get a key.
+
+## Signed packages
+
+A theme that declares `signing_keys` is updated from GitHub only with packages signed with one of those keys: next to
+`{name}-X.Y.Z.zip` and its `.sha256` the release needs `{name}-X.Y.Z.zip.sig`, the Ed25519 signature of the zip in
+base64. The keys are those of the **installed** version, so a package cannot bring its own; to change key, publish a
+version signed with the old key that declares the new one. Themes without `signing_keys` are checked with the SHA-256
+only, and the *Updates* page says so.
+
+The signature is the same the app uses for its own packages and can be made with OpenSSL:
+
+```bash
+openssl genpkey -algorithm ed25519 -out signing.pem                      # once; keep it secret
+openssl pkey -in signing.pem -pubout -outform DER | tail -c 32 | base64  # the public key for signing_keys
+openssl pkeyutl -sign -inkey signing.pem -rawin -in fancy-1.1.0.zip | base64 -w0 > fancy-1.1.0.zip.sig
+```
+

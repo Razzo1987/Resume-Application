@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Support\Update;
 
 /**
- * A release published on GitHub (tag vX.Y.Z) with the full package and its SHA-256.
+ * A release published on GitHub (tag vX.Y.Z) with the full package, its SHA-256 and its Ed25519 signature.
  */
 final readonly class Release
 {
@@ -14,6 +14,7 @@ final readonly class Release
     /**
      * @param  array{id: int, name: string, size: int, api_url: string, download_url: string}|null  $package
      * @param  array{id: int, name: string, size: int, api_url: string, download_url: string}|null  $checksum
+     * @param  array{id: int, name: string, size: int, api_url: string, download_url: string}|null  $signature
      */
     public function __construct(
         public string $version,
@@ -24,6 +25,7 @@ final readonly class Release
         public ?string $publishedAt,
         public ?array $package,
         public ?array $checksum,
+        public ?array $signature = null,
     ) {}
 
     /**
@@ -69,6 +71,7 @@ final readonly class Release
             publishedAt: is_string($data['published_at'] ?? null) ? $data['published_at'] : null,
             package: $assets["{$package}-{$version}.zip"] ?? null,
             checksum: $assets["{$package}-{$version}.zip.sha256"] ?? null,
+            signature: $assets["{$package}-{$version}.zip.sig"] ?? null,
         );
     }
 
@@ -81,6 +84,8 @@ final readonly class Release
         $package = is_array($data['package'] ?? null) ? $data['package'] : null;
         /** @var array{id: int, name: string, size: int, api_url: string, download_url: string}|null $checksum */
         $checksum = is_array($data['checksum'] ?? null) ? $data['checksum'] : null;
+        /** @var array{id: int, name: string, size: int, api_url: string, download_url: string}|null $signature */
+        $signature = is_array($data['signature'] ?? null) ? $data['signature'] : null;
 
         return new self(
             version: (string) ($data['version'] ?? ''),
@@ -91,6 +96,7 @@ final readonly class Release
             publishedAt: is_string($data['published_at'] ?? null) ? $data['published_at'] : null,
             package: $package,
             checksum: $checksum,
+            signature: $signature,
         );
     }
 
@@ -108,6 +114,7 @@ final readonly class Release
             'published_at' => $this->publishedAt,
             'package' => $this->package,
             'checksum' => $this->checksum,
+            'signature' => $this->signature,
         ];
     }
 

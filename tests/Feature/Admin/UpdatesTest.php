@@ -18,6 +18,7 @@ use App\Support\Update\PackageInspector;
 use App\Support\Update\Release;
 use App\Support\Update\ReleaseChecker;
 use App\Support\Update\ReleaseDownloader;
+use App\Support\Update\Signature;
 use App\Support\Update\UpdateSources;
 use App\Support\Update\UpdateStorage;
 use App\Themes\ThemeManager;
@@ -76,6 +77,7 @@ beforeEach(function () {
     $this->app->instance(UpdateStorage::class, new UpdateStorage("{$this->core}/storage"));
     $this->app->bind(PackageInspector::class, fn (): PackageInspector => new PackageInspector(app(Updater::class), app(ThemeManager::class), $this->core, $this->web));
     $this->state = "{$this->core}/storage/framework/resume-update.json";
+    config(['resume.updates.signing_keys' => [base64_encode(sodium_crypto_sign_publickey(testSigningKey()))]]);
 });
 
 afterEach(function () {
@@ -145,8 +147,27 @@ function githubRelease(string $version, array $overrides = [], int $size = 30): 
         'assets' => [
             ['id' => 11, 'name' => "resume-app-{$version}.zip", 'size' => $size, 'url' => "{$base}/11", 'browser_download_url' => "{$download}/resume-app-{$version}.zip"],
             ['id' => 12, 'name' => "resume-app-{$version}.zip.sha256", 'size' => 90, 'url' => "{$base}/12", 'browser_download_url' => "{$download}/resume-app-{$version}.zip.sha256"],
+            ['id' => 13, 'name' => "resume-app-{$version}.zip.sig", 'size' => 88, 'url' => "{$base}/13", 'browser_download_url' => "{$download}/resume-app-{$version}.zip.sig"],
         ],
     ], $overrides);
+}
+
+/**
+ * Key pair of the tests, used in place of the maintainer's one (config resume.updates.signing_keys).
+ */
+function testSigningKey(): string
+{
+    static $keypair = null;
+
+    return $keypair ??= sodium_crypto_sign_keypair();
+}
+
+/**
+ * Content of the .sig file of a package signed with the key of the tests.
+ */
+function signatureFor(string $content): string
+{
+    return base64_encode(sodium_crypto_sign_detached($content, sodium_crypto_sign_secretkey(testSigningKey())));
 }
 
 function fakeLatestRelease(array $data, int $status = 200): void
@@ -386,6 +407,10 @@ it('downloads the package in chunks and checks its SHA-256', function () {
     $release = Release::fromGitHub(githubRelease(UPDATES_FIX, size: strlen($content)));
 
     Http::fake(function (Request $request) use ($content) {
+        if (str_ends_with($request->url(), '.sig')) {
+            return Http::response(signatureFor($content));
+        }
+
         if (str_ends_with($request->url(), '.sha256')) {
             return Http::response(hash('sha256', $content).'  resume-app-'.UPDATES_FIX.'.zip');
         }
@@ -432,6 +457,55 @@ it('refuses to download a release without its SHA-256 file', function () {
 
     Http::assertNothingSent();
     expect(app(UpdateStorage::class)->packages())->toBe([]);
+});
+
+it('keeps only packages signed with the key of the app, and says when the signature was not checked', function () {
+    $content = 'resume-app-package';
+    $release = Release::fromGitHub(githubRelease(UPDATES_FIX, size: strlen($content)));
+    $other = sodium_crypto_sign_keypair();
+    $downloader = new ReleaseDownloader(app(UpdateStorage::class), app(ReleaseChecker::class), app(GitHub::class));
+
+    // Signed with another key: the package is deleted
+    Http::fake(fn (Request $request) => match (true) {
+        str_ends_with($request->url(), '.sig') => Http::response(base64_encode(sodium_crypto_sign_detached($content, sodium_crypto_sign_secretkey($other)))),
+        str_ends_with($request->url(), '.sha256') => Http::response(hash('sha256', $content).'  x.zip'),
+        default => Http::response($content, 200),
+    });
+
+    expect(fn () => $downloader->next($release))->toThrow(RuntimeException::class, __('admin.updates.errors.signature_bad'))
+        ->and(app(UpdateStorage::class)->packages())->toBe([]);
+
+    // Without the .sig file the release is not downloaded at all
+    $data = githubRelease(UPDATES_FIX);
+    array_pop($data['assets']);
+
+    expect(fn () => $downloader->next(Release::fromGitHub($data)))->toThrow(RuntimeException::class, '.sig');
+
+    // A package uploaded by hand can be installed, with a note that its signature was not checked
+    $storage = app(UpdateStorage::class);
+    File::ensureDirectoryExists($storage->packagesDirectory());
+    copy(updatePackage(UPDATES_FIX), $storage->packagesDirectory().'/resume-app-'.UPDATES_FIX.'.zip');
+    $path = (string) $storage->package('resume-app-'.UPDATES_FIX.'.zip');
+
+    expect($storage->isSigned($path))->toBeFalse()
+        ->and(app(PackageInspector::class)->inspect($path)->notes)->toContain(__('admin.updates.notes.unsigned'));
+});
+
+it('checks the Ed25519 signatures of the packages', function () {
+    $file = tempnam(sys_get_temp_dir(), 'sig');
+    file_put_contents($file, random_bytes(2048));
+    $keypair = sodium_crypto_sign_keypair();
+    $signature = base64_encode(sodium_crypto_sign_detached((string) file_get_contents($file), sodium_crypto_sign_secretkey($keypair)));
+    $key = base64_encode(sodium_crypto_sign_publickey($keypair));
+
+    expect(Signature::verify($file, $signature."\n", ['not-a-key', $key]))->toBeTrue()
+        ->and(Signature::verify($file, $signature, [base64_encode(sodium_crypto_sign_publickey(sodium_crypto_sign_keypair()))]))->toBeFalse()
+        ->and(Signature::verify($file, 'garbage', [$key]))->toBeFalse()
+        ->and(Signature::keys([$key, 'short', $key]))->toBe([$key])
+        // The real keys of the app are well formed
+        ->and(Signature::keys(Signature::KEYS))->toHaveCount(2);
+
+    unlink($file);
 });
 
 it('assembles a package uploaded in chunks, only for administrators', function () {
@@ -563,6 +637,10 @@ function fakeGitHubWithPackage(string $version): void
             return Http::response(githubRelease($version, size: strlen($content)));
         }
 
+        if (str_ends_with($request->url(), '.sig')) {
+            return Http::response(signatureFor($content));
+        }
+
         if (str_ends_with($request->url(), '.sha256')) {
             return Http::response(hash('sha256', $content)."  resume-app-{$version}.zip");
         }
@@ -674,6 +752,7 @@ it('does not install a fix release the web server cannot run', function () {
     Http::fake(function (Request $request) use ($content) {
         return match (true) {
             str_ends_with($request->url(), 'releases/latest') => Http::response(githubRelease(UPDATES_FIX, size: strlen($content))),
+            str_ends_with($request->url(), '.sig') => Http::response(signatureFor($content)),
             str_ends_with($request->url(), '.sha256') => Http::response(hash('sha256', $content).'  resume-app-'.UPDATES_FIX.'.zip'),
             default => Http::response($content, 200),
         };

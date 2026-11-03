@@ -10,5 +10,6 @@
     ],
     "license": "MIT",
     "theme_color": "#16324f",
-    "sprite": "themes/base/resources/icons/sprite.svg"
+    "sprite": "themes/base/resources/icons/sprite.svg",
+    "preview": "preview.webp"
 }

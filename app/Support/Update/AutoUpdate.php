@@ -153,7 +153,8 @@ class AutoUpdate
     {
         $existing = $this->storage->package($release->packageName());
 
-        if ($existing !== null) {
+        // A package with the same name uploaded by hand is downloaded again: by itself only signed packages
+        if ($existing !== null && $this->storage->isSigned($existing)) {
             return $existing;
         }
 
@@ -179,6 +180,10 @@ class AutoUpdate
         $this->recordAttempt($release->version);
         $report = $this->inspector->inspect($package);
         $problems = [...$report->problems, ...$this->checkWebRuntime($package)];
+
+        if (! $this->storage->isSigned($package)) {
+            $problems[] = (string) __('admin.updates.errors.signature_missing');
+        }
 
         if ($problems !== []) {
             $this->notify('failed', $release->version, implode("\n", $problems));

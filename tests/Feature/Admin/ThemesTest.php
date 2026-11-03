@@ -624,3 +624,77 @@ it('installs themes and recognises app packages uploaded on the Updates page', f
         ->call('packageUploaded', '../../.env')
         ->assertReturned(__('admin.updates.problems.not_zip'));
 });
+
+it('shows the preview of a theme and of its variants only to administrators', function () {
+    [$manifest, $files] = variantTheme();
+    $manifest['preview'] = 'preview.webp';
+    $manifest['variants']['dark']['preview'] = 'previews/dark.webp';
+    $manifest['variants']['light']['preview'] = '../../.env';
+    app(ThemeInstaller::class)->install(themeZip($manifest, [...$files, 'preview.webp' => 'RIFFmainWEBP', 'previews/dark.webp' => 'RIFFdarkWEBP']));
+    Filament::setCurrentPanel('admin');
+
+    $url = fn (?string $variant = null): string => route('filament.admin.theme-preview', array_filter(['theme' => 'demo-pro', 'variant' => $variant]));
+
+    $this->get($url())->assertRedirect();
+
+    $this->actingAs(User::factory()->create());
+
+    $main = $this->get($url())->assertOk()->assertHeader('Content-Type', 'image/webp');
+    expect(file_get_contents($main->baseResponse->getFile()->getPathname()))->toBe('RIFFmainWEBP');
+    expect(file_get_contents($this->get($url('dark'))->assertOk()->baseResponse->getFile()->getPathname()))->toBe('RIFFdarkWEBP');
+
+    // A variant with an invalid path uses the theme's preview; unknown themes and base without preview: 404
+    expect(file_get_contents($this->get($url('light'))->assertOk()->baseResponse->getFile()->getPathname()))->toBe('RIFFmainWEBP');
+    $this->get(route('filament.admin.theme-preview', ['theme' => 'missing']))->assertNotFound();
+
+    $this->get('/admin/themes')->assertOk()
+        ->assertSee('src="'.$url().'?v=1.0.0"', escape: false)
+        ->assertSee('Anteprima del tema Demo-pro');
+});
+
+it('refuses theme packages with other files next to the preview images', function () {
+    expect(fn () => app(ThemeInstaller::class)->install(themeZip(extra: ['previews/evil.php' => '<?php'])))->toThrow(ThemeException::class)
+        ->and(fn () => app(ThemeInstaller::class)->install(themeZip(extra: ['preview.svg' => '<svg/>'])))->toThrow(ThemeException::class);
+});
+
+it('installs the updates of a theme that declares its keys only with a valid signature', function () {
+    $keypair = sodium_crypto_sign_keypair();
+    [$manifest, $files] = variantTheme();
+    $manifest['signing_keys'] = [base64_encode(sodium_crypto_sign_publickey($keypair))];
+    app(ThemeInstaller::class)->install(themeZip($manifest, $files));
+    [$next, $nextFiles] = variantTheme(version: '1.2.0');
+    $package = (string) file_get_contents(themeZip($next, $nextFiles));
+    $signature = base64_encode(sodium_crypto_sign_detached($package, sodium_crypto_sign_secretkey(sodium_crypto_sign_keypair())));
+
+    $listing = [];
+    // One fake for the whole test (fakes added later would not replace it): it reads the current listing and signature
+    Http::fake(function (Request $request) use ($package, &$signature, &$listing) {
+        return match (true) {
+            str_contains($request->url(), '/releases?') => Http::response($listing),
+            str_ends_with($request->url(), '.sig') => Http::response($signature),
+            str_ends_with($request->url(), '.sha256') => Http::response(hash('sha256', $package).'  demo-pro-1.2.0.zip'),
+            default => Http::response($package),
+        };
+    });
+    $fake = function (array $release) use (&$listing): void {
+        $listing = [$release];
+        app(ThemeUpdates::class)->check();
+    };
+
+    $release = themeRelease('demo-pro', '1.2.0');
+    $release['assets'][] = ['id' => 3, 'name' => 'demo-pro-1.2.0.zip.sig', 'size' => 88, 'url' => '', 'browser_download_url' => 'https://github.com/acme/resume-themes/releases/download/demo-pro-v1.2.0/demo-pro-1.2.0.zip.sig'];
+
+    // Signed with another key
+    $fake($release);
+    expect(app(UpdateSources::class)->find('demo-pro')?->signed)->toBeTrue()
+        ->and(fn () => app(ThemeUpdates::class)->update('demo-pro'))->toThrow(ThemeException::class, __('admin.updates.errors.signature_bad'));
+
+    // Without signature
+    $fake(themeRelease('demo-pro', '1.2.0'));
+    expect(fn () => app(ThemeUpdates::class)->update('demo-pro'))->toThrow(ThemeException::class, '.sig');
+
+    // Signed with the key of the installed version
+    $signature = base64_encode(sodium_crypto_sign_detached($package, sodium_crypto_sign_secretkey($keypair)));
+    $fake($release);
+    expect(app(ThemeUpdates::class)->update('demo-pro')['theme']->version)->toBe('1.2.0');
+});

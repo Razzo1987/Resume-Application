@@ -43,6 +43,10 @@ The CV page, top to bottom (click to open it full size):
 |---|---|
 | ![Settings](screenshots/admin-settings.webp) | ![Themes](screenshots/admin-themes.webp) |
 
+| Updates: the app and every theme, with its state, source and GitHub key | The same upload area for packages, themes and content |
+|---|---|
+| ![Updates](screenshots/admin-updates.webp) | ![Upload a package](screenshots/admin-upload.webp) |
+
 ## Taking them again
 
 ```bash

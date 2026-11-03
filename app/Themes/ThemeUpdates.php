@@ -9,6 +9,7 @@ use App\Models\User;
 use App\Support\Languages\AdminLocales;
 use App\Support\Update\GitHub;
 use App\Support\Update\Release;
+use App\Support\Update\Signature;
 use App\Support\Update\UpdateStorage;
 use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Support\Carbon;
@@ -24,7 +25,7 @@ use Throwable;
  *   "updates": { "repository": "owner/resume-themes-pro", "tag_prefix": "folio-v" }
  *
  * The releases of a theme have tags "{tag_prefix}X.Y.Z" and the package "{name}-X.Y.Z.zip" (with an optional
- * "{name}-X.Y.Z.zip.sha256"). Private repositories need a GitHub key of the Updates page (a fine-grained token
+ * "{name}-X.Y.Z.zip.sha256" and, for themes that declare "signing_keys", "{name}-X.Y.Z.zip.sig"). Private repositories need a GitHub key of the Updates page (a fine-grained token
  * with read access to the repository contents), chosen per repository by GitHub. One request per repository, conditional (ETag), so
  * several themes published in the same repository cost a single call and an unchanged answer is free.
  */
@@ -299,6 +300,13 @@ class ThemeUpdates
             throw new ThemeException((string) __('admin.updates.errors.checksum_none', ['version' => $release->version]));
         }
 
+        // A theme that declares its signing keys accepts only packages signed with them (the keys of the installed
+        // version: a package cannot bring its own)
+        $keys = $this->themes->get($name)->signingKeys;
+        $signatureAsset = $keys !== []
+            ? ($release->signature ?? throw new ThemeException((string) __('admin.updates.errors.signature_none', ['version' => $release->version])))
+            : null;
+
         if ($asset['size'] > self::MAX_PACKAGE) {
             throw new ThemeException((string) __('admin.themes.errors.too_big'));
         }
@@ -321,6 +329,14 @@ class ThemeUpdates
             if (! $checksum->successful() || preg_match('/^([a-f0-9]{64})\b/i', trim($checksum->body()), $match) !== 1
                 || ! hash_equals(strtolower($match[1]), (string) hash_file('sha256', $file))) {
                 throw new ThemeException((string) __('admin.updates.errors.checksum_mismatch'));
+            }
+
+            if ($signatureAsset !== null) {
+                $signature = $this->github->asset($repository, $signatureAsset);
+
+                if (! $signature->successful() || ! Signature::verify($file, $signature->body(), $keys)) {
+                    throw new ThemeException((string) __('admin.updates.errors.signature_bad'));
+                }
             }
 
             $results = collect($this->installer->installAll($file));

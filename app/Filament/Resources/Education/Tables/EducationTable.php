@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\Education\Tables;
 
 use App\Filament\Support\Columns;
+use App\Filament\Support\Filters;
 use App\Models\Education;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
@@ -31,6 +32,7 @@ class EducationTable
                 ToggleColumn::make('is_visible')->label(__('admin.fields.is_visible')),
                 Columns::missingTranslations(),
             ])
+            ->filters([Filters::missingTranslations()])
             ->recordActions([EditAction::make()])
             ->toolbarActions([BulkActionGroup::make([DeleteBulkAction::make()])]);
     }

@@ -4,6 +4,7 @@ namespace App\Filament\Resources\Certifications\Tables;
 
 use App\Enums\CertificationType;
 use App\Filament\Support\Columns;
+use App\Filament\Support\Filters;
 use App\Models\Certification;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
@@ -38,6 +39,7 @@ class CertificationsTable
                 Columns::missingTranslations(),
             ])
             ->filters([
+                Filters::missingTranslations(),
                 SelectFilter::make('type')->label(__('admin.fields.certification_type'))->options(CertificationType::class),
             ])
             ->recordActions([EditAction::make()])

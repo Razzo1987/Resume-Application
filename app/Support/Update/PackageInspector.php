@@ -56,7 +56,8 @@ class PackageInspector
     {
         $current = $this->updater->codeVersion();
         $problems = [];
-        $notes = [];
+        // Uploaded or copied by hand: the signature could not be checked
+        $notes = is_file($file.'.signed') ? [] : [(string) __('admin.updates.notes.unsigned')];
         $version = null;
         $entries = 0;
         $size = 0;

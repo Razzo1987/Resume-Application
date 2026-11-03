@@ -42,6 +42,11 @@ return [
         'settings' => ['title' => 'Settings'],
     ],
 
+    'filters' => [
+        'missing_translation' => 'To translate into',
+        'missing_translation_any' => 'All entries',
+    ],
+
     'sections' => [
         'general' => 'General',
         'content' => 'Texts',
@@ -285,6 +290,7 @@ return [
         'activated_variant' => 'Theme ":theme" is active, variant :variant',
         'installed_many' => ':count themes installed or updated',
         'variants' => 'Variants',
+        'preview' => 'Preview of the theme :theme',
         'updates' => [
             'install' => 'Update to :version',
             'notes' => 'What is new',
@@ -476,6 +482,8 @@ return [
             'private' => 'private',
             'unknown' => 'public or private: to be checked',
             'key' => 'key ":key"',
+            'signed' => 'signed packages',
+            'unsigned' => 'packages without a signature (SHA-256 only)',
             'private_or_missing' => 'private or missing',
             'no_key' => 'no key',
             'manual' => 'The theme does not say where it is published: upload its zip to update it.',
@@ -625,6 +633,7 @@ return [
             'not_packaged' => 'Updating from here only works with an installation from a release package (core/manifest.json).',
         ],
         'notes' => [
+            'unsigned' => 'This package was not downloaded by the app from GitHub, so its signature was not checked: install it only if it comes from the official releases. Automatic updates install only signed packages.',
             'same_version' => 'It is the version already installed: the files are written again (useful to repair an update).',
         ],
         'errors' => [
@@ -633,6 +642,9 @@ return [
             'no_release' => 'No new version to download.',
             'no_package' => 'Release :version does not contain the resume-app-:version.zip package.',
             'checksum_none' => 'The release :version has no SHA-256 file (.sha256): the package is not downloaded, because it could not be checked.',
+            'signature_none' => 'The release :version has no signature (.sig): the package is not downloaded, because who published it could not be checked.',
+            'signature_missing' => 'Cannot read the signature of the release.',
+            'signature_bad' => 'The signature of the package is not valid: it does not come from who publishes this component. The package was deleted.',
             'checksum_missing' => 'The SHA-256 of the release cannot be read.',
             'checksum_mismatch' => 'The downloaded package does not match the SHA-256 of the release: it was deleted, please try again.',
             'upload_invalid' => 'Invalid upload: choose the zip file of the package.',

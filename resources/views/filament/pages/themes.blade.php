@@ -20,6 +20,11 @@
                     @endif
                 </x-slot>
 
+                <div @class(['resume-themes-body', 'has-preview' => $item['preview']])>
+                @if ($item['preview'])
+                    <img class="resume-themes-preview" src="{{ $item['preview'] }}" alt="{{ __('admin.themes.preview', ['theme' => $theme->title]) }}" loading="lazy" width="640" height="400">
+                @endif
+                <div class="resume-themes-info">
                 @if ($theme->description)
                     <p>{{ $theme->description }}</p>
                 @endif
@@ -86,6 +91,8 @@
                         @endif
                     </div>
                 @endif
+                </div>
+                </div>
             </x-filament::section>
         @endforeach
     </div>
@@ -94,6 +101,11 @@
 
     <style>
         .resume-themes { display: grid; gap: 1.5rem; }
+        .resume-themes-body.has-preview { display: grid; grid-template-columns: minmax(12rem, 20rem) 1fr; gap: 1.5rem; align-items: start; }
+        @media (max-width: 48rem) { .resume-themes-body.has-preview { grid-template-columns: 1fr; } }
+        .resume-themes-preview { width: 100%; height: auto; aspect-ratio: 16 / 10; object-fit: cover; object-position: top; border-radius: .5rem; box-shadow: 0 0 0 1px rgb(3 7 18 / .1); }
+        .dark .resume-themes-preview { box-shadow: 0 0 0 1px rgb(255 255 255 / .15); }
+        .resume-themes-info > :first-child { margin-top: 0; }
         .resume-themes-version { margin-left: .5rem; font-weight: 400; font-size: .875rem; opacity: .7; }
         .resume-system-list { display: grid; grid-template-columns: minmax(9rem, max-content) 1fr; gap: .5rem 1.5rem; margin: 1rem 0 0; }
         .resume-system-list dt { font-weight: 600; }

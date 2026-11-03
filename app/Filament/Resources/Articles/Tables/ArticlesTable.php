@@ -4,6 +4,7 @@ namespace App\Filament\Resources\Articles\Tables;
 
 use App\Enums\ArticleStatus;
 use App\Filament\Support\Columns;
+use App\Filament\Support\Filters;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
@@ -26,6 +27,7 @@ class ArticlesTable
                 Columns::missingTranslations(),
             ])
             ->filters([
+                Filters::missingTranslations(),
                 SelectFilter::make('status')->label(__('admin.fields.status'))->options(ArticleStatus::class),
             ])
             ->recordActions([EditAction::make()])

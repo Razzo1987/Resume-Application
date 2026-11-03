@@ -71,10 +71,25 @@ class ManageThemes extends Page
                     'compatible' => $theme->requires === null || Compatibility::satisfies($version, $theme->requires),
                     'base' => $theme->name === $themes->base()->name,
                     'source' => $sources->get($theme->name),
+                    'preview' => self::previewUrl($theme, $theme->name === $active ? $themes->active()->variant : $theme->defaultVariant),
                 ])
                 ->values()
                 ->all(),
         ];
+    }
+
+    /**
+     * Address of the preview image of a theme (of the variant in use, or of the default one), or null.
+     */
+    private static function previewUrl(Theme $theme, ?string $variant): ?string
+    {
+        if ($theme->previewFile($variant) === null) {
+            return null;
+        }
+
+        $parameters = ['theme' => $theme->name, 'variant' => $variant !== null && ($theme->variants[$variant]->preview ?? null) !== null ? $variant : null];
+
+        return route('filament.admin.theme-preview', array_filter($parameters)).'?v='.rawurlencode($theme->version);
     }
 
     protected function getHeaderActions(): array

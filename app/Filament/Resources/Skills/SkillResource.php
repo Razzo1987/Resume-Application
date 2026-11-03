@@ -4,6 +4,7 @@ namespace App\Filament\Resources\Skills;
 
 use App\Filament\Resources\Skills\Pages\ManageSkills;
 use App\Filament\Support\Columns;
+use App\Filament\Support\Filters;
 use App\Filament\Support\HasAdminLabels;
 use App\Filament\Support\Translatable;
 use App\Models\Skill;
@@ -72,6 +73,7 @@ class SkillResource extends Resource
                 Columns::missingTranslations(),
             ])
             ->filters([
+                Filters::missingTranslations(),
                 SelectFilter::make('skill_category_id')
                     ->label(__('admin.fields.skill_category'))
                     ->options(fn (): array => SkillCategory::query()->ordered()->get()->mapWithKeys(fn (SkillCategory $c): array => [$c->id => (string) $c->t('name')])->all()),

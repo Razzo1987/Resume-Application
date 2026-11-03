@@ -52,6 +52,11 @@ rm -rf "$PKG/uploads" "$PKG/core/.env" "$PKG/core/.env.example.local"
 # storage: structure only (the folders with their .gitignore), no data
 find "$PKG/core/storage" -type f ! -name .gitignore -delete
 
+echo "== Permissions: nothing executable but artisan (the hosting runs everything through PHP)"
+find "$PKG" -type d -exec chmod 755 {} +
+find "$PKG" -type f -exec chmod 644 {} +
+chmod 755 "$PKG/core/artisan"
+
 echo "== Manifest (to remove orphan files during updates)"
 echo "$VERSION" > "$PKG/core/VERSION"
 ( cd "$PKG" && find . -type f ! -path './core/manifest.json' -print0 | sort -z \

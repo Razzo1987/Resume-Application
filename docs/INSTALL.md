@@ -29,12 +29,13 @@ Node.js (the package already contains the PHP dependencies and the compiled asse
 ## Getting the package
 
 Every version is published on the [GitHub releases page](https://github.com/Razzo1987/Resume-Application/releases)
-with two files:
+with three files:
 
 | File | Content |
 |---|---|
 | `resume-app-x.y.z.zip` | the complete application, ready to extract (about 26 MB) |
 | `resume-app-x.y.z.zip.sha256` | its SHA-256 checksum |
+| `resume-app-x.y.z.zip.sig` | its Ed25519 signature (from 2.4.0), checked by the app before installing an update |
 
 To check that the download is complete and unchanged, compare the checksum with the one in the `.sha256` file
 (also shown at the end of the release notes):
@@ -156,8 +157,9 @@ needed*, *The key has no access*, *Key expired or revoked*. For the app:
   at most every 12 hours when the dashboard is opened; it shows "Version x.y.z is available" with its release notes
   and emails the administrators; *Check now* checks immediately;
 - **Download and install** fetches the package straight from GitHub to the server, in 8 MB chunks, and verifies the
-  SHA-256 published with the release (a release without its `.sha256` file is not downloaded at all; the same
-  applies to theme updates); **Upload a package** (drop the zip or browse) sends a zip from your computer in 1 MB
+  SHA-256 and the **Ed25519 signature** published with the release, made with the maintainer's key: a release without
+  its `.sha256` or `.sig` file is not downloaded at all, and a package whose signature does not match the public keys
+  inside the app is deleted (theme updates: SHA-256 always, signature for themes that declare their keys); **Upload a package** (drop the zip or browse) sends a zip from your computer in 1 MB
   chunks, so the hosting upload limit does not matter: an app package goes to the checks below, a package with
   themes is installed right away; a zip copied into `core/storage/app/private/updates/packages` with the File
   Manager is listed too;

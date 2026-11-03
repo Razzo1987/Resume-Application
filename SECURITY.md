@@ -25,7 +25,10 @@ What the application protects, and what it trusts by design:
   administrator does not expect to run code (restoring a content export, uploading an image or a PDF) must never do
   so: those are in scope.
 - **Update channel**: packages come from the GitHub releases of this repository and are checked against the SHA-256
-  published with them. Anything that makes a site install a package that was not published by this repository is in
+  and the Ed25519 signature published with them (from 2.4.0: the public keys are in
+  `app/Support/Update/Signature.php`, the private key is used only by the release workflow for tags signed with the
+  maintainer's GPG key). Packages uploaded by hand are installed only by an administrator, with a note that their
+  signature was not checked; automatic updates install only signed packages. Anything that makes a site install a package that was not published by this repository is in
   scope.
 - **Installer**: available only until the `.env` file exists.
 - **Release layout**: the application code lives in `core/` inside the web root and is protected by `.htaccess`

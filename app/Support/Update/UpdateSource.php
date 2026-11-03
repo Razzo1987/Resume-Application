@@ -36,6 +36,7 @@ final readonly class UpdateSource
         public ?string $message,
         public ?Carbon $checkedAt,
         public bool $active = false,
+        public bool $signed = false,
     ) {}
 
     public function isApp(): bool

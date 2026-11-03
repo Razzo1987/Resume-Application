@@ -4,6 +4,7 @@ namespace App\Filament\Resources\SkillCategories;
 
 use App\Filament\Resources\SkillCategories\Pages\ManageSkillCategories;
 use App\Filament\Support\Columns;
+use App\Filament\Support\Filters;
 use App\Filament\Support\HasAdminLabels;
 use App\Filament\Support\Translatable;
 use App\Models\SkillCategory;
@@ -59,6 +60,7 @@ class SkillCategoryResource extends Resource
                 TextColumn::make('skills_count')->label(Str::ucfirst(__('admin.resources.skills.plural')))->counts('skills'),
                 Columns::missingTranslations(),
             ])
+            ->filters([Filters::missingTranslations()])
             ->recordActions([EditAction::make(), DeleteAction::make()]);
     }
 

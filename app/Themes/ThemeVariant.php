@@ -8,7 +8,8 @@ namespace App\Themes;
  * A variant of a theme (palette and fonts), declared in theme.json under "variants":
  *
  *   "variants": {
- *       "lux": { "title": "Lux", "entrypoints": ["themes/folio/resources/scss/lux.scss"], "theme_color": "#1a1a1a" }
+ *       "lux": { "title": "Lux", "entrypoints": ["themes/folio/resources/scss/lux.scss"], "theme_color": "#1a1a1a",
+ *                "preview": "previews/lux.webp" }
  *   }
  *
  * Its entry points are added to those of the theme; the administrator picks the variant on the Themes page.
@@ -24,6 +25,7 @@ final readonly class ThemeVariant
         public array $entrypoints,
         public ?string $themeColor = null,
         public ?string $description = null,
+        public ?string $preview = null,
     ) {}
 
     /**
@@ -39,6 +41,7 @@ final readonly class ThemeVariant
             entrypoints: array_values(array_filter((array) ($data['entrypoints'] ?? []), 'is_string')),
             themeColor: Theme::color($string('theme_color')),
             description: $string('description'),
+            preview: Theme::previewPath($string('preview')),
         );
     }
 }

@@ -6,6 +6,7 @@ use App\Enums\CefrLevel;
 use App\Filament\Resources\LanguageSkills\Pages\ManageLanguageSkills;
 use App\Filament\Support\Columns;
 use App\Filament\Support\Fields;
+use App\Filament\Support\Filters;
 use App\Filament\Support\HasAdminLabels;
 use App\Filament\Support\Translatable;
 use App\Models\Certification;
@@ -88,6 +89,7 @@ class LanguageSkillResource extends Resource
                 Columns::missingTranslations(),
                 ToggleColumn::make('is_visible')->label(__('admin.fields.is_visible')),
             ])
+            ->filters([Filters::missingTranslations()])
             ->recordActions([EditAction::make(), DeleteAction::make()]);
     }
 
