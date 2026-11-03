@@ -4,6 +4,7 @@ namespace App\Filament\Pages;
 
 use App\Support\Settings\Settings;
 use App\Support\System\Updater;
+use App\Support\Update\UpdateSources;
 use App\Support\Update\UpdateStorage;
 use App\Themes\Compatibility;
 use App\Themes\Theme;
@@ -55,16 +56,12 @@ class ManageThemes extends Page
         $themes = app(ThemeManager::class);
         $version = app(Updater::class)->codeVersion();
         $active = $themes->active()->name;
-        $updates = app(ThemeUpdates::class);
-        $status = $updates->status();
-        $available = $updates->available();
+        $sources = collect(app(UpdateSources::class)->all())->keyBy('id');
 
         return [
             'active' => $active,
             'activeVariant' => $themes->active()->variant,
             'configured' => $themes->activeName(),
-            'updatesChecked' => $status['checked_at'],
-            'hasUpdatable' => $updates->updatable() !== [],
             'themes' => collect(array_keys($themes->installed()))
                 ->map(fn (string $name): Theme => $themes->get($name))
                 ->sortBy(fn (Theme $theme): string => ($theme->name === $active ? '0' : '1').$theme->title)
@@ -73,8 +70,7 @@ class ManageThemes extends Page
                     'assets' => $theme->name === $themes->base()->name || $theme->hasAssets($themes->publicPath()),
                     'compatible' => $theme->requires === null || Compatibility::satisfies($version, $theme->requires),
                     'base' => $theme->name === $themes->base()->name,
-                    'update' => $available[$theme->name] ?? null,
-                    'updateError' => $status['errors'][$theme->name] ?? null,
+                    'source' => $sources->get($theme->name),
                 ])
                 ->values()
                 ->all(),
@@ -88,41 +84,28 @@ class ManageThemes extends Page
                 ->label(__('admin.themes.install'))
                 ->icon(Heroicon::OutlinedArrowUpTray)
                 ->modalDescription(__('admin.themes.install_help'))
-                // Chunked upload (no upload_max_filesize limit): the page script calls installUploaded() at the end
-                ->modalContent(view('filament.pages.themes-upload', ['uploadUrl' => route('filament.admin.update-upload', ['target' => 'theme'])]))
+                // Chunked upload (no upload_max_filesize limit), then installUploaded()
+                ->modalContent(fn () => view('filament.pages.themes-upload'))
                 ->modalSubmitAction(false)
                 ->modalCancelActionLabel(__('admin.themes.close')),
-            Action::make('checkUpdates')
-                ->label(__('admin.themes.updates.check'))
-                ->icon(Heroicon::OutlinedArrowPath)
+            Action::make('updates')
+                ->label(__('admin.pages.updates.title'))
+                ->icon(Heroicon::OutlinedArrowPathRoundedSquare)
                 ->color('gray')
-                ->visible(fn (): bool => app(ThemeUpdates::class)->updatable() !== [])
-                ->action(function (): void {
-                    $updates = app(ThemeUpdates::class);
-                    $status = $updates->check();
-                    $available = $updates->available();
-
-                    $notification = Notification::make()->title($available === []
-                        ? __('admin.themes.updates.none')
-                        : trans_choice('admin.themes.updates.found', count($available), ['count' => count($available)]));
-
-                    ($status['errors'] !== [] ? $notification->warning()->body(new HtmlString(implode('<br>', array_map('e', array_unique($status['errors']))))) : $notification->success())->send();
-                }),
+                ->url(fn (): string => ManageUpdates::getUrl()),
         ];
     }
 
     /**
      * Installs the package uploaded in chunks from the Themes modal (one theme or several), then deletes it.
      */
-    public function installUploaded(string $package): void
+    public function installUploaded(string $package): ?string
     {
         $storage = app(UpdateStorage::class);
         $path = $storage->themeUploadsDirectory().'/'.$package;
 
         if (preg_match('/^[A-Za-z0-9._-]{1,120}\.zip$/', $package) !== 1 || ! is_file($path)) {
-            Notification::make()->danger()->title(__('admin.themes.errors.title'))->body(__('admin.themes.errors.not_zip'))->send();
-
-            return;
+            return (string) __('admin.themes.errors.not_zip');
         }
 
         try {
@@ -135,8 +118,11 @@ class ManageThemes extends Page
                 ->send();
 
             $this->unmountAction();
+
+            return null;
         } catch (ThemeException $exception) {
-            Notification::make()->danger()->title(__('admin.themes.errors.title'))->body($exception->getMessage())->persistent()->send();
+            // Shown in the upload area, where the admin can drop another file
+            return $exception->getMessage();
         } finally {
             File::delete($path);
         }
@@ -147,7 +133,7 @@ class ManageThemes extends Page
      *
      * @param  array{theme: Theme, updated: bool, previous: string|null}  $result
      */
-    private static function describe(array $result): string
+    public static function describe(array $result): string
     {
         return match (true) {
             ! $result['updated'] => __('admin.themes.installed', ['theme' => $result['theme']->title, 'version' => $result['theme']->version]),
@@ -158,7 +144,15 @@ class ManageThemes extends Page
 
     public function updateAction(): Action
     {
-        return Action::make('update')
+        return self::themeUpdateAction('update');
+    }
+
+    /**
+     * Download and installation of a theme's new version (Themes and Updates pages).
+     */
+    public static function themeUpdateAction(string $name): Action
+    {
+        return Action::make($name)
             ->label(fn (array $arguments): string => __('admin.themes.updates.install', ['version' => (string) ($arguments['version'] ?? '')]))
             ->icon(Heroicon::OutlinedArrowDownTray)
             ->size('sm')

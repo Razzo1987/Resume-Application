@@ -164,7 +164,8 @@ address and language, update channel, mail).
 
 ## 🔄 Updating
 
-From version 2.0.3 the site updates itself from the admin: *System* → *Updates*.
+From version 2.0.3 the site updates itself from the admin: the **Updates** page (until 2.3, *System* → *Updates*) shows
+the app and every installed theme with its state, and the GitHub keys needed by private theme repositories.
 
 1. The dashboard tells you when a new version is published on GitHub.
 2. **Download and install** fetches the package to the server and checks its SHA-256 (or upload a zip from your

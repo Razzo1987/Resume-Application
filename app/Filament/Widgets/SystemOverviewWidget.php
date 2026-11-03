@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Filament\Widgets;
 
 use App\Filament\Pages\ManageSystem;
+use App\Filament\Pages\ManageUpdates;
 use App\Support\Cron\Cron;
 use App\Support\Settings\Settings;
 use App\Support\System\Backup;
@@ -39,13 +40,14 @@ class SystemOverviewWidget extends StatsOverviewWidget
         $event = $auto->lastEvent();
         $backup = app(Backup::class)->lastCreatedAt()?->setTimezone(app(Settings::class)->timezone());
         $system = ManageSystem::getUrl();
+        $updates = ManageUpdates::getUrl();
 
         return [
             Stat::make(__('admin.widgets.version'), $updater->codeVersion())
                 ->description($available !== null ? __('admin.dashboard.update_available', ['version' => $available->version]) : 'Laravel '.app()->version().' · PHP '.PHP_VERSION)
                 ->descriptionIcon($available !== null ? 'heroicon-m-arrow-down-circle' : null)
                 ->color($available !== null ? 'info' : 'gray')
-                ->url($system),
+                ->url($updates),
             Stat::make(__('admin.dashboard.cron'), $cron->isActive() ? __('admin.dashboard.cron_active') : __('admin.dashboard.cron_missing'))
                 ->description($cron->isActive() && $cron->lastCron() !== null
                     ? __('admin.cron.last', ['when' => $cron->lastCron()->diffForHumans()])
@@ -57,7 +59,7 @@ class SystemOverviewWidget extends StatsOverviewWidget
                     ? __('admin.updates.auto.last_event.'.$event['type'], ['version' => $event['version'], 'when' => $event['at']->diffForHumans()])
                     : __('admin.updates.auto.descriptions.'.$auto->level()))
                 ->color($event !== null && $event['type'] === 'failed' ? 'danger' : 'gray')
-                ->url($system),
+                ->url($updates),
             Stat::make(__('admin.dashboard.backup'), $backup !== null ? $backup->translatedFormat('j M Y') : __('admin.dashboard.never'))
                 ->description($backup === null || $backup->lt(now()->subDays(30)) ? __('admin.dashboard.backup_old') : __('admin.dashboard.backup_help'))
                 ->color($backup === null || $backup->lt(now()->subDays(30)) ? 'warning' : 'gray')

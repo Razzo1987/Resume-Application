@@ -1,24 +1,30 @@
 <?php
 
 use App\Filament\Pages\ManageSystem;
+use App\Filament\Pages\ManageUpdates;
 use App\Models\User;
 use App\Support\Cron\Cron;
 use App\Support\Cron\CronJobs;
 use App\Support\Languages\Locales;
 use App\Support\Settings\Settings;
 use App\Support\System\Maintenance;
+use App\Support\System\SystemStatus;
 use App\Support\System\Updater;
 use App\Support\Update\AutoUpdate;
 use App\Support\Update\CronStop;
+use App\Support\Update\GitHub;
+use App\Support\Update\GitHubKeys;
 use App\Support\Update\PackageInspector;
 use App\Support\Update\Release;
 use App\Support\Update\ReleaseChecker;
 use App\Support\Update\ReleaseDownloader;
+use App\Support\Update\UpdateSources;
 use App\Support\Update\UpdateStorage;
 use App\Themes\ThemeManager;
 use Filament\Facades\Filament;
 use Illuminate\Http\Client\Request;
 use Illuminate\Support\Facades\Artisan;
+use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Http;
 use Livewire\Livewire;
@@ -260,9 +266,12 @@ it('refuses packages that cannot be installed', function (string $package, strin
 
 // --- Releases on GitHub ---------------------------------------------------------------------------------
 
-it('finds a newer release on GitHub, sending the token when there is one', function () {
-    app(UpdateStorage::class)->setToken('github_pat_test');
-    fakeLatestRelease(githubRelease(UPDATES_FIX));
+it('finds a newer release on GitHub, without sending a key to a public repository', function () {
+    app(GitHubKeys::class)->save(null, 'Themes', ['*'], 'github_pat_test');
+
+    Http::fake(fn (Request $request) => str_ends_with($request->url(), '/repos/Razzo1987/Resume-Application')
+        ? Http::response(['private' => false])
+        : Http::response(githubRelease(UPDATES_FIX)));
 
     $status = app(ReleaseChecker::class)->check();
     $release = app(ReleaseChecker::class)->available();
@@ -270,28 +279,82 @@ it('finds a newer release on GitHub, sending the token when there is one', funct
     expect($status['error'])->toBeNull()
         ->and($release?->version)->toBe(UPDATES_FIX)
         ->and($release?->package['name'])->toBe('resume-app-'.UPDATES_FIX.'.zip')
-        ->and(app(ReleaseChecker::class)->isStale())->toBeFalse();
+        ->and(app(ReleaseChecker::class)->isStale())->toBeFalse()
+        // Read with the key the first time, then GitHub says it is public: no key from now on
+        ->and(app(GitHub::class)->repository('Razzo1987/Resume-Application')['private'])->toBeFalse()
+        ->and(app(UpdateSources::class)->find('app')?->access())->toBe('public');
 
-    Http::assertSent(fn (Request $request): bool => $request->hasHeader('Authorization', 'Bearer github_pat_test')
-        && $request->hasHeader('X-GitHub-Api-Version'));
+    $sent = count(Http::recorded());
+    app(ReleaseChecker::class)->check();
+    $later = Http::recorded()->slice($sent)->values()->all();
+
+    expect($later)->toHaveCount(1)
+        ->and($later[0][0]->hasHeader('Authorization'))->toBeFalse()
+        ->and($later[0][0]->hasHeader('X-GitHub-Api-Version'))->toBeTrue();
 });
 
-it('keeps the GitHub token encrypted, with the one in .env taking precedence', function () {
-    $storage = app(UpdateStorage::class);
-    $storage->setToken('github_pat_secret');
+it('reads a public repository even with an expired key, and says the key is no longer valid', function () {
+    $key = app(GitHubKeys::class)->save(null, 'Old', ['*'], 'github_pat_expired');
 
-    expect(file_get_contents($storage->tokenFile()))->not->toContain('github_pat_secret')
-        ->and($storage->token())->toBe('github_pat_secret')
-        ->and($storage->tokenSource())->toBe('admin');
+    Http::fake(fn (Request $request) => $request->hasHeader('Authorization')
+        ? Http::response(['message' => 'Bad credentials'], 401)
+        : Http::response(githubRelease(UPDATES_FIX)));
 
+    expect(app(ReleaseChecker::class)->check()['error'])->toBeNull()
+        ->and(app(ReleaseChecker::class)->available()?->version)->toBe(UPDATES_FIX)
+        ->and(app(GitHubKeys::class)->find($key->id)?->state())->toBe('invalid')
+        ->and(app(SystemStatus::class)->alerts())->toHaveKey('github_key_expired');
+});
+
+it('keeps the GitHub keys encrypted and chooses the most specific one for a repository', function () {
+    $keys = app(GitHubKeys::class);
+    $all = $keys->save(null, 'All', ['*'], 'github_pat_all');
+    $owner = $keys->save(null, 'Acme', ['acme/*'], 'github_pat_owner');
+    $one = $keys->save(null, 'Themes', ['acme/themes'], 'github_pat_one');
+
+    expect(file_get_contents($keys->file()))->not->toContain('github_pat_')
+        ->and($keys->forRepository('acme/themes')?->id)->toBe($one->id)
+        ->and($keys->forRepository('ACME/other')?->id)->toBe($owner->id)
+        ->and($keys->forRepository('someone/else')?->id)->toBe($all->id);
+
+    // The .env key wins over the admin key for every repository, never over a more specific one
     config(['resume.updates.token' => 'from_env']);
 
-    expect($storage->token())->toBe('from_env')->and($storage->tokenSource())->toBe('env');
+    expect($keys->forRepository('someone/else')?->source)->toBe('env')
+        ->and($keys->forRepository('acme/themes')?->id)->toBe($one->id);
 
     config(['resume.updates.token' => null]);
-    $storage->setToken(null);
 
-    expect($storage->token())->toBeNull()->and($storage->tokenFile())->not->toBeFile();
+    // A blank token keeps the saved one, a new token forgets what was known about the old one
+    $keys->remember($one->id, ['status' => 'ok', 'expires_at' => now()->addDays(5)->toAtomString()]);
+    $keys->save($one->id, 'PRO themes', ['acme/themes'], '');
+
+    expect($keys->find($one->id)?->label)->toBe('PRO themes')
+        ->and($keys->find($one->id)?->token)->toBe('github_pat_one')
+        ->and($keys->find($one->id)?->state())->toBe('expiring');
+
+    $keys->save($one->id, 'PRO themes', ['acme/themes'], 'github_pat_new');
+
+    expect($keys->find($one->id)?->state())->toBe('unchecked');
+
+    expect(fn () => $keys->save(null, 'Bad', ['not a repository'], 'x'))->toThrow(InvalidArgumentException::class);
+
+    $keys->delete($owner->id);
+
+    expect($keys->forRepository('acme/other')?->id)->toBe($all->id);
+});
+
+it('turns the single token of the previous versions into a key for every repository', function () {
+    $storage = app(UpdateStorage::class);
+    File::ensureDirectoryExists($storage->directory());
+    file_put_contents($storage->tokenFile(), Crypt::encryptString('github_pat_legacy'));
+
+    $keys = app(GitHubKeys::class)->all();
+
+    expect($keys)->toHaveCount(1)
+        ->and($keys[0]->token)->toBe('github_pat_legacy')
+        ->and($keys[0]->scopes)->toBe(['*'])
+        ->and($storage->tokenFile())->not->toBeFile();
 });
 
 it('does not offer older versions, drafts or pre-releases', function (array $data) {
@@ -332,7 +395,7 @@ it('downloads the package in chunks and checks its SHA-256', function () {
         return Http::response(substr($content, (int) $range[1], (int) $range[2] - (int) $range[1] + 1), 206);
     });
 
-    $downloader = new ReleaseDownloader(app(UpdateStorage::class), app(ReleaseChecker::class), 8);
+    $downloader = new ReleaseDownloader(app(UpdateStorage::class), app(ReleaseChecker::class), app(GitHub::class), 8);
     $calls = 0;
 
     do {
@@ -352,7 +415,7 @@ it('deletes a download that does not match the published SHA-256', function () {
         ? Http::response(str_repeat('0', 64).'  resume-app-'.UPDATES_FIX.'.zip')
         : Http::response('0123456789', 206));
 
-    expect(fn () => (new ReleaseDownloader(app(UpdateStorage::class), app(ReleaseChecker::class)))->next($release))
+    expect(fn () => (new ReleaseDownloader(app(UpdateStorage::class), app(ReleaseChecker::class), app(GitHub::class)))->next($release))
         ->toThrow(RuntimeException::class)
         ->and(app(UpdateStorage::class)->packages())->toBe([]);
 });
@@ -364,7 +427,7 @@ it('refuses to download a release without its SHA-256 file', function () {
 
     Http::fake(fn () => Http::response('0123456789', 206));
 
-    expect(fn () => (new ReleaseDownloader(app(UpdateStorage::class), app(ReleaseChecker::class)))->next($release))
+    expect(fn () => (new ReleaseDownloader(app(UpdateStorage::class), app(ReleaseChecker::class), app(GitHub::class)))->next($release))
         ->toThrow(RuntimeException::class, 'SHA-256');
 
     Http::assertNothingSent();
@@ -401,22 +464,24 @@ it('shows a new version on the dashboard and on the system page', function () {
 
     $this->get('/admin')->assertOk()->assertSee('Disponibile la versione '.UPDATES_FIX);
 
-    $this->get('/admin/system')
+    $this->get('/admin/updates')
         ->assertOk()
         ->assertSee('Scarica e installa')
         ->assertSee('prima cosa')
         ->assertDontSee('<script>alert(1)</script>', escape: false);
+
+    $this->get('/admin/system')->assertOk()->assertSee('Disponibile la '.UPDATES_FIX)->assertSee('Apri Aggiornamenti');
 });
 
-it('checks GitHub on request from the system page', function () {
+it('checks GitHub on request from the updates page', function () {
     seedDemo();
     $this->actingAs(User::factory()->create());
     Filament::setCurrentPanel('admin');
     fakeLatestRelease(githubRelease(UPDATES_FIX));
 
-    Livewire::test(ManageSystem::class)
-        ->callAction('checkUpdates')
-        ->assertNotified('Disponibile la versione '.UPDATES_FIX);
+    Livewire::test(ManageUpdates::class)
+        ->callAction('checkAll')
+        ->assertNotified('Un aggiornamento disponibile');
 });
 
 it('updates from the system page: checks, safety copy, extraction outside Laravel, completion', function () {
@@ -429,7 +494,7 @@ it('updates from the system page: checks, safety copy, extraction outside Larave
     rename(updatePackage(UPDATES_FIX), $storage->packagesDirectory().'/resume-app-'.UPDATES_FIX.'.zip');
     $backups = glob(storage_path('app/private/backups/*.zip')) ?: [];
 
-    Livewire::test(ManageSystem::class)
+    Livewire::test(ManageUpdates::class)
         ->callAction('install', arguments: ['package' => 'resume-app-'.UPDATES_FIX.'.zip'])
         ->assertRedirectContains('?resume-update=');
 
@@ -476,7 +541,7 @@ it('refuses to start an update with a package that fails the checks', function (
     File::ensureDirectoryExists($storage->packagesDirectory());
     rename(updatePackage('1.9.0'), $storage->packagesDirectory().'/resume-app-1.9.0.zip');
 
-    Livewire::test(ManageSystem::class)
+    Livewire::test(ManageUpdates::class)
         ->callAction('install', arguments: ['package' => 'resume-app-1.9.0.zip'])
         ->assertNotified(__('admin.updates.install_failed'))
         ->assertNoRedirect();
@@ -633,13 +698,14 @@ it('lets the administrator choose the automatic update level', function () {
     $this->actingAs(User::factory()->create());
     Filament::setCurrentPanel('admin');
 
-    Livewire::test(ManageSystem::class)
+    Livewire::test(ManageUpdates::class)
         ->callAction('autoUpdates', data: ['level' => AutoUpdate::PATCH])
         ->assertNotified(__('admin.messages.saved'));
 
     expect(app(AutoUpdate::class)->level())->toBe(AutoUpdate::PATCH);
 
-    $this->get('/admin/system')->assertOk()->assertSee('Installa da solo le versioni di correzione')->assertSee('schedule:run');
+    $this->get('/admin/updates')->assertOk()->assertSee('Installa da solo le versioni di correzione');
+    $this->get('/admin/system')->assertOk()->assertSee('schedule:run');
 });
 
 it('checks GitHub at every cron run with a conditional request, and emails a new version once', function () {

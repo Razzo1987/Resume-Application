@@ -146,7 +146,10 @@ Every release is a **full package**: there are no patches to apply in a specific
 
 ### From the admin (version 2.0.3 and later)
 
-Admin → *System* → **Updates**:
+Admin → **Updates** (from version 2.4; before, *System* → *Updates*). The page lists everything that can be updated,
+the app and every installed theme, with the installed and the latest version, where it comes from (public or private
+repository, which GitHub key it uses) and its state: *Up to date*, *Version x.y.z available*, *A GitHub key is
+needed*, *The key has no access*, *Key expired or revoked*. For the app:
 
 - the site checks the GitHub releases of `RESUME_UPDATE_REPOSITORY` (default `Razzo1987/Resume-Application`):
   with the cron job every 30 minutes (conditional requests, which do not count against the GitHub limit), without it
@@ -154,8 +157,9 @@ Admin → *System* → **Updates**:
   and emails the administrators; *Check now* checks immediately;
 - **Download and install** fetches the package straight from GitHub to the server, in 8 MB chunks, and verifies the
   SHA-256 published with the release (a release without its `.sha256` file is not downloaded at all; the same
-  applies to theme updates); **Upload a package** sends a zip from your computer in 1 MB chunks, so the
-  hosting upload limit does not matter; a zip copied into `core/storage/app/private/updates/packages` with the File
+  applies to theme updates); **Upload a package** (drop the zip or browse) sends a zip from your computer in 1 MB
+  chunks, so the hosting upload limit does not matter: an app package goes to the checks below, a package with
+  themes is installed right away; a zip copied into `core/storage/app/private/updates/packages` with the File
   Manager is listed too;
 - before starting, the package is checked: it is a Resume App package, not older than the installed version, the
   server has the required PHP version and extensions, installed themes declare themselves compatible, there is
@@ -166,10 +170,17 @@ Admin → *System* → **Updates**:
 - back on the *System* page the update is completed automatically (migrations, caches, `.htaccess` block, version)
   and maintenance is turned off if it was off before.
 
-While the repository is private, a GitHub token is needed: a **fine-grained personal access token** with access to
-that repository only and the *Contents: Read-only* permission. Enter it with *GitHub token* on the same page (stored
-encrypted with the `APP_KEY` in `core/storage`, never in content exports) or set `RESUME_UPDATE_TOKEN` in
-`core/.env`. Public repositories need no token. If the server cannot reach GitHub, upload the package instead.
+**GitHub keys** are needed only for private repositories (for example those of PRO themes): a **fine-grained personal
+access token** with access to those repositories only and the *Contents: Read-only* permission. On the *Updates*
+page, *GitHub keys* → *Add a key* (or the button of the row that needs it, which fills in the owner): a name, the
+repositories it is used for (`owner/*`, `owner/repository` or `*`) and the token. *Save and verify* asks GitHub
+whether the key is valid, until when, and which of the repositories in use it can read, then checks the updates
+again. Several keys can coexist (for example one per theme vendor): each repository uses the most specific one.
+Keys are stored encrypted with the `APP_KEY` in `core/storage` (never in content exports); `RESUME_UPDATE_TOKEN` in
+`core/.env` is listed too, read-only, for every repository. Public repositories never get a key, so an expired key
+cannot stop the app updates; the expiration date of the keys is read from GitHub and the dashboard warns two weeks
+before. A single token entered with an older version becomes a key for every repository. If the server cannot reach
+GitHub, upload the package instead.
 
 ### Scheduled jobs (cron) and automatic updates
 
@@ -219,7 +230,8 @@ engines are told to come back later, and the admin area keeps working.
 *System* → *Tools* → *Export the content* creates a zip with the content (database tables, uploaded images, CV PDFs;
 no users, passwords or `.env`). *Import content* on another installation (same or newer version) replaces all its
 content with the zip; users and passwords stay as they are, and a copy of the previous content is saved in
-`core/storage/app/private/backups`.
+`core/storage/app/private/backups`. The zip is dropped on the upload area (or chosen with *Browse*) and sent in 1 MB
+chunks, so the hosting upload limit does not matter; it is then chosen in the list of the exports on the server.
 
 ### From version 1
 

@@ -178,8 +178,9 @@ switch, so things can be prepared and published later. Items with a public page 
 | **Social profiles** | LinkedIn, GitHub, GitLab, X, Bluesky, Mastodon, Facebook, Instagram, YouTube, Medium, SlideShare, Stack Overflow or any website, with order and visibility. |
 | **Redirects** | Old addresses that must lead to new ones (301 or 302), for example after moving from another site. Changing a slug or a URL word creates the redirect by itself. |
 | **Settings** | See [Settings](#settings). |
-| **Themes** | Installed themes with their version: *Activate*, choose the variant (palette and fonts) of themes that have them, *Install or update a theme* (zip with one or more themes), *Check for theme updates* and *Update to X.Y.Z* for themes published on GitHub, remove the ones not in use. See [THEMES.md](THEMES.md). |
-| **System** | Version, updates (also automatic), scheduled jobs (cron), maintenance and tools: clear caches, check the protection of `core/`, `.htaccess` rules, delete files left by older versions, export and import the content. Updates are described in [INSTALL.md](INSTALL.md#updating). |
+| **Themes** | Installed themes with their version: *Activate*, choose the variant (palette and fonts) of themes that have them, *Install or update a theme* (zip with one or more themes), the update state of each theme with *Update to X.Y.Z* for themes published on GitHub, remove the ones not in use. See [THEMES.md](THEMES.md). |
+| **Updates** | Everything that can be updated (the app and the installed themes) with its state and where it comes from, *Check now*, *Upload a package* (app or themes), the update of the app (also automatic) and the **GitHub keys** for private repositories. See [INSTALL.md](INSTALL.md#updating). |
+| **System** | Version, summary of the updates, scheduled jobs (cron), maintenance and tools: clear caches, check the protection of `core/`, `.htaccess` rules, delete files left by older versions, export and import the content. Updates are described in [INSTALL.md](INSTALL.md#updating). |
 
 ## Languages and translations
 
@@ -249,7 +250,7 @@ to the next request (if they do not, *System* → *Tools* → *Clear caches*).
 |---|---|---|
 | `APP_URL` | from the installer | public address of the site, used for absolute links, sitemap and canonical URLs |
 | `APP_ENV`, `APP_DEBUG` | `production`, `false` | never turn `APP_DEBUG` on in production: errors would show paths and settings |
-| `APP_KEY` | generated | encryption key (sessions, two-factor secrets, GitHub token); changing it logs everybody out |
+| `APP_KEY` | generated | encryption key (sessions, two-factor secrets, GitHub keys); changing it logs everybody out |
 | `APP_LOCALE`, `APP_FALLBACK_LOCALE` | from the installer | languages used before the database is ready; the site languages are managed from the admin |
 | `RESUME_ADMIN_PATH` | `admin` | address of the admin area (`/admin`) |
 | `RESUME_ADMIN_LOCALE` | `it` or `en` | default language of the admin interface (each administrator can choose another one in the profile) |
@@ -257,7 +258,7 @@ to the next request (if they do not, *System* → *Tools* → *Clear caches*).
 | `RESUME_PAGE_CACHE` | `true` | HTML cache of the public pages; turn it off only to debug |
 | `RESUME_TRUSTED_PROXIES` | empty | only when the site is behind a proxy that changes the request address (CDN or tunnel such as Cloudflare, GitHub Codespaces): `*` for any proxy, or a comma-separated list of IP addresses or networks. Address, protocol and visitor IP are then read from the `X-Forwarded-*` headers. Leave it empty otherwise: with `*` and no proxy in front, anybody could fake those headers |
 | `RESUME_UPDATE_REPOSITORY` | `Razzo1987/Resume-Application` | GitHub repository whose releases are offered as updates |
-| `RESUME_UPDATE_TOKEN` | empty | GitHub token for a private repository (it can also be entered from *System*) |
+| `RESUME_UPDATE_TOKEN` | empty | GitHub key for every private repository (keys can also be added, per repository, on the *Updates* page) |
 | `RESUME_UPDATE_API` | `https://api.github.com` | GitHub API address (GitHub Enterprise or tests) |
 | `RESUME_GEOIP_ACCOUNT_ID`, `RESUME_GEOIP_LICENSE_KEY` | empty | MaxMind account for the GeoLite databases of the statistics (they can also be entered from *Statistics*) |
 | `DB_HOST`, `DB_PORT`, `DB_DATABASE`, `DB_USERNAME`, `DB_PASSWORD` | from the installer | database connection |
@@ -274,7 +275,7 @@ to the next request (if they do not, *System* → *Tools* → *Clear caches*).
 - Uploaded images are resized and converted to WebP; CV PDFs are stored outside the web root.
 - Visit statistics (off by default) use no cookies, store the IP address only shortened and recognize a visitor for
   24 hours at most; see [Statistics](#statistics).
-- Content exports contain no users, passwords, `.env`, GitHub token, MaxMind account or statistics.
+- Content exports contain no users, passwords, `.env`, GitHub keys, MaxMind account or statistics.
 
 ## Backups
 

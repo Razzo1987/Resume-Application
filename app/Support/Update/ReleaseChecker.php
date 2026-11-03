@@ -6,10 +6,8 @@ namespace App\Support\Update;
 
 use App\Support\System\Updater;
 use Illuminate\Http\Client\ConnectionException;
-use Illuminate\Http\Client\PendingRequest;
 use Illuminate\Http\Client\Response;
 use Illuminate\Support\Carbon;
-use Illuminate\Support\Facades\Http;
 use Throwable;
 
 /**
@@ -23,21 +21,32 @@ class ReleaseChecker
     public function __construct(
         private readonly UpdateStorage $storage,
         private readonly Updater $updater,
+        private readonly GitHub $github,
     ) {}
+
+    public function repository(): string
+    {
+        return trim((string) config('resume.updates.repository'), '/');
+    }
 
     /**
      * Result of the last check, without calling GitHub.
      *
-     * @return array{checked_at: ?Carbon, release: ?Release, error: ?string}
+     * @return array{checked_at: ?Carbon, release: ?Release, error: ?string, problem: ?string}
      */
     public function status(): array
     {
         $data = $this->storage->readJson($this->storage->checkFile()) ?? [];
+        $problem = is_string($data['problem'] ?? null) ? $data['problem'] : null;
 
         return [
             'checked_at' => is_string($data['checked_at'] ?? null) ? Carbon::parse($data['checked_at']) : null,
             'release' => is_array($data['release'] ?? null) ? Release::fromArray($data['release']) : null,
-            'error' => is_string($data['error'] ?? null) ? $data['error'] : null,
+            // Problems with a code are translated now, in the language of who reads them
+            'error' => $problem !== null && $problem !== 'other'
+                ? $this->github->message($problem, is_int($data['status'] ?? null) ? $data['status'] : null)
+                : (is_string($data['error'] ?? null) ? $data['error'] : null),
+            'problem' => $problem,
         ];
     }
 
@@ -86,32 +95,37 @@ class ReleaseChecker
     /**
      * Asks GitHub for the latest release and saves the result.
      *
-     * @return array{checked_at: ?Carbon, release: ?Release, error: ?string}
+     * @return array{checked_at: ?Carbon, release: ?Release, error: ?string, problem: ?string}
      */
     public function check(): array
     {
         $release = null;
         $error = null;
+        $problem = null;
+        $status = null;
         $previous = $this->status()['release'];
         $etag = $previous !== null ? $this->etag() : null;
         $newEtag = $etag;
 
         try {
-            $request = $this->api();
-            $response = ($etag !== null ? $request->withHeaders(['If-None-Match' => $etag]) : $request)->get($this->apiUrl('releases/latest'));
+            $response = $this->github->get($this->repository(), 'releases/latest', $etag !== null ? ['If-None-Match' => $etag] : []);
 
             if ($response->status() === 304) {
                 $release = $previous; // nothing new since the last check
             } elseif ($response->successful()) {
                 $newEtag = $response->header('ETag') !== '' ? $response->header('ETag') : null;
                 $release = Release::fromGitHub((array) $response->json());
-                $error = $release === null ? __('admin.updates.errors.no_version') : null;
+                [$problem, $error] = $release === null ? ['other', (string) __('admin.updates.errors.no_version')] : [null, null];
             } else {
-                $error = $this->describe($response);
+                $problem = $this->github->repository($this->repository())['problem'] ?? 'http';
+                $status = $response->status();
+                $error = $this->github->message($problem, $status);
             }
         } catch (ConnectionException) {
-            $error = __('admin.updates.errors.unreachable');
+            $problem = 'unreachable';
+            $error = $this->github->message($problem);
         } catch (Throwable $exception) {
+            $problem = 'other';
             $error = $exception->getMessage();
         }
 
@@ -120,6 +134,8 @@ class ReleaseChecker
             // If GitHub does not respond, the last known release is kept
             'release' => ($release ?? $previous)?->toArray(),
             'error' => $error,
+            'problem' => $problem,
+            'status' => $status,
             'etag' => $newEtag,
         ]);
 
@@ -127,35 +143,10 @@ class ReleaseChecker
     }
 
     /**
-     * Request to the GitHub API, with the token if there is one.
+     * Message for a failed response from the app's repository.
      */
-    public function api(): PendingRequest
-    {
-        $request = Http::timeout(8)
-            ->connectTimeout(4)
-            ->withHeaders([
-                'Accept' => 'application/vnd.github+json',
-                'X-GitHub-Api-Version' => '2022-11-28',
-                'User-Agent' => 'Resume-App/'.$this->updater->codeVersion(),
-            ]);
-
-        $token = $this->storage->token();
-
-        return $token !== null ? $request->withToken($token) : $request;
-    }
-
-    public function apiUrl(string $path): string
-    {
-        return rtrim((string) config('resume.updates.api'), '/').'/repos/'.trim((string) config('resume.updates.repository'), '/').'/'.$path;
-    }
-
     public function describe(Response $response): string
     {
-        return match (true) {
-            $response->status() === 401 => __('admin.updates.errors.token_invalid'),
-            $response->status() === 403 && $response->header('X-RateLimit-Remaining') === '0' => __('admin.updates.errors.rate_limited'),
-            $response->status() === 404 => __('admin.updates.errors.not_found'),
-            default => __('admin.updates.errors.http', ['status' => $response->status()]),
-        };
+        return $this->github->describe($response, $this->repository());
     }
 }

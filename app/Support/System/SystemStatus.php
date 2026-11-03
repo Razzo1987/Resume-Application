@@ -5,13 +5,17 @@ declare(strict_types=1);
 namespace App\Support\System;
 
 use App\Support\Update\AutoUpdate;
+use App\Support\Update\GitHubKey;
+use App\Support\Update\GitHubKeys;
 use App\Support\Update\ReleaseChecker;
+use App\Support\Update\UpdateSource;
+use App\Support\Update\UpdateSources;
 use App\Support\Update\UpdateStorage;
 use Illuminate\Support\Facades\Cache;
 
 /**
  * System status for the admin: protection of core/ (checked at most once a day),
- * maintenance, update to complete, new version available.
+ * maintenance, update to complete, new versions of the app and of the themes, GitHub keys to renew or add.
  */
 class SystemStatus
 {
@@ -24,6 +28,8 @@ class SystemStatus
         private readonly ReleaseChecker $releases,
         private readonly AutoUpdate $auto,
         private readonly UpdateStorage $storage,
+        private readonly UpdateSources $sources,
+        private readonly GitHubKeys $keys,
     ) {}
 
     public function coreProtection(bool $refresh = false): string
@@ -70,6 +76,24 @@ class SystemStatus
 
         if ($available !== null) {
             $alerts[$this->storage->package($available->packageName()) !== null ? 'update_downloaded' : 'update_available'] = 'info';
+        }
+
+        $sources = $this->sources->all();
+
+        if (array_filter($sources, fn (UpdateSource $source): bool => ! $source->isApp() && $source->hasUpdate()) !== []) {
+            $alerts['theme_updates'] = 'info';
+        }
+
+        if (array_filter($sources, fn (UpdateSource $source): bool => $source->needsKey()) !== []) {
+            $alerts['update_sources_key'] = 'warning';
+        }
+
+        $states = array_map(fn (GitHubKey $key): string => $key->state(), $this->keys->all());
+
+        if (array_intersect($states, ['expired', 'invalid']) !== []) {
+            $alerts['github_key_expired'] = 'danger';
+        } elseif (in_array('expiring', $states, true)) {
+            $alerts['github_key_expiring'] = 'warning';
         }
 
         return $alerts;

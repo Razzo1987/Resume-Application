@@ -3,7 +3,6 @@
 namespace App\Filament\Pages;
 
 use App\Support\Cron\Cron;
-use App\Support\Settings\Settings;
 use App\Support\System\Backup;
 use App\Support\System\CoreProbe;
 use App\Support\System\Htaccess;
@@ -11,36 +10,25 @@ use App\Support\System\Maintenance;
 use App\Support\System\OrphanFiles;
 use App\Support\System\SystemStatus;
 use App\Support\System\Updater;
-use App\Support\Update\AutoUpdate;
-use App\Support\Update\PackageInspector;
-use App\Support\Update\ReleaseChecker;
-use App\Support\Update\ReleaseDownloader;
 use App\Support\Update\UpdateRunner;
-use App\Support\Update\UpdateStorage;
+use App\Support\Update\UpdateSources;
 use App\Themes\ThemeManager;
 use BackedEnum;
 use Filament\Actions\Action;
 use Filament\Actions\ActionGroup;
-use Filament\Forms\Components\FileUpload;
-use Filament\Forms\Components\Radio;
 use Filament\Forms\Components\Select;
-use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
 use Filament\Notifications\Notification;
 use Filament\Pages\Page;
-use Filament\Schemas\Components\Utilities\Get;
 use Filament\Support\Icons\Heroicon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Mail;
-use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\HtmlString;
-use Illuminate\Support\Str;
 use RuntimeException;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
 use Throwable;
 
 /**
- * System: version, updates (check on GitHub, package download or upload, installation), completion of updates,
+ * System: state of the server, summary of the updates (managed in ManageUpdates), completion of updates,
  * maintenance, cache, .htaccess, protection of core/, orphan files, content export and import.
  */
 class ManageSystem extends Page
@@ -113,34 +101,8 @@ class ManageSystem extends Page
             'laravel' => app()->version(),
             'database' => $database,
             'paths' => ['core' => base_path(), 'webroot' => public_path()],
-            ...$this->updateViewData(),
+            'sources' => app(UpdateSources::class)->all(),
             ...$this->cronViewData(),
-        ];
-    }
-
-    /**
-     * @return array<string, mixed>
-     */
-    private function updateViewData(): array
-    {
-        $releases = app(ReleaseChecker::class);
-        $storage = app(UpdateStorage::class);
-        $status = $releases->status();
-        $available = $releases->available();
-
-        return [
-            'updateCheck' => $status,
-            'updateAvailable' => $available,
-            'updateNotes' => $available !== null && $available->notes !== ''
-                ? new HtmlString(Str::markdown($available->notes, ['html_input' => 'strip', 'allow_unsafe_links' => false]))
-                : null,
-            'updateRepository' => (string) config('resume.updates.repository'),
-            'updateTokenSource' => $storage->tokenSource(),
-            'updatePackages' => $storage->packages(),
-            'updateSupported' => app(PackageInspector::class)->isPackagedInstall(),
-            'updateUploadUrl' => route('filament.admin.update-upload'),
-            'autoLevel' => app(AutoUpdate::class)->level(),
-            'autoEvent' => app(AutoUpdate::class)->lastEvent(),
         ];
     }
 
@@ -161,155 +123,22 @@ class ManageSystem extends Page
         ];
     }
 
-    public function autoUpdatesAction(): Action
-    {
-        return Action::make('autoUpdates')
-            ->label(__('admin.updates.auto.change'))
-            ->link()
-            ->size('sm')
-            ->fillForm(fn (): array => ['level' => app(AutoUpdate::class)->level()])
-            ->modalHeading(__('admin.updates.auto.title'))
-            ->modalDescription(__('admin.updates.auto.help'))
-            ->schema([
-                Radio::make('level')
-                    ->hiddenLabel()
-                    ->options([
-                        AutoUpdate::OFF => __('admin.updates.auto.levels.off'),
-                        AutoUpdate::DOWNLOAD => __('admin.updates.auto.levels.download'),
-                        AutoUpdate::PATCH => __('admin.updates.auto.levels.patch'),
-                    ])
-                    ->descriptions([
-                        AutoUpdate::OFF => __('admin.updates.auto.descriptions.off'),
-                        AutoUpdate::DOWNLOAD => __('admin.updates.auto.descriptions.download'),
-                        AutoUpdate::PATCH => __('admin.updates.auto.descriptions.patch'),
-                    ])
-                    ->required(),
-            ])
-            ->action(function (array $data): void {
-                app(Settings::class)->set(AutoUpdate::SETTING, (string) $data['level']);
-                Notification::make()->success()->title(__('admin.messages.saved'))->send();
-            });
-    }
-
     /**
-     * Downloads the next chunk of the new version's package (called repeatedly by the page).
-     *
-     * @return array{received?: int, total?: int, done?: bool, file?: ?string, error?: string}
+     * After the upload in "Import the content": the new export is chosen in the list of the form.
      */
-    public function downloadChunk(): array
+    public function backupUploaded(string $file): ?string
     {
-        $release = app(ReleaseChecker::class)->available();
-
-        if ($release === null) {
-            return ['error' => (string) __('admin.updates.errors.no_release')];
+        if (app(Backup::class)->find($file) === null) {
+            return (string) __('admin.system.restore_errors.not_zip');
         }
 
-        try {
-            return app(ReleaseDownloader::class)->next($release);
-        } catch (Throwable $exception) {
-            return ['error' => $exception->getMessage()];
+        $index = array_key_last($this->mountedActions);
+
+        if ($index !== null) {
+            $this->mountedActions[$index]['data']['existing'] = $file;
         }
-    }
 
-    public function checkUpdatesAction(): Action
-    {
-        return Action::make('checkUpdates')
-            ->label(__('admin.updates.check_now'))
-            ->icon(Heroicon::OutlinedArrowPath)
-            ->color('gray')
-            ->size('sm')
-            ->action(function (): void {
-                $status = app(ReleaseChecker::class)->check();
-                $available = app(ReleaseChecker::class)->available();
-
-                $notification = match (true) {
-                    $status['error'] !== null => Notification::make()->danger()->title(__('admin.updates.check_failed'))->body($status['error']),
-                    $available !== null => Notification::make()->info()->title(__('admin.updates.available', ['version' => $available->version])),
-                    default => Notification::make()->success()->title(__('admin.updates.up_to_date')),
-                };
-
-                $notification->send();
-            });
-    }
-
-    public function githubTokenAction(): Action
-    {
-        return Action::make('githubToken')
-            ->label(__('admin.updates.token'))
-            ->icon(Heroicon::OutlinedKey)
-            ->color('gray')
-            ->size('sm')
-            ->modalDescription(new HtmlString(__('admin.updates.token_help', ['repository' => e((string) config('resume.updates.repository'))])))
-            ->schema([
-                TextInput::make('token')
-                    ->label(__('admin.updates.token'))
-                    ->password()
-                    ->revealable()
-                    ->placeholder(fn (): string => app(UpdateStorage::class)->tokenSource() !== null ? __('admin.updates.token_saved') : '')
-                    ->helperText(fn (): ?string => app(UpdateStorage::class)->tokenSource() === 'env' ? __('admin.updates.token_env') : null),
-                Toggle::make('remove')
-                    ->label(__('admin.updates.token_remove'))
-                    ->visible(fn (): bool => app(UpdateStorage::class)->tokenSource() === 'admin'),
-            ])
-            ->action(function (array $data): void {
-                $storage = app(UpdateStorage::class);
-
-                if ($data['remove'] ?? false) {
-                    $storage->setToken(null);
-                } elseif (filled($data['token'] ?? null)) {
-                    $storage->setToken((string) $data['token']);
-                }
-
-                Notification::make()->success()->title(__('admin.messages.saved'))->send();
-            });
-    }
-
-    /**
-     * Checks the package and, if everything is fine, starts the update.
-     */
-    public function installAction(): Action
-    {
-        return Action::make('install')
-            ->label(__('admin.updates.install'))
-            ->icon(Heroicon::OutlinedArrowDownCircle)
-            ->size('sm')
-            ->modalHeading(fn (array $arguments): string => __('admin.updates.install_heading', ['file' => (string) ($arguments['package'] ?? '')]))
-            ->modalContent(function (array $arguments) {
-                $path = app(UpdateStorage::class)->package((string) ($arguments['package'] ?? ''));
-
-                return view('filament.pages.system-update-check', [
-                    'report' => $path !== null ? app(PackageInspector::class)->inspect($path) : null,
-                ]);
-            })
-            ->modalSubmitActionLabel(__('admin.updates.install_submit'))
-            ->action(function (array $arguments): void {
-                $path = app(UpdateStorage::class)->package((string) ($arguments['package'] ?? ''));
-
-                try {
-                    if ($path === null) {
-                        throw new RuntimeException((string) __('admin.updates.problems.not_zip'));
-                    }
-
-                    $url = app(UpdateRunner::class)->start($path, static::getUrl(['update' => 'finish']));
-                    $this->redirect($url);
-                } catch (RuntimeException $exception) {
-                    Notification::make()->danger()->title(__('admin.updates.install_failed'))->body($exception->getMessage())->persistent()->send();
-                }
-            });
-    }
-
-    public function deletePackageAction(): Action
-    {
-        return Action::make('deletePackage')
-            ->label(__('admin.updates.delete_package'))
-            ->icon(Heroicon::OutlinedTrash)
-            ->iconButton()
-            ->color('gray')
-            ->size('sm')
-            ->requiresConfirmation()
-            ->action(function (array $arguments): void {
-                app(UpdateStorage::class)->deletePackage((string) ($arguments['package'] ?? ''));
-            });
+        return null;
     }
 
     /**
@@ -435,26 +264,20 @@ class ManageSystem extends Page
                     ->icon(Heroicon::OutlinedArrowUpTray)
                     ->color('danger')
                     ->modalDescription(__('admin.system.restore_help'))
+                    // Chunked upload: the export lands among those on the server and is chosen in the list below
+                    ->modalContent(fn () => view('filament.pages.system-restore-upload'))
                     ->schema([
-                        FileUpload::make('package')
-                            ->label(__('admin.system.restore_file'))
-                            ->helperText(__('admin.system.upload_limit', ['size' => ini_get('upload_max_filesize') ?: '?', 'path' => 'core/storage/app/private/backups']))
-                            ->disk('local')
-                            ->directory('restore-uploads')
-                            ->acceptedFileTypes(['application/zip', 'application/x-zip-compressed'])
-                            ->maxSize(50 * 1024)
-                            ->required(fn (Get $get): bool => blank($get('existing'))),
                         Select::make('existing')
                             ->label(__('admin.system.restore_existing'))
                             ->options(fn (): array => app(Backup::class)->available())
-                            ->placeholder(__('admin.system.restore_existing_none')),
+                            ->placeholder(__('admin.system.restore_existing_none'))
+                            ->helperText(__('admin.system.restore_server', ['path' => 'core/storage/app/private/backups']))
+                            ->required(),
                     ])
                     ->modalSubmitActionLabel(__('admin.system.restore_submit'))
                     ->action(function (array $data): void {
                         $backup = app(Backup::class);
-                        $disk = Storage::disk('local');
-                        $upload = filled($data['package'] ?? null) ? (string) $data['package'] : null;
-                        $path = $upload !== null ? $disk->path($upload) : $backup->find((string) ($data['existing'] ?? ''));
+                        $path = $backup->find((string) ($data['existing'] ?? ''));
 
                         try {
                             if ($path === null) {
@@ -466,10 +289,6 @@ class ManageSystem extends Page
                             Notification::make()->success()->title(__('admin.system.restore_done', $result))->persistent()->send();
                         } catch (RuntimeException $exception) {
                             Notification::make()->danger()->title(__('admin.system.restore_failed'))->body($exception->getMessage())->persistent()->send();
-                        } finally {
-                            if ($upload !== null) {
-                                $disk->delete($upload);
-                            }
                         }
                     }),
             ])

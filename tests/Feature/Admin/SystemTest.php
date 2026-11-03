@@ -12,7 +12,6 @@ use App\Support\System\OrphanFiles;
 use App\Support\System\Updater;
 use App\Support\System\UploadsGuard;
 use Filament\Facades\Filament;
-use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Storage;
 use Livewire\Livewire;
@@ -257,18 +256,35 @@ it('writes the .htaccess of uploads, which serves only images and PDFs and never
     File::deleteDirectory($guard->directory());
 });
 
-it('imports an export from the system page', function () {
+it('imports an export uploaded in chunks, which is chosen in the list by itself', function () {
     $export = app(Backup::class)->create();
+    $content = (string) file_get_contents($export);
+    @unlink($export);
     Experience::query()->get()->each->delete();
 
+    $query = ['target' => 'backup', 'id' => str_repeat('c', 32), 'index' => 0, 'count' => 1, 'name' => 'export.zip'];
+    $this->call('POST', route('filament.admin.update-upload').'?'.http_build_query($query), [], [], [], ['CONTENT_TYPE' => 'application/octet-stream', 'HTTP_ACCEPT' => 'application/json'], $content)
+        ->assertOk()
+        ->assertJson(['done' => true, 'file' => 'export.zip']);
+
+    expect(app(Backup::class)->find('export.zip'))->not->toBeNull();
+
     Livewire::test(ManageSystem::class)
-        ->callAction('restore', ['package' => UploadedFile::fake()->createWithContent('export.zip', (string) file_get_contents($export))])
+        ->mountAction('restore')
+        ->call('backupUploaded', 'export.zip')
+        ->assertReturned(null)
+        ->assertSchemaStateSet(['existing' => 'export.zip'])
+        ->callMountedAction()
+        ->assertHasNoActionErrors()
         ->assertNotified();
 
     expect(Experience::query()->count())->toBeGreaterThan(0);
 
-    @unlink($export);
-    array_map('unlink', glob(storage_path('app/private/backups/resume-backup-*.zip')) ?: []);
+    // A second upload with the same name does not overwrite the first one
+    $this->call('POST', route('filament.admin.update-upload').'?'.http_build_query([...$query, 'id' => str_repeat('d', 32)]), [], [], [], ['CONTENT_TYPE' => 'application/octet-stream', 'HTTP_ACCEPT' => 'application/json'], 'x')
+        ->assertJson(['done' => true, 'file' => 'export-1.zip']);
+
+    array_map('unlink', glob(storage_path('app/private/backups/{export,resume-backup-}*.zip'), GLOB_BRACE) ?: []);
 });
 
 it('imports an export already on the server, chosen from the list', function () {

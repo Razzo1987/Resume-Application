@@ -121,9 +121,11 @@ theme on GitHub:
 
 Several themes can be published in the same repository, each with its own tag prefix: the app makes one request per
 repository (conditional, so an unchanged answer does not count against the GitHub limit). The check runs with the
-cron job *New theme versions* (every 30 minutes) or from *Themes* → *Check for theme updates*; the administrators
-get one email per theme and version, and the *Themes* page shows *Update to X.Y.Z*.
+cron job *New theme versions* (every 30 minutes) or from *Updates* → *Check now*; the administrators get one email
+per theme and version, and the *Updates* and *Themes* pages show the state of every theme and *Update to X.Y.Z*.
 
-**Private repositories** need the GitHub token of *System* → *Updates*: a fine-grained token with access to those
-repositories and the permission *Contents: Read-only*. The same token still works for the app updates, because public
-repositories can always be read.
+**Private repositories** need a GitHub key of the *Updates* page: a fine-grained token with access to those
+repositories and the permission *Contents: Read-only*, used for `owner/*` or for the single repositories (see
+[INSTALL.md](INSTALL.md#from-the-admin-version-203-and-later)). The page says for every theme whether its repository is
+public or private, which key it uses and what is missing (*A GitHub key is needed*, *The key has no access*, *Key
+expired or revoked*). Public repositories never get a key.

@@ -81,12 +81,14 @@ class AdminPanelProvider extends PanelProvider
                 NavigationGroup::make(fn (): string => __('admin.nav.site')),
             ])
             ->sidebarCollapsibleOnDesktop()
-            // Chunked upload of the update package (System page)
+            // Chunked upload of the zip files (app and theme packages, content exports), see x-admin.upload
             ->authenticatedRoutes(function (): void {
                 Route::post('system/update-upload', UpdateUploadController::class)->name('update-upload');
             })
             // "Go to site" in the top bar, before the user menu
             ->renderHook(PanelsRenderHook::USER_MENU_BEFORE, fn (): View => view('filament.site-link', ['url' => SiteActions::homeUrl()]))
+            // Script and styles of the zip upload, available also in the modals
+            ->renderHook(PanelsRenderHook::BODY_END, fn (): View => view('filament.upload-assets'))
             ->middleware([
                 EncryptCookies::class,
                 AddQueuedCookiesToResponse::class,

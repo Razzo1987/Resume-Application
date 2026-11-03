@@ -1,8 +1,12 @@
 <?php
 
 use App\Filament\Pages\ManageThemes;
+use App\Filament\Pages\ManageUpdates;
 use App\Models\User;
 use App\Support\Settings\Settings;
+use App\Support\System\SystemStatus;
+use App\Support\Update\GitHubKeys;
+use App\Support\Update\UpdateSources;
 use App\Support\Update\UpdateStorage;
 use App\Themes\Compatibility;
 use App\Themes\ThemeException;
@@ -222,11 +226,12 @@ it('shows why an upload is refused', function () {
     File::ensureDirectoryExists($uploads);
     copy(themeZip(extra: ['dist/x.php' => '<?php']), "{$uploads}/bad.zip");
 
+    // The reason is shown in the upload area (the method returns it)
     Livewire::test(ManageThemes::class)
         ->call('installUploaded', 'bad.zip')
-        ->assertNotified(__('admin.themes.errors.title'))
+        ->assertReturned(fn (?string $error): bool => $error !== null && $error !== '')
         ->call('installUploaded', '../../.env')
-        ->assertNotified(__('admin.themes.errors.title'));
+        ->assertReturned(__('admin.themes.errors.not_zip'));
 
     expect(app(ThemeManager::class)->installed())->toBe(['base' => 'Base']);
 });
@@ -483,14 +488,15 @@ it('finds, announces and installs theme updates published on GitHub', function (
         ->and(glob("{$this->sandbox}/storage/app/updates/packages/*") ?: [])->toBe([]);
 });
 
-it('explains that a private repository of themes needs the token', function () {
+it('explains that a private repository of themes needs a key', function () {
     [$manifest, $files] = variantTheme();
     app(ThemeInstaller::class)->install(themeZip($manifest, $files));
 
     Http::fake(['api.github.com/*' => Http::response(['message' => 'Not Found'], 404)]);
 
-    expect(app(ThemeUpdates::class)->run(true))->toBe(__('admin.themes.updates.errors.private'))
-        ->and(app(ThemeUpdates::class)->available())->toBe([]);
+    expect(app(ThemeUpdates::class)->run(true))->toBe(__('admin.updates.github.needs_key'))
+        ->and(app(ThemeUpdates::class)->available())->toBe([])
+        ->and(app(UpdateSources::class)->find('demo-pro')?->state)->toBe('needs_key');
 });
 
 it('has nothing to check without themes that declare updates', function () {
@@ -499,4 +505,122 @@ it('has nothing to check without themes that declare updates', function () {
     expect(app(ThemeUpdates::class)->run(true))->toBe('no themes');
 
     Http::assertNothingSent();
+});
+
+it('reads a private repository of themes with its key, and says so on the Updates page', function () {
+    [$manifest, $files] = variantTheme();
+    app(ThemeInstaller::class)->install(themeZip($manifest, $files));
+    [$next, $nextFiles] = variantTheme(version: '1.2.0');
+    $package = (string) file_get_contents(themeZip($next, $nextFiles));
+    $key = app(GitHubKeys::class)->save(null, 'PRO', ['acme/*'], 'github_pat_pro');
+
+    Http::fake(function (Request $request) use ($package) {
+        if (! $request->hasHeader('Authorization', 'Bearer github_pat_pro')) {
+            return Http::response(['message' => 'Not Found'], 404);
+        }
+
+        return match (true) {
+            str_ends_with($request->url(), '/repos/acme/resume-themes') => Http::response(['private' => true]),
+            str_contains($request->url(), '/releases?') => Http::response([themeRelease('demo-pro', '1.2.0')], 200, ['github-authentication-token-expiration' => now()->addDays(10)->format('Y-m-d H:i:s O')]),
+            str_ends_with($request->url(), '-sha') => Http::response(hash('sha256', $package).'  demo-pro-1.2.0.zip'),
+            default => Http::response($package),
+        };
+    });
+
+    app(ThemeUpdates::class)->check();
+    $source = app(UpdateSources::class)->find('demo-pro');
+
+    expect($source?->state)->toBe('available')
+        ->and($source?->access())->toBe('private')
+        ->and($source?->key?->id)->toBe($key->id)
+        // The expiration date comes with the answers of GitHub: the dashboard warns in time
+        ->and(app(GitHubKeys::class)->find($key->id)?->state())->toBe('expiring')
+        ->and(app(SystemStatus::class)->alerts())->toHaveKeys(['theme_updates', 'github_key_expiring']);
+
+    $this->actingAs(User::factory()->create());
+    $this->get('/admin/updates')->assertOk()
+        ->assertSee('Demo-pro')
+        ->assertSee('acme/resume-themes')
+        ->assertSee('Disponibile la 1.2.0')
+        ->assertSee('chiave &quot;PRO&quot;', escape: false)
+        ->assertDontSee('github_pat_pro');
+
+    // The package is downloaded through the API, with the key
+    expect(app(ThemeUpdates::class)->update('demo-pro')['theme']->version)->toBe('1.2.0');
+    Http::assertSent(fn (Request $request): bool => str_contains($request->url(), 'releases/assets/demo-pro-1.2.0') && $request->hasHeader('Authorization'));
+});
+
+it('tells a missing key from a key without access to the repository', function () {
+    [$manifest, $files] = variantTheme();
+    app(ThemeInstaller::class)->install(themeZip($manifest, $files));
+    Http::fake(['api.github.com/*' => Http::response(['message' => 'Not Found'], 404)]);
+
+    app(ThemeUpdates::class)->check();
+
+    expect(app(UpdateSources::class)->find('demo-pro')?->state)->toBe('needs_key')
+        ->and(app(SystemStatus::class)->alerts())->toHaveKey('update_sources_key');
+
+    app(GitHubKeys::class)->save(null, 'Other', ['someone/*', 'acme/resume-themes'], 'github_pat_other');
+    app(ThemeUpdates::class)->check();
+
+    expect(app(UpdateSources::class)->find('demo-pro')?->state)->toBe('key_denied')
+        ->and(app(ThemeUpdates::class)->status()['errors']['demo-pro'])->toBe(__('admin.updates.github.key_denied'));
+});
+
+it('adds a key from the Updates page, verifies it and checks again', function () {
+    [$manifest, $files] = variantTheme();
+    app(ThemeInstaller::class)->install(themeZip($manifest, $files));
+    $this->actingAs(User::factory()->create());
+    Filament::setCurrentPanel('admin');
+
+    Http::fake(function (Request $request) {
+        $authorized = $request->hasHeader('Authorization', 'Bearer github_pat_new');
+
+        return match (true) {
+            str_ends_with($request->url(), '/user') && $authorized => Http::response(['login' => 'luca'], 200, ['github-authentication-token-expiration' => '2027-02-01 10:00:00 +0100']),
+            str_ends_with($request->url(), '/repos/acme/resume-themes') && $authorized => Http::response(['private' => true]),
+            str_contains($request->url(), 'acme/resume-themes/releases') && $authorized => Http::response([themeRelease('demo-pro', '1.0.0')]),
+            default => Http::response(['message' => 'Not Found'], 404),
+        };
+    });
+
+    Livewire::test(ManageUpdates::class)
+        ->callAction('key', data: ['label' => 'PRO', 'scopes' => ['acme/*'], 'token' => 'github_pat_new'])
+        ->assertHasNoActionErrors()
+        ->assertNotified(__('admin.updates.keys.valid_until', ['key' => 'PRO', 'date' => '1 febbraio 2027']));
+
+    $key = app(GitHubKeys::class)->all()[0];
+
+    expect($key->login)->toBe('luca')
+        ->and($key->state())->toBe('ok')
+        ->and(app(UpdateSources::class)->find('demo-pro')?->state)->toBe('up_to_date')
+        ->and(app(UpdateSources::class)->find('demo-pro')?->access())->toBe('private');
+});
+
+it('installs themes and recognises app packages uploaded on the Updates page', function () {
+    $this->actingAs(User::factory()->create());
+    Filament::setCurrentPanel('admin');
+    $storage = app(UpdateStorage::class);
+    File::ensureDirectoryExists($storage->packagesDirectory());
+    copy(themeZip(), $storage->packagesDirectory().'/demo.zip');
+
+    Livewire::test(ManageUpdates::class)
+        ->call('packageUploaded', 'demo.zip')
+        ->assertReturned(null)
+        ->assertNotified();
+
+    expect(app(ThemeManager::class)->installed())->toHaveKey('demo-pro')
+        ->and($storage->packages())->toBe([]);
+
+    $app = new ZipArchive;
+    $app->open($storage->packagesDirectory().'/resume-app-9.9.9.zip', ZipArchive::CREATE);
+    $app->addFromString('core/VERSION', '9.9.9');
+    $app->close();
+
+    expect(ManageUpdates::isAppPackage($storage->packagesDirectory().'/resume-app-9.9.9.zip'))->toBeTrue()
+        ->and(ManageUpdates::isAppPackage($storage->packagesDirectory().'/missing.zip'))->toBeFalse();
+
+    Livewire::test(ManageUpdates::class)
+        ->call('packageUploaded', '../../.env')
+        ->assertReturned(__('admin.updates.problems.not_zip'));
 });

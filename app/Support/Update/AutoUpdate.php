@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Support\Update;
 
 use App\Filament\Pages\ManageSystem;
+use App\Filament\Pages\ManageUpdates;
 use App\Models\User;
 use App\Support\Cron\Cron;
 use App\Support\Languages\AdminLocales;
@@ -389,10 +390,10 @@ class AutoUpdate
             $lines[] = (string) __('admin.updates.auto.mail.resume', ['url' => $url]);
         }
 
-        // What to do next: for a new version, which button to press in System
+        // What to do next: for a new version, which button to press in Updates
         $lines[] = in_array($type, ['available', 'downloaded'], true)
-            ? (string) __('admin.updates.auto.mail.'.$type.'_next', ['url' => ManageSystem::getUrl()])
-            : (string) __('admin.updates.auto.mail.admin', ['url' => ManageSystem::getUrl()]);
+            ? (string) __('admin.updates.auto.mail.'.$type.'_next', ['url' => ManageUpdates::getUrl()])
+            : (string) __('admin.updates.auto.mail.admin', ['url' => ManageUpdates::getUrl()]);
 
         if ($release !== null && $release->url !== '') {
             $lines[] = (string) __('admin.updates.auto.mail.notes', ['url' => $release->url]);

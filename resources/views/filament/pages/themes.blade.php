@@ -6,10 +6,6 @@
         </x-filament::section>
     @endif
 
-    @if ($hasUpdatable)
-        <p class="resume-themes-checked">{{ $updatesChecked ? __('admin.themes.updates.checked', ['when' => $updatesChecked->diffForHumans()]) : __('admin.themes.updates.never') }}</p>
-    @endif
-
     <div class="resume-themes">
         @foreach ($themes as $item)
             @php($theme = $item['theme'])
@@ -28,13 +24,17 @@
                     <p>{{ $theme->description }}</p>
                 @endif
 
-                @if ($item['update'])
+                @if ($item['source'])
                     <div class="resume-themes-update">
-                        <x-filament::badge color="warning" icon="heroicon-o-arrow-down-circle">{{ __('admin.themes.updates.available', ['version' => $item['update']->version]) }}</x-filament::badge>
-                        @if ($item['update']->url)
-                            <a href="{{ $item['update']->url }}" target="_blank" rel="noopener" class="resume-link">{{ __('admin.themes.updates.notes') }}</a>
+                        @include('filament.pages.partials.update-state', ['source' => $item['source']])
+                        @if ($item['source']->hasUpdate())
+                            @if ($item['source']->latest->url)
+                                <a href="{{ $item['source']->latest->url }}" target="_blank" rel="noopener" class="resume-link">{{ __('admin.themes.updates.notes') }}</a>
+                            @endif
+                            {{ ($this->updateAction)(['theme' => $theme->name, 'version' => $item['source']->latest->version]) }}
+                        @elseif ($item['source']->needsKey())
+                            <a href="{{ \App\Filament\Pages\ManageUpdates::getUrl() }}" class="resume-link">{{ __('admin.updates.keys.manage') }}</a>
                         @endif
-                        {{ ($this->updateAction)(['theme' => $theme->name, 'version' => $item['update']->version]) }}
                     </div>
                 @endif
 
@@ -66,12 +66,9 @@
                         <dt>{{ __('admin.themes.requires') }}</dt>
                         <dd>{{ $theme->requires }} @unless ($item['compatible']) — <strong>{{ __('admin.themes.incompatible') }}</strong> @endunless</dd>
                     @endif
-                    @if ($theme->updateRepository)
+                    @if ($item['source'])
                         <dt>{{ __('admin.themes.updates.source') }}</dt>
-                        <dd>
-                            <code>{{ $theme->updateRepository }}</code>
-                            @if ($item['updateError']) <br><span class="resume-themes-problem">{{ $item['updateError'] }}</span> @endif
-                        </dd>
+                        <dd>@include('filament.pages.partials.update-access', ['source' => $item['source']])</dd>
                     @endif
                     @unless ($item['assets'])
                         <dt>{{ __('admin.themes.assets') }}</dt>
@@ -94,53 +91,8 @@
     </div>
 
 
-    <script>
-        // Theme packages are uploaded in 1 MB chunks, then installed (installUploaded)
-        window.resumeThemeUpload = (url, token) => ({
-            busy: false, sent: 0, size: 0, error: null,
-            async upload() {
-                const file = this.$refs.file.files[0];
-                if (!file) { return; }
-                const chunk = 1024 * 1024;
-                const count = Math.ceil(file.size / chunk);
-                const id = Array.from(crypto.getRandomValues(new Uint8Array(16)), (byte) => byte.toString(16).padStart(2, '0')).join('');
-                const name = file.name.replace(/[^A-Za-z0-9._-]/g, '-');
-                this.busy = true;
-                this.error = null;
-                this.size = file.size;
-                this.sent = 0;
-                try {
-                    let index = 0;
-                    while (index < count) {
-                        const query = new URLSearchParams({ id, index, count, name });
-                        const response = await fetch(url + (url.includes('?') ? '&' : '?') + query, {
-                            method: 'POST',
-                            credentials: 'same-origin',
-                            headers: { 'X-CSRF-TOKEN': token, 'Content-Type': 'application/octet-stream', 'Accept': 'application/json' },
-                            body: file.slice(index * chunk, (index + 1) * chunk),
-                        });
-                        const data = await response.json().catch(() => ({ error: response.status + ' ' + response.statusText }));
-                        if (response.status === 409) { index = data.next; continue; }
-                        if (!response.ok || data.error) { throw new Error(data.error || response.statusText); }
-                        index++;
-                        this.sent = Math.min(index * chunk, file.size);
-                        if (data.done) { await this.$wire.installUploaded(data.file); }
-                    }
-                } catch (exception) {
-                    this.error = exception.message;
-                } finally {
-                    this.busy = false;
-                }
-            },
-        });
-    </script>
 
     <style>
-        .resume-theme-upload-row { display: flex; gap: .75rem; align-items: center; flex-wrap: wrap; }
-        .resume-theme-upload-progress { display: flex; gap: .75rem; align-items: center; margin-top: .75rem; }
-        .resume-theme-upload-progress progress { flex: 1; height: .75rem; }
-        .resume-theme-upload-problem { margin-top: .75rem; color: rgb(220 38 38); }
-        .resume-themes-checked { margin: 0; font-size: .875rem; opacity: .75; }
         .resume-themes { display: grid; gap: 1.5rem; }
         .resume-themes-version { margin-left: .5rem; font-weight: 400; font-size: .875rem; opacity: .7; }
         .resume-system-list { display: grid; grid-template-columns: minmax(9rem, max-content) 1fr; gap: .5rem 1.5rem; margin: 1rem 0 0; }
@@ -149,7 +101,8 @@
         .resume-themes-actions { display: flex; gap: .75rem; margin-top: 1rem; }
         .resume-themes-update, .resume-themes-variants { display: flex; flex-wrap: wrap; align-items: center; gap: .5rem .75rem; margin-top: 1rem; }
         .resume-themes-variants-label { font-weight: 600; margin-right: .25rem; }
-        .resume-themes-problem { color: var(--danger-600, #dc2626); }
+        .resume-updates-access { margin-left: .5rem; font-size: .8125rem; opacity: .75; }
+        .resume-updates-message { font-size: .8125rem; opacity: .75; }
         .resume-link { text-decoration: underline; }
     </style>
 </x-filament-panels::page>

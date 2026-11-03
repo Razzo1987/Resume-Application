@@ -4,15 +4,13 @@ declare(strict_types=1);
 
 namespace App\Support\Update;
 
-use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Number;
-use Throwable;
 
 /**
  * Update files in core/storage (never in the web root, never in the content exports):
  * downloaded or uploaded packages, chunked uploads in progress, result of the last GitHub check,
- * GitHub token (encrypted with the APP_KEY), update in progress.
+ * GitHub keys (GitHubKeys, encrypted with the APP_KEY), update in progress.
  */
 class UpdateStorage
 {
@@ -73,6 +71,9 @@ class UpdateStorage
         return $this->directory().'/check.json';
     }
 
+    /**
+     * Single GitHub token of the versions before 2.4, moved into the keys by GitHubKeys.
+     */
     public function tokenFile(): string
     {
         return $this->directory().'/github-token';
@@ -139,53 +140,6 @@ class UpdateStorage
         File::ensureDirectoryExists(dirname($file));
         file_put_contents($file.'.tmp', json_encode($data, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE));
         rename($file.'.tmp', $file);
-    }
-
-    /**
-     * GitHub token: the one in .env (RESUME_UPDATE_TOKEN) takes precedence over the one entered in the admin.
-     */
-    public function token(): ?string
-    {
-        $env = config('resume.updates.token');
-
-        if (is_string($env) && $env !== '') {
-            return $env;
-        }
-
-        try {
-            $token = is_file($this->tokenFile()) ? Crypt::decryptString((string) file_get_contents($this->tokenFile())) : null;
-        } catch (Throwable) {
-            $token = null; // APP_KEY changed: the token must be entered again
-        }
-
-        return $token !== null && $token !== '' ? $token : null;
-    }
-
-    /**
-     * Where the token comes from: "env", "admin" or null.
-     */
-    public function tokenSource(): ?string
-    {
-        $env = config('resume.updates.token');
-
-        return match (true) {
-            is_string($env) && $env !== '' => 'env',
-            $this->token() !== null => 'admin',
-            default => null,
-        };
-    }
-
-    public function setToken(?string $token): void
-    {
-        if ($token === null || trim($token) === '') {
-            File::delete($this->tokenFile());
-
-            return;
-        }
-
-        File::ensureDirectoryExists($this->directory());
-        file_put_contents($this->tokenFile(), Crypt::encryptString(trim($token)));
-        @chmod($this->tokenFile(), 0600);
     }
 
     private function storage(): string

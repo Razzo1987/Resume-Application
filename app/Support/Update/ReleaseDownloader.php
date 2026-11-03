@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace App\Support\Update;
 
 use Illuminate\Http\Client\ConnectionException;
-use Illuminate\Http\Client\PendingRequest;
 use Illuminate\Http\Client\Response;
 use Illuminate\Support\Facades\File;
 use RuntimeException;
@@ -25,6 +24,7 @@ class ReleaseDownloader
     public function __construct(
         private readonly UpdateStorage $storage,
         private readonly ReleaseChecker $checker,
+        private readonly GitHub $github,
         private readonly int $chunk = self::CHUNK,
     ) {}
 
@@ -110,27 +110,17 @@ class ReleaseDownloader
     }
 
     /**
-     * A file attached to the release. With the token (private repository) it is fetched via the API, which redirects
-     * to a temporary GitHub URL (the token is not sent to that URL); without a token, via the public link.
+     * A file attached to the release (through the API with the key for a private repository, see GitHub::asset()).
      *
      * @param  array{id: int, name: string, size: int, api_url: string, download_url: string}  $asset
      * @param  array<string, string>  $headers
      */
     private function fetch(array $asset, array $headers = []): Response
     {
-        $useApi = $this->storage->token() !== null && $asset['api_url'] !== '';
-
         try {
-            return $this->request()
-                ->withHeaders([...$headers, 'Accept' => 'application/octet-stream'])
-                ->get($useApi ? $asset['api_url'] : $asset['download_url']);
+            return $this->github->asset($this->checker->repository(), $asset, $headers);
         } catch (ConnectionException) {
             throw new RuntimeException((string) __('admin.updates.errors.unreachable'));
         }
-    }
-
-    private function request(): PendingRequest
-    {
-        return $this->checker->api()->timeout(60);
     }
 }

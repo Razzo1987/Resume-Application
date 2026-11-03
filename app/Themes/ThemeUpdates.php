@@ -4,14 +4,13 @@ declare(strict_types=1);
 
 namespace App\Themes;
 
-use App\Filament\Pages\ManageThemes;
+use App\Filament\Pages\ManageUpdates;
 use App\Models\User;
 use App\Support\Languages\AdminLocales;
+use App\Support\Update\GitHub;
 use App\Support\Update\Release;
-use App\Support\Update\ReleaseChecker;
 use App\Support\Update\UpdateStorage;
 use Illuminate\Http\Client\ConnectionException;
-use Illuminate\Http\Client\Response;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Mail;
@@ -25,8 +24,8 @@ use Throwable;
  *   "updates": { "repository": "owner/resume-themes-pro", "tag_prefix": "folio-v" }
  *
  * The releases of a theme have tags "{tag_prefix}X.Y.Z" and the package "{name}-X.Y.Z.zip" (with an optional
- * "{name}-X.Y.Z.zip.sha256"). Private repositories need the GitHub token of the System page (a fine-grained
- * token with read access to the repository contents). One request per repository, conditional (ETag), so
+ * "{name}-X.Y.Z.zip.sha256"). Private repositories need a GitHub key of the Updates page (a fine-grained token
+ * with read access to the repository contents), chosen per repository by GitHub. One request per repository, conditional (ETag), so
  * several themes published in the same repository cost a single call and an unchanged answer is free.
  */
 class ThemeUpdates
@@ -37,7 +36,7 @@ class ThemeUpdates
         private readonly ThemeManager $themes,
         private readonly ThemeInstaller $installer,
         private readonly UpdateStorage $storage,
-        private readonly ReleaseChecker $checker,
+        private readonly GitHub $github,
     ) {}
 
     public function file(): string
@@ -68,12 +67,14 @@ class ThemeUpdates
     /**
      * Result of the last check, without calling GitHub.
      *
-     * @return array{checked_at: ?Carbon, releases: array<string, Release>, errors: array<string, string>}
+     * @return array{checked_at: ?Carbon, releases: array<string, Release>, errors: array<string, string>, problems: array<string, string>}
      */
     public function status(): array
     {
         $data = $this->storage->readJson($this->file()) ?? [];
         $releases = [];
+        $errors = array_filter(is_array($data['errors'] ?? null) ? $data['errors'] : [], 'is_string');
+        $problems = array_filter(is_array($data['problems'] ?? null) ? $data['problems'] : [], 'is_string');
 
         foreach (is_array($data['releases'] ?? null) ? $data['releases'] : [] as $name => $release) {
             if (is_string($name) && is_array($release)) {
@@ -81,10 +82,18 @@ class ThemeUpdates
             }
         }
 
+        // Problems with a code are translated now, in the language of who reads them
+        foreach ($problems as $name => $problem) {
+            if (in_array($problem, GitHub::PROBLEMS, true)) {
+                $errors[$name] = $this->github->message($problem, is_int($data['statuses'][$name] ?? null) ? $data['statuses'][$name] : null);
+            }
+        }
+
         return [
             'checked_at' => is_string($data['checked_at'] ?? null) ? Carbon::parse($data['checked_at']) : null,
             'releases' => $releases,
-            'errors' => array_filter(is_array($data['errors'] ?? null) ? $data['errors'] : [], 'is_string'),
+            'errors' => $errors,
+            'problems' => $problems,
         ];
     }
 
@@ -119,7 +128,7 @@ class ThemeUpdates
     /**
      * Asks GitHub for the latest release of every updatable theme and saves the result.
      *
-     * @return array{checked_at: ?Carbon, releases: array<string, Release>, errors: array<string, string>}
+     * @return array{checked_at: ?Carbon, releases: array<string, Release>, errors: array<string, string>, problems: array<string, string>}
      */
     public function check(): array
     {
@@ -128,6 +137,8 @@ class ThemeUpdates
         $listings = is_array($previous['listings'] ?? null) ? $previous['listings'] : [];
         $releases = [];
         $errors = [];
+        $problems = [];
+        $statuses = [];
 
         $byRepository = [];
 
@@ -138,12 +149,12 @@ class ThemeUpdates
         foreach ($byRepository as $repository => $themes) {
             $listing = null;
             $error = null;
+            $problem = null;
+            $status = null;
 
             try {
                 $etag = is_string($etags[$repository] ?? null) && isset($listings[$repository]) ? $etags[$repository] : null;
-                $request = $this->checker->api();
-                $response = ($etag !== null ? $request->withHeaders(['If-None-Match' => $etag]) : $request)
-                    ->get($this->apiUrl($repository, 'releases?per_page=100'));
+                $response = $this->github->get($repository, 'releases?per_page=100', $etag !== null ? ['If-None-Match' => $etag] : []);
 
                 if ($response->status() === 304) {
                     $listing = $listings[$repository];
@@ -151,13 +162,14 @@ class ThemeUpdates
                     $listing = array_values(array_filter((array) $response->json(), 'is_array'));
                     $etags[$repository] = $response->header('ETag') !== '' ? $response->header('ETag') : null;
                 } else {
-                    // 404 on a private repository: token missing or without access to it
-                    $error = $response->status() === 404 && $this->storage->token() === null
-                        ? __('admin.themes.updates.errors.private')
-                        : $this->checker->describe($response);
+                    // 404: private repository without a key, or a key without access to it
+                    $problem = $this->github->repository($repository)['problem'] ?? 'http';
+                    $status = $response->status();
+                    $error = $this->github->message($problem, $status);
                 }
             } catch (ConnectionException) {
-                $error = __('admin.updates.errors.unreachable');
+                $problem = 'unreachable';
+                $error = $this->github->message($problem);
             } catch (Throwable $exception) {
                 $error = $exception->getMessage();
             }
@@ -168,7 +180,12 @@ class ThemeUpdates
 
             foreach ($themes as $name => $theme) {
                 if ($error !== null) {
-                    $errors[$name] = (string) $error;
+                    $errors[$name] = $error;
+                }
+
+                if ($problem !== null) {
+                    $problems[$name] = $problem;
+                    $statuses[$name] = $status;
                 }
 
                 $latest = $this->latest($listings[$repository] ?? [], $theme);
@@ -185,6 +202,8 @@ class ThemeUpdates
             'checked_at' => now()->toAtomString(),
             'releases' => $releases,
             'errors' => $errors,
+            'problems' => $problems,
+            'statuses' => $statuses,
             'etags' => array_intersect_key($etags, $byRepository),
             'listings' => array_intersect_key($listings, $byRepository),
             'mailed' => is_array($previous['mailed'] ?? null) ? $previous['mailed'] : [],
@@ -251,7 +270,7 @@ class ThemeUpdates
                     $subject = '['.config('app.name').'] '.__('admin.themes.updates.mail.subject', ['theme' => $theme->title, 'version' => $release->version]);
                     $body = implode("\n\n", array_filter([
                         (string) __('admin.themes.updates.mail.body', ['theme' => $theme->title, 'version' => $release->version, 'installed' => $theme->version, 'site' => url('/')]),
-                        (string) __('admin.themes.updates.mail.next', ['url' => ManageThemes::getUrl()]),
+                        (string) __('admin.themes.updates.mail.next', ['url' => ManageUpdates::getUrl()]),
                         $release->url !== '' ? (string) __('admin.updates.auto.mail.notes', ['url' => $release->url]) : null,
                     ]));
                 } finally {
@@ -285,18 +304,19 @@ class ThemeUpdates
         }
 
         $file = $this->storage->packagesDirectory().'/theme-'.Str::lower(Str::random(8)).'.zip';
+        $repository = (string) $this->themes->get($name)->updateRepository;
         File::ensureDirectoryExists(dirname($file));
 
         try {
-            $response = $this->fetch($asset);
+            $response = $this->github->asset($repository, $asset);
 
             if (! $response->successful()) {
-                throw new ThemeException($this->checker->describe($response));
+                throw new ThemeException($this->github->describe($response, $repository));
             }
 
             file_put_contents($file, $response->body());
 
-            $checksum = $this->fetch($release->checksum);
+            $checksum = $this->github->asset($repository, $release->checksum);
 
             if (! $checksum->successful() || preg_match('/^([a-f0-9]{64})\b/i', trim($checksum->body()), $match) !== 1
                 || ! hash_equals(strtolower($match[1]), (string) hash_file('sha256', $file))) {
@@ -364,25 +384,5 @@ class ThemeUpdates
                 'browser_download_url' => $asset['browser_download_url'] ?? '',
             ] : [], is_array($release['assets'] ?? null) ? $release['assets'] : []),
         ], $listing);
-    }
-
-    /**
-     * A release file: via the API with the token (needed for private repositories), otherwise the public link.
-     *
-     * @param  array{id: int, name: string, size: int, api_url: string, download_url: string}  $asset
-     */
-    private function fetch(array $asset): Response
-    {
-        $useApi = $this->storage->token() !== null && $asset['api_url'] !== '';
-
-        return $this->checker->api()
-            ->timeout(60)
-            ->withHeaders(['Accept' => 'application/octet-stream'])
-            ->get($useApi ? $asset['api_url'] : $asset['download_url']);
-    }
-
-    private function apiUrl(string $repository, string $path): string
-    {
-        return rtrim((string) config('resume.updates.api'), '/').'/repos/'.$repository.'/'.$path;
     }
 }

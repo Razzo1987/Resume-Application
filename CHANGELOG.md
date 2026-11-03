@@ -2,6 +2,36 @@
 
 All notable changes to this project are documented here. The format follows [Keep a Changelog](https://keepachangelog.com/) and the project uses [Semantic Versioning](https://semver.org/).
 
+## [2.4.0] — 2026-11-03
+
+Updates that are easy to read: one page says what can be updated, where it comes from and what is missing.
+
+### Added
+- **Updates** page (menu *Site*, with a badge when something is to update or to fix): the app and every installed
+  theme with installed and latest version, repository, public or private, the GitHub key used and a clear state
+  (*Up to date*, *Version x.y.z available*, *A GitHub key is needed*, *The key has no access*, *Key expired or
+  revoked*, *Updated from its zip* for themes that do not say where they are published), with the button that solves
+  it on the same row. One *Check now* for the app and the themes.
+- **GitHub keys** per repository: any number of keys, each for `owner/*`, `owner/repository` or `*`; the most
+  specific one is used. *Save and verify* (and *Verify*) asks GitHub whether the key is valid, until when, and which
+  repositories in use it can read, then checks the updates again. The expiration date of the keys is read from the
+  answers of GitHub; the dashboard warns two weeks before and when a key has expired or was revoked.
+- Dashboard: alerts for theme updates and for components that need a GitHub key.
+- The same upload area everywhere (app and theme packages, content import): drop the zip or browse, sent in 1 MB
+  chunks with its progress, errors shown in the area itself. *Upload a package* on the *Updates* page accepts the app
+  package (checked before the installation) and packages with themes (installed right away).
+
+### Changed
+- The update of the app (new version, packages on the server, automatic updates) moved from *System* to *Updates*;
+  *System* keeps a summary with the state of every component. The update emails point to the *Updates* page.
+- Public repositories never get a key: an expired or revoked key can no longer stop the check of the app updates (a
+  key refused by GitHub is retried without it on public repositories).
+- Content import: the export is uploaded in chunks, so the hosting upload limit no longer matters (the hint to copy
+  bigger files by FTP is gone); the uploaded file appears already chosen in the list of the exports on the server,
+  and an existing export with the same name is never overwritten.
+- The single GitHub token of the previous versions becomes a key for every repository, with nothing to do.
+- Problems reported by GitHub are saved as codes and shown in the language of who reads them.
+
 ## [2.3.2] — 2026-11-02
 
 ### Fixed
