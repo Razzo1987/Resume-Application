@@ -218,7 +218,10 @@ class GitHub
      */
     private function send(string $url, array $headers, ?GitHubKey $key, int $timeout): Response
     {
-        $request = $this->request($timeout)->withHeaders($headers);
+        // replaceHeaders: withHeaders() would add a second Accept to the default one, and with
+        // "application/vnd.github+json, application/octet-stream" the API answers with the JSON description of a
+        // release file instead of the file (private repositories: the SHA-256 never matched)
+        $request = $this->request($timeout)->replaceHeaders($headers);
         $response = ($key !== null ? $request->withToken($key->token) : $request)->get($url);
 
         if ($key !== null) {

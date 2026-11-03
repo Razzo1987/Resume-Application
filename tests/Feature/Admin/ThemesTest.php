@@ -545,9 +545,12 @@ it('reads a private repository of themes with its key, and says so on the Update
         ->assertSee('chiave &quot;PRO&quot;', escape: false)
         ->assertDontSee('github_pat_pro');
 
-    // The package is downloaded through the API, with the key
+    // The package is downloaded through the API, with the key and only "application/octet-stream" as Accept (with the
+    // JSON type too, GitHub would answer with the description of the file)
     expect(app(ThemeUpdates::class)->update('demo-pro')['theme']->version)->toBe('1.2.0');
-    Http::assertSent(fn (Request $request): bool => str_contains($request->url(), 'releases/assets/demo-pro-1.2.0') && $request->hasHeader('Authorization'));
+    Http::assertSent(fn (Request $request): bool => str_contains($request->url(), 'releases/assets/demo-pro-1.2.0') && $request->hasHeader('Authorization')
+        && $request->header('Accept') === ['application/octet-stream']);
+    Http::assertNotSent(fn (Request $request): bool => str_contains($request->url(), 'releases/assets/') && $request->header('Accept') !== ['application/octet-stream']);
 });
 
 it('tells a missing key from a key without access to the repository', function () {

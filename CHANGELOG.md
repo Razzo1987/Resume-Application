@@ -2,6 +2,14 @@
 
 All notable changes to this project are documented here. The format follows [Keep a Changelog](https://keepachangelog.com/) and the project uses [Semantic Versioning](https://semver.org/).
 
+## [2.4.1] — 2026-11-03
+
+### Fixed
+- Updates from private repositories (themes, or the app from a private fork): the files of the release were asked to
+  the GitHub API with two `Accept` types, and GitHub answered with the description of the file instead of the file, so
+  the check failed with "the downloaded package does not match the SHA-256". Now only `application/octet-stream` is
+  sent. Public repositories were not affected.
+
 ## [2.4.0] — 2026-11-03
 
 Updates that are easy to read and signed: one page says what can be updated, where it comes from and what is missing,
