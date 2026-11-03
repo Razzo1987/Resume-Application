@@ -44,7 +44,7 @@ if [ -n "$ZIP_OUT" ]; then
   WORK="$(mktemp -d)"; trap 'rm -rf "$WORK"' EXIT
   PKG="$WORK/$NAME"
   mkdir -p "$PKG/dist"
-  ( cd "themes/$NAME" && for f in theme.json icons.php README.md LICENSE LICENSE.txt LICENSE.md views lang preview.webp preview.png preview.jpg previews; do
+  ( cd "themes/$NAME" && for f in theme.json icons.php README.md LICENSE LICENSE.txt LICENSE.md views lang preview.webp preview.png preview.jpg preview-mobile.webp preview-mobile.png preview-mobile.jpg previews; do
       [ -e "$f" ] && cp -R "$f" "$PKG/"; done; true )
   cp -R "public/themes/$NAME/." "$PKG/dist/"
   find "$PKG" -name '.DS_Store' -delete

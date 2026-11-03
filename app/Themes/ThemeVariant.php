@@ -9,7 +9,7 @@ namespace App\Themes;
  *
  *   "variants": {
  *       "lux": { "title": "Lux", "entrypoints": ["themes/folio/resources/scss/lux.scss"], "theme_color": "#1a1a1a",
- *                "preview": "previews/lux.webp" }
+ *                "preview": "previews/lux.webp", "preview_mobile": "previews/lux-mobile.webp" }
  *   }
  *
  * Its entry points are added to those of the theme; the administrator picks the variant on the Themes page.
@@ -26,6 +26,7 @@ final readonly class ThemeVariant
         public ?string $themeColor = null,
         public ?string $description = null,
         public ?string $preview = null,
+        public ?string $previewMobile = null,
     ) {}
 
     /**
@@ -42,6 +43,7 @@ final readonly class ThemeVariant
             themeColor: Theme::color($string('theme_color')),
             description: $string('description'),
             preview: Theme::previewPath($string('preview')),
+            previewMobile: Theme::previewPath($string('preview_mobile')),
         );
     }
 }

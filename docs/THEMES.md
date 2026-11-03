@@ -22,7 +22,8 @@ fancy/
 ├── views/              # only the views that change (the others come from base)
 ├── lang/               # optional strings of the theme: __('theme::file.key')
 ├── preview.webp        # optional image of the theme for the Themes page (also .png or .jpg)
-├── previews/           # optional images of the variants (previews/dark.webp)
+├── preview-mobile.webp # optional image of the theme on a phone
+├── previews/           # optional images of the variants (previews/dark.webp, previews/dark-mobile.webp)
 ├── resources/          # sources: SCSS, JS, fonts, icon sources (not in the package)
 └── README.md, LICENSE  # copied into the package
 ```
@@ -48,9 +49,10 @@ printed only through the helpers of `base` (see the views of `base` as reference
     "variants": {
         "light": { "title": "Light", "entrypoints": ["themes/fancy/resources/scss/light.scss"], "theme_color": "#2c3e50" },
         "dark": { "title": "Dark", "entrypoints": ["themes/fancy/resources/scss/dark.scss"], "theme_color": "#121212",
-                  "preview": "previews/dark.webp" }
+                  "preview": "previews/dark.webp", "preview_mobile": "previews/dark-mobile.webp" }
     },
     "preview": "preview.webp",
+    "preview_mobile": "preview-mobile.webp",
     "updates": { "repository": "owner/fancy-themes", "tag_prefix": "fancy-v" },
     "signing_keys": ["base64 of the 32 bytes of the public key="],
     "author": "Your name",
@@ -68,7 +70,7 @@ printed only through the helpers of `base` (see the views of `base` as reference
 | `sprite` | Vite key of the SVG icon sprite built from `icons.php`. |
 | `theme_color` | Color of the browser bar on phones (`meta theme-color`). |
 | `variants`, `default_variant` | See [Variants](#variants). |
-| `preview` | Image shown on the *Themes* page: `preview.webp` (or `.png`, `.jpg`) in the theme folder, 16:10, about 960 x 600 px. A variant can have its own (`previews/{name}.webp`): the page shows the one of the variant in use. The images stay in `core/themes` and are served only to administrators. |
+| `preview`, `preview_mobile` | Images shown on the *Themes* page: the site on a computer (`preview.webp`, or `.png`, `.jpg`, 16:10, about 960 x 600 px) and on a phone (`preview-mobile.webp`, the first screen, about 300 x 610 px). The phone appears over a corner of the computer image; a click opens both at full size. A variant can have its own (`previews/{name}.webp`, `previews/{name}-mobile.webp`): the page shows those of the variant in use. A variant with its own computer image but no phone image shows no phone image (the theme's one would have another palette). The images stay in `core/themes` and are served only to administrators. |
 | `updates` | See [Updates from GitHub](#updates-from-github). |
 | `signing_keys` | Ed25519 public keys (base64) of the packages of the theme. See [Signed packages](#signed-packages). |
 

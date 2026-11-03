@@ -32,7 +32,7 @@ class ThemeInstaller
     private const string THEME_FILES = '#^(theme\.json|icons\.php|README\.md|LICENSE(\.txt|\.md)?'
         .'|views/([a-z0-9_-]+/)*[a-z0-9_.-]+\.blade\.php'
         .'|lang/[A-Za-z0-9_-]+/[a-z0-9_-]+\.php|lang/[A-Za-z0-9_-]+\.json'
-        .'|preview\.(webp|png|jpe?g)|previews/[a-z0-9_-]+\.(webp|png|jpe?g))$#';
+        .'|preview(-mobile)?\.(webp|png|jpe?g)|previews/[a-z0-9_-]+\.(webp|png|jpe?g))$#';
 
     /** Allowed public assets */
     private const string DIST_FILES = '#^dist/([A-Za-z0-9_.@-]+/)*[A-Za-z0-9_.@-]+\.(css|js|mjs|map|json|svg|woff2?|ttf|otf|png|jpe?g|webp|avif|gif|ico|txt)$#';

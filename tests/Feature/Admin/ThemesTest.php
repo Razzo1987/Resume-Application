@@ -628,9 +628,13 @@ it('installs themes and recognises app packages uploaded on the Updates page', f
 it('shows the preview of a theme and of its variants only to administrators', function () {
     [$manifest, $files] = variantTheme();
     $manifest['preview'] = 'preview.webp';
+    $manifest['preview_mobile'] = 'preview-mobile.webp';
     $manifest['variants']['dark']['preview'] = 'previews/dark.webp';
+    $manifest['variants']['dark']['preview_mobile'] = 'previews/dark-mobile.webp';
     $manifest['variants']['light']['preview'] = '../../.env';
-    app(ThemeInstaller::class)->install(themeZip($manifest, [...$files, 'preview.webp' => 'RIFFmainWEBP', 'previews/dark.webp' => 'RIFFdarkWEBP']));
+    $manifest['variants']['sepia'] = ['title' => 'Sepia', 'entrypoints' => [], 'preview' => 'previews/sepia.webp'];
+    app(ThemeInstaller::class)->install(themeZip($manifest, [...$files, 'preview.webp' => 'RIFFmainWEBP', 'preview-mobile.webp' => 'RIFFmainMOBILE',
+        'previews/dark.webp' => 'RIFFdarkWEBP', 'previews/dark-mobile.webp' => 'RIFFdarkMOBILE', 'previews/sepia.webp' => 'RIFFsepiaWEBP']));
     Filament::setCurrentPanel('admin');
 
     $url = fn (?string $variant = null): string => route('filament.admin.theme-preview', array_filter(['theme' => 'demo-pro', 'variant' => $variant]));
@@ -643,13 +647,23 @@ it('shows the preview of a theme and of its variants only to administrators', fu
     expect(file_get_contents($main->baseResponse->getFile()->getPathname()))->toBe('RIFFmainWEBP');
     expect(file_get_contents($this->get($url('dark'))->assertOk()->baseResponse->getFile()->getPathname()))->toBe('RIFFdarkWEBP');
 
+    // Phone previews: the theme's one, the dark variant has its own, a variant with its own computer image but no
+    // phone image has none
+    $mobile = fn (?string $variant = null) => $this->get($url($variant).'?device=mobile');
+    expect(file_get_contents($mobile()->assertOk()->baseResponse->getFile()->getPathname()))->toBe('RIFFmainMOBILE')
+        ->and(file_get_contents($mobile('dark')->assertOk()->baseResponse->getFile()->getPathname()))->toBe('RIFFdarkMOBILE');
+
     // A variant with an invalid path uses the theme's preview; unknown themes and base without preview: 404
     expect(file_get_contents($this->get($url('light'))->assertOk()->baseResponse->getFile()->getPathname()))->toBe('RIFFmainWEBP');
     $this->get(route('filament.admin.theme-preview', ['theme' => 'missing']))->assertNotFound();
 
+    $mobile('sepia')->assertNotFound();
+
     $this->get('/admin/themes')->assertOk()
         ->assertSee('src="'.$url().'?v=1.0.0"', escape: false)
-        ->assertSee('Anteprima del tema Demo-pro');
+        ->assertSee('src="'.$url().'?device=mobile&amp;v=1.0.0"', escape: false)
+        ->assertSee('Anteprima del tema Demo-pro')
+        ->assertSee('Anteprima su telefono del tema Demo-pro');
 });
 
 it('refuses theme packages with other files next to the preview images', function () {

@@ -72,6 +72,7 @@ class ManageThemes extends Page
                     'base' => $theme->name === $themes->base()->name,
                     'source' => $sources->get($theme->name),
                     'preview' => self::previewUrl($theme, $theme->name === $active ? $themes->active()->variant : $theme->defaultVariant),
+                    'previewMobile' => self::previewUrl($theme, $theme->name === $active ? $themes->active()->variant : $theme->defaultVariant, mobile: true),
                 ])
                 ->values()
                 ->all(),
@@ -79,17 +80,19 @@ class ManageThemes extends Page
     }
 
     /**
-     * Address of the preview image of a theme (of the variant in use, or of the default one), or null.
+     * Address of the preview image of a theme (of the variant in use, or of the default one), on a computer or on a
+     * phone, or null.
      */
-    private static function previewUrl(Theme $theme, ?string $variant): ?string
+    private static function previewUrl(Theme $theme, ?string $variant, bool $mobile = false): ?string
     {
-        if ($theme->previewFile($variant) === null) {
+        if ($theme->previewFile($variant, $mobile) === null) {
             return null;
         }
 
-        $parameters = ['theme' => $theme->name, 'variant' => $variant !== null && ($theme->variants[$variant]->preview ?? null) !== null ? $variant : null];
+        $own = $variant !== null ? ($theme->variants[$variant] ?? null) : null;
+        $parameters = ['theme' => $theme->name, 'variant' => $own?->preview !== null || $own?->previewMobile !== null ? $variant : null];
 
-        return route('filament.admin.theme-preview', array_filter($parameters)).'?v='.rawurlencode($theme->version);
+        return route('filament.admin.theme-preview', array_filter($parameters)).'?'.http_build_query(array_filter(['device' => $mobile ? 'mobile' : null, 'v' => $theme->version]));
     }
 
     protected function getHeaderActions(): array

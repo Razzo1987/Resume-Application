@@ -22,6 +22,7 @@ final readonly class Theme
      * @param  string|null  $updateRepository  GitHub repository of the releases ("owner/name"), for updates
      * @param  string  $updateTagPrefix  prefix of the release tags of this theme ("v", "folio-v")
      * @param  string|null  $preview  preview image for the Themes page, relative to the theme folder ("preview.webp")
+     * @param  string|null  $previewMobile  the same on a phone ("preview-mobile.webp")
      * @param  list<string>  $signingKeys  Ed25519 public keys of the theme's packages (updates are checked with them)
      */
     public function __construct(
@@ -43,10 +44,14 @@ final readonly class Theme
         public ?string $author = null,
         public ?string $preview = null,
         public array $signingKeys = [],
+        public ?string $previewMobile = null,
     ) {}
 
-    /** Preview images: preview.webp (or .png, .jpg) and previews/{name}.webp for the variants */
-    public const string PREVIEW_PATTERN = '#^(preview|previews/[a-z0-9_-]+)\.(webp|png|jpe?g)$#';
+    /**
+     * Preview images: preview.webp and preview-mobile.webp (or .png, .jpg), previews/{name}.webp and
+     * previews/{name}-mobile.webp for the variants
+     */
+    public const string PREVIEW_PATTERN = '#^(preview|preview-mobile|previews/[a-z0-9_-]+)\.(webp|png|jpe?g)$#';
 
     public static function previewPath(?string $value): ?string
     {
@@ -54,12 +59,20 @@ final readonly class Theme
     }
 
     /**
-     * Absolute path of the preview image of the theme or of one of its variants (the theme's one if the variant has
-     * none), only if the file is there.
+     * Absolute path of the preview image of the theme or of one of its variants, on a computer or on a phone, only if
+     * the file is there. A variant without its own images uses the theme's ones; a variant with its own computer image
+     * but no phone image has no phone image (the theme's one would show another palette).
      */
-    public function previewFile(?string $variant = null): ?string
+    public function previewFile(?string $variant = null, bool $mobile = false): ?string
     {
-        $relative = ($variant !== null ? ($this->variants[$variant]->preview ?? null) : null) ?? $this->preview;
+        $own = $variant !== null ? ($this->variants[$variant] ?? null) : null;
+
+        $relative = match (true) {
+            ! $mobile => $own->preview ?? $this->preview,
+            $own?->previewMobile !== null => $own->previewMobile,
+            $own?->preview !== null => null,
+            default => $this->previewMobile,
+        };
         $file = $relative !== null ? $this->path.DIRECTORY_SEPARATOR.$relative : null;
 
         return $file !== null && is_file($file) ? $file : null;
@@ -137,6 +150,7 @@ final readonly class Theme
             updateTagPrefix: $tagPrefix,
             author: $string('author'),
             preview: self::previewPath($string('preview')),
+            previewMobile: self::previewPath($string('preview_mobile')),
             signingKeys: Signature::keys($data['signing_keys'] ?? null),
         );
     }
@@ -172,6 +186,7 @@ final readonly class Theme
             author: $this->author,
             preview: $this->preview,
             signingKeys: $this->signingKeys,
+            previewMobile: $this->previewMobile,
         );
     }
 

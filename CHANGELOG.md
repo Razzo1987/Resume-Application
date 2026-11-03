@@ -23,8 +23,9 @@ and the packages are checked with an Ed25519 signature.
   still be installed by an administrator, with a note that its signature was not checked, and automatic updates
   install only signed packages. Themes can declare their keys in `theme.json` (`signing_keys`): their updates are
   then checked with the keys of the installed version.
-- **Preview image of the themes** on the *Themes* page (`preview` in `theme.json`, also per variant), served only to
-  administrators from the theme folder. The base theme has one.
+- **Preview of the themes** on the *Themes* page, on a computer and on a phone (`preview` and `preview_mobile` in
+  `theme.json`, also per variant): the phone over a corner of the computer image, a click opens both at full size.
+  Served only to administrators from the theme folder. The base theme has both.
 - **"To translate into..."** filter in the lists of the admin that show the missing translations.
 - Release workflow: inspection of the package content (no data, secrets, development files, other themes, symbolic
   links or executable files; `manifest.json` matches the files) and of the extracted files with the privacy guard;

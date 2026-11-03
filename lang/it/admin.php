@@ -291,6 +291,9 @@ return [
         'installed_many' => ':count temi installati o aggiornati',
         'variants' => 'Varianti',
         'preview' => 'Anteprima del tema :theme',
+        'preview_mobile' => 'Anteprima su telefono del tema :theme',
+        'preview_open' => 'Ingrandisci le anteprime del tema :theme',
+        'preview_zoom' => 'Ingrandisci',
         'updates' => [
             'install' => 'Aggiorna alla :version',
             'notes' => 'Novità',
