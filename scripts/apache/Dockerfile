@@ -1,7 +1,7 @@
 # Apache 2.4 + PHP 8.4 (mod_php) with the extensions the app requires, like a typical shared hosting: used by the
 # release workflow to install the package with the web installer and run scripts/smoke-test.sh and the end-to-end
 # tests of the site on it. The webroot is mounted on /var/www/html.
-FROM php:8.4-apache
+FROM php:8.5-apache
 
 RUN apt-get update \
     && apt-get install -y --no-install-recommends libicu-dev libzip-dev libpng-dev libjpeg62-turbo-dev libfreetype6-dev libwebp-dev \
